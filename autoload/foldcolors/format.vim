@@ -1,39 +1,39 @@
 
 
-if expand('<sfile>:p')!=#expand('%:p') && exists('g:loaded_foldCC')| finish| endif| let g:loaded_foldCC = 1
+if expand('<sfile>:p')!=#expand('%:p') && exists('g:loaded_foldcolors')| finish| endif| let g:loaded_foldcolors = 1
 let s:save_cpo = &cpo| set cpo&vim
 scriptencoding utf-8
 "=============================================================================
-let g:foldCCtext_maxchars = get(g:, 'foldCCtext_maxchars', 78)
-let g:foldCCtext_head = get(g:, 'foldCCtext_head', 'v:folddashes. " "')
-let g:foldCCtext_tail = get(g:, 'foldCCtext_tail', 'v:foldend - v:foldstart+1')
-let g:foldCCtext_enable_autofdc_adjuster = get(g:, 'foldCCtext_enable_autofdc_adjuster', 0)
-let g:foldCCnavi_maxchars = get(g:, 'foldCCnavi_maxchars', 60)
+let g:foldcolors_text_maxchars = get(g:, 'foldcolors_text_maxchars', 78)
+let g:foldcolors_text_head = get(g:, 'foldcolors_text_head', 'v:folddashes. " "')
+let g:foldcolors_text_tail = get(g:, 'foldcolors_text_tail', 'v:foldend - v:foldstart+1')
+let g:foldcolors_text_enable_autofdc_adjuster = get(g:, 'foldcolors_text_enable_autofdc_adjuster', 0)
+let g:foldcolors_navi_maxchars = get(g:, 'foldcolors_navi_maxchars', 60)
 
 
 "=============================================================================
 "Main:
-function! FoldCCtext() "{{{
-  if g:foldCCtext_enable_autofdc_adjuster && v:foldlevel > &fdc-1
+function! foldcolors#format#text() "{{{
+  if g:foldcolors_text_enable_autofdc_adjuster && v:foldlevel > &fdc-1
     let &fdc = v:foldlevel + 1
   endif
   let headline = getline(v:foldstart)
-  let head = g:foldCCtext_head=='' ? '' : eval(g:foldCCtext_head)
-  let tail = g:foldCCtext_tail=='' ? '' : ' '. eval(g:foldCCtext_tail)
+  let head = g:foldcolors_text_head=='' ? '' : eval(g:foldcolors_text_head)
+  let tail = g:foldcolors_text_tail=='' ? '' : ' '. eval(g:foldcolors_text_tail)
   let headline = s:_adjust_headline(headline, strlen(head)+strlen(tail))
   return substitute(headline, '^\s*\ze', '\0'. head, ''). tail
 endfunction
 "}}}
 
-function! FoldCCnavi() "{{{
-  let foldheads = FoldCCnavi_get_headlines()
+function! foldcolors#format#info() "{{{
+  let foldheads = Foldcolors_navi_get_headlines()
   if empty(foldheads)
     return ''
   endif
   return join(foldheads, ' > ')
 endfunction
 "}}}
-function! FoldCCnavi_get_headlines() "{{{
+function! Foldcolors_navi_get_headlines() "{{{
   if !foldlevel('.')
     return []
   endif
@@ -68,7 +68,7 @@ endfunction
 function! s:_adjust_headline(headline, reducelen) "{{{
   let headline = s:_remove_commentstring_and_foldmarkers(a:headline)
   let colwidth = s:_get_colwidth()
-  let truncatelen = (colwidth < g:foldCCtext_maxchars ? colwidth : g:foldCCtext_maxchars) - a:reducelen
+  let truncatelen = (colwidth < g:foldcolors_text_maxchars ? colwidth : g:foldcolors_text_maxchars) - a:reducelen
   let dispwidth = strdisplaywidth(headline)
   if dispwidth < truncatelen
     let multibyte_widthgap = strlen(headline) - dispwidth
@@ -99,7 +99,7 @@ function! s:FoldGatherer._register_headline(headline) "{{{
   let headline = s:_remove_commentstring_and_foldmarkers(a:headline)
   let headline = substitute(substitute(headline, '^\s*\|\s$', '', 'g'), '\s\+', ' ', 'g')
   let multibyte_widthgap = len(headline) - strdisplaywidth(headline)
-  let truncatelen = g:foldCCnavi_maxchars + multibyte_widthgap
+  let truncatelen = g:foldcolors_navi_maxchars + multibyte_widthgap
   let headline = s:_remove_multibyte_garbage(headline[:truncatelen])
   call insert(self.headlines, headline)
 endfunction
@@ -122,8 +122,8 @@ function! s:FoldGatherer._gather_outer_headlines() "{{{
       let row = line('.')
     endwhile
   catch
-    ec 'foldCCnavi: 何かしらのエラーが起こりました g:foldCC_err参照'
-    let g:foldCC_err = v:exception
+    ec 'foldcolors_navi: 何かしらのエラーが起こりました g:foldcolors__err参照'
+    let g:foldcolors__err = v:exception
   endtry
 endfunction
 "}}}
