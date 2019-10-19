@@ -26,24 +26,24 @@ endfunction
 "}}}
 
 function! foldcolors#format#info() "{{{
-  let foldheads = Foldcolors_navi_get_headlines()
+  let foldheads = s:info_headlines()
   if empty(foldheads)
     return ''
   endif
   return join(foldheads, ' > ')
 endfunction
 "}}}
-function! Foldcolors_navi_get_headlines() "{{{
+function! s:info_headlines() "{{{
   if !foldlevel('.')
     return []
   endif
-  let save_view = winsaveview()
+  let view = winsaveview()
   let gatherer = s:newFoldGatherer()
   try
     call gatherer.gather_headlines()
     return gatherer.get_headlines()
   finally
-    call winrestview(save_view)
+    call winrestview(view)
   endtry
 endfunction
 "}}}
@@ -57,7 +57,7 @@ function! s:_remove_commentstring_and_foldmarkers(str) "{{{
   let foldmarkers = split(&foldmarker, ',')
   return substitute(a:str, '\%('.cmsbgn.'\)\?\s*'.foldmarkers[0].'\%(\d\+\)\?\s*\%('.cmsend.'\)\?', '','')
 endfunction "}}}
-function! s:_get_colwidth() "{{{
+function! s:colwidth() "{{{
   return winwidth(0) - &foldcolumn - (!&number ? 0 : max([&numberwidth, len(line('$'))])) - 1
 endfunction
 "}}}
@@ -67,7 +67,7 @@ endfunction
 "}}}
 function! s:_adjust_headline(headline, reducelen) "{{{
   let headline = s:_remove_commentstring_and_foldmarkers(a:headline)
-  let colwidth = s:_get_colwidth()
+  let colwidth = s:colwidth()
   let truncatelen = (colwidth < g:foldcolors_text_maxchars ? colwidth : g:foldcolors_text_maxchars) - a:reducelen
   let dispwidth = strdisplaywidth(headline)
   if dispwidth < truncatelen
