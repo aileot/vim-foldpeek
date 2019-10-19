@@ -1,7 +1,35 @@
+" ============================================================================
+" File: autoload/foldcolors/format.vim
+" Author: kaile256
+" License: MIT license {{{
+"     Permission is hereby granted, free of charge, to any person obtaining
+"     a copy of this software and associated documentation files (the
+"     "Software"), to deal in the Software without restriction, including
+"     without limitation the rights to use, copy, modify, merge, publish,
+"     distribute, sublicense, and/or sell copies of the Software, and to
+"     permit persons to whom the Software is furnished to do so, subject to
+"     the following conditions:
+"
+"     The above copyright notice and this permission notice shall be included
+"     in all copies or substantial portions of the Software.
+"
+"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+" }}}
+" ============================================================================
 
+if expand('<sfile>:p') !=# expand('%:p') && exists('g:loaded_foldcolors') | finish | endif
+let g:loaded_foldcolors = 1
+" save 'cpoptions' {{{
+let s:save_cpo = &cpo
+set cpo&vim
+"}}}
 
-if expand('<sfile>:p')!=#expand('%:p') && exists('g:loaded_foldcolors')| finish| endif| let g:loaded_foldcolors = 1
-let s:save_cpo = &cpo| set cpo&vim
 scriptencoding utf-8
 "=============================================================================
 let g:foldcolors_text_maxchars = get(g:, 'foldcolors_text_maxchars', 78)
@@ -18,12 +46,11 @@ function! foldcolors#format#text() "{{{
     let &fdc = v:foldlevel + 1
   endif
   let headline = getline(v:foldstart)
-  let head = g:foldcolors_text_head=='' ? '' : eval(g:foldcolors_text_head)
-  let tail = g:foldcolors_text_tail=='' ? '' : ' '. eval(g:foldcolors_text_tail)
-  let headline = s:_adjust_headline(headline, strlen(head)+strlen(tail))
+  let head = (g:foldcolors_text_head == '') ? '' : eval(g:foldcolors_text_head)
+  let tail = (g:foldcolors_text_tail == '') ? '' : ' '. eval(g:foldcolors_text_tail)
+  let headline = s:_adjust_headline(headline, strlen(head) + strlen(tail) )
   return substitute(headline, '^\s*\ze', '\0'. head, ''). tail
-endfunction
-"}}}
+endfunction "}}}
 
 function! foldcolors#format#info() "{{{
   let foldheads = s:info_headlines()
@@ -31,8 +58,8 @@ function! foldcolors#format#info() "{{{
     return ''
   endif
   return join(foldheads, ' > ')
-endfunction
-"}}}
+endfunction "}}}
+
 function! s:info_headlines() "{{{
   if !foldlevel('.')
     return []
@@ -45,20 +72,18 @@ function! s:info_headlines() "{{{
   finally
     call winrestview(view)
   endtry
-endfunction
-"}}}
-
+endfunction "}}}
 
 "=============================================================================
 "Misc:
 function! s:_remove_commentstring_and_foldmarkers(str) "{{{
   let cms = matchlist(&cms, '\(.\{-}\)%s\(.\{-}\)')
-  let [cmsbgn, cmsend] = cms==[] ? ['', ''] : [substitute(cms[1], '\s', '', 'g'), cms[2]]
+  let [cmsbgn, cmsend] = cms==[] ? ['', ''] : [substitute(cms[1], '\s', '', 'g'), cms[2] ]
   let foldmarkers = split(&foldmarker, ',')
   return substitute(a:str, '\%('.cmsbgn.'\)\?\s*'.foldmarkers[0].'\%(\d\+\)\?\s*\%('.cmsend.'\)\?', '','')
 endfunction "}}}
 function! s:colwidth() "{{{
-  return winwidth(0) - &foldcolumn - (!&number ? 0 : max([&numberwidth, len(line('$'))])) - 1
+  return winwidth(0) - &foldcolumn - (!&number ? 0 : max([&numberwidth, len(line('$'))]) ) - 1
 endfunction
 "}}}
 function! s:_remove_multibyte_garbage(str) "{{{
@@ -105,14 +130,15 @@ function! s:FoldGatherer._register_headline(headline) "{{{
 endfunction
 "}}}
 function! s:FoldGatherer._gather_outer_headlines() "{{{
-  if mode() =~ '[sS]' "FIXME:selectmodeでnormal!コマンドを使うとE523が出る問題の暫定的解消
+  if mode() =~ '[sS]' "FIXME: ad hoc for E523 on :norm! in selectmode.
     return
   endif
   let row = 0
   try
     while 1
       keepj normal! [z
-      if row == line('.') "FIXME:同一行にFoldingMarkerが重なってると無限ループになる問題の暫定的解消
+      if row == line('.')
+        "FIXME: ad hoc for endless loop when multi foldmarkers are in the same line.
         break
       endif
       call self._register_headline(getline('.'))
@@ -122,7 +148,7 @@ function! s:FoldGatherer._gather_outer_headlines() "{{{
       let row = line('.')
     endwhile
   catch
-    ec 'foldcolors_navi: 何かしらのエラーが起こりました g:foldcolors__err参照'
+    throw 'See: g:foldcolors_err'
     let g:foldcolors__err = v:exception
   endtry
 endfunction
@@ -152,5 +178,8 @@ endfunction
 "}}}
 
 "=============================================================================
-"END "{{{1
-let &cpo = s:save_cpo| unlet s:save_cpo
+" restore 'cpoptions' {{{
+let &cpo = s:save_cpo
+unlet s:save_cpo
+"}}}
+" vim: ts=2 sts=2 sw=2 et fdm=marker
