@@ -23,47 +23,47 @@
 " }}}
 " ============================================================================
 
-if expand('<sfile>:p') !=# expand('%:p') && exists('g:loaded_foldtext') | finish | endif
+if v:version < 700 | finish | endif
+
+if exists('g:loaded_foldtext') | finish | endif
 let g:loaded_foldtext = 1
 " save 'cpoptions' {{{
 let s:save_cpo = &cpo
 set cpo&vim
 "}}}
 
-let g:foldtext#text_maxchars = get(g:, 'foldtext#text_maxchars', 78)
-let g:foldtext#text_head = get(g:, 'foldtext#text_head', 'v:folddashes. " "')
-let g:foldtext#text_tail = get(g:, 'foldtext#text_tail', 'v:foldend - v:foldstart+1')
-let g:foldtext#text_enable_autofdc_adjuster = get(g:, 'foldtext#text_enable_autofdc_adjuster', 0)
-let g:foldtext#navi_maxchars = get(g:, 'foldtext#navi_maxchars', 60)
+let g:foldtext#maxchars        = get(g:, 'foldtext#maxchars', 78)
+let g:foldtext#auto_foldcolumn = get(g:, 'foldtext#auto_foldcolumn', 0)
+
+let g:foldtext#head_in_indent  = get(g:, 'foldtext#head_in_indent', 0)
+let g:foldtext#head = get(g:, 'foldtext#head',
+      \ "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes ")
+let g:foldtext#tail = get(g:, 'foldtext#tail',
+      \ "' ['. (v:foldend - v:foldstart + 1) .']'")
 
 function! foldtext#text() abort "{{{1
-  if g:foldtext#text_enable_autofdc_adjuster && v:foldlevel > &fdc-1
+  if g:foldtext#auto_foldcolumn && v:foldlevel > (&fdc - 1)
     let &fdc = v:foldlevel + 1
   endif
+
   let headtext = getline(v:foldstart)
-  let head = (g:foldtext#text_head == '') ? '' : eval(g:foldtext#text_head)
-  let tail = (g:foldtext#text_tail == '') ? '' : ' '. eval(g:foldtext#text_tail)
-  let headtext = s:_adjust_headtext(headtext, strlen(head) + strlen(tail) + 1)
-  return substitute(headtext, '^\s*\ze', '\0'. head, ''). tail
-endfunction
-function! s:_remove_commentstring_and_foldmarkers(str) abort "{{{2
-  let cms = matchlist(&cms, '\(.\{-}\)%s\(.\{-}\)')
-  let [cmsbgn, cmsend] = cms==[] ? ['', ''] : [substitute(cms[1], '\s', '', 'g'), cms[2] ]
-  let foldmarkers = split(&foldmarker, ',')
-  return substitute(a:str, '\%('.cmsbgn.'\)\?\s*'.foldmarkers[0].'\%(\d\+\)\?\s*\%('.cmsend.'\)\?', '','')
-endfunction
-function! s:colwidth() abort "{{{2
-  return winwidth(0) - &foldcolumn - (!&number ? 0 : max([&numberwidth, len(line('$'))]) ) - 1
+  let head = get(b:, 'foldtext_head', eval(g:foldtext#head))
+  let tail = get(b:, 'foldtext_head', eval(g:foldtext#tail))
+
+  " Note: makes sure head/tail not to show '0'
+  let head = empty(head) ? '' : head
+  let tail = empty(tail) ? '' : tail
+
+  let headtext = s:adjust_textlen(headtext, strlen(head) + strlen(tail) + 1)
+
+  " Note: keep indent before `head`
+  return substitute(headtext, '^\s*\ze', '\0'. head, '') . tail
 endfunction
 
-function! s:_remove_multibyte_garbage(str) abort "{{{2
-  return substitute(substitute(strtrans(a:str), '^\%(<\x\x>\)\+\|\%(<\x\x>\)\+$', '', 'g'), '\^I', "\t", 'g')
-endfunction
-
-function! s:_adjust_headtext(headtext, reducelen) abort "{{{2
-  let headtext = s:_remove_commentstring_and_foldmarkers(a:headtext)
+function! s:adjust_textlen(headtext, reducelen) abort "{{{2
+  let headtext = s:remove_cms_and_fdm(a:headtext)
   let colwidth = s:colwidth()
-  let truncatelen = ((colwidth < g:foldtext#text_maxchars)? colwidth : g:foldtext#text_maxchars) - a:reducelen
+  let truncatelen = ((colwidth < g:foldtext#maxchars) ? colwidth : g:foldtext#maxchars) - a:reducelen
   let dispwidth = strdisplaywidth(headtext)
   if dispwidth < truncatelen
     let multibyte_widthgap = strlen(headtext) - dispwidth
@@ -79,94 +79,18 @@ function! s:_adjust_headtext(headtext, reducelen) abort "{{{2
     end
     let ret .= char
   endfor
-  return strdisplaywidth(ret)==truncatelen ? ret : ret.' '
+  return (strdisplaywidth(ret) == truncatelen) ? ret : ret .' '
 endfunction
 
-function! foldtext#info() abort "{{{1
-  let foldheads = s:info_headtexts()
-  if empty(foldheads)
-    return ' Not inside any fold'
-  endif
-  return join(foldheads, ' > ')
+function! s:remove_cms_and_fdm(str) abort "{{{2
+  let cms = matchlist(&commentstring, '\(.\{-}\)%s\(.\{-}\)')
+  let [cmsbgn, cmsend] = (cms == [] )? ['', ''] : [substitute(cms[1], '\s', '', 'g'), cms[2] ]
+  let fdm = split(&foldmarker, ',')
+  return substitute(a:str, '\%('. cmsbgn .'\)\?\s*'. fdm[0] .'\%(\d\+\)\?\s*\%('. cmsend .'\)\?', '','')
 endfunction
 
-function! s:info_headtexts() abort "{{{2
-  if !foldlevel('.')
-    return []
-  endif
-  let view_save = winsaveview()
-  let gatherer = s:newFoldGatherer()
-  try
-    call gatherer.gather_headtexts()
-    return gatherer.get_headtexts()
-  finally
-    call winrestview(view_save)
-  endtry
-endfunction
-
-"=============================================================================
-let s:FoldGatherer = {} "{{{2
-function! s:newFoldGatherer() abort "{{{3
-  let obj = copy(s:FoldGatherer)
-  let obj.headtexts = []
-  return obj
-endfunction
-
-function! s:FoldGatherer._register_headtext(headtext) abort "{{{3
-  let headtext = s:_remove_commentstring_and_foldmarkers(a:headtext)
-  let headtext = substitute(substitute(headtext, '^\s*\|\s$', '', 'g'), '\s\+', ' ', 'g')
-  let multibyte_widthgap = len(headtext) - strdisplaywidth(headtext)
-  let truncatelen = g:foldtext#navi_maxchars + multibyte_widthgap
-  let headtext = s:_remove_multibyte_garbage(headtext[:truncatelen])
-  call insert(self.headtexts, headtext)
-endfunction
-
-function! s:FoldGatherer._gather_outer_headtexts() abort "{{{3
-  if mode() =~ '[sS]' "FIXME: ad hoc for E523 on :norm! in selectmode.
-    return
-  endif
-  let row = 0
-  try
-    while 1
-      keepj normal! [z
-      if row == line('.')
-        "FIXME: ad hoc for endless loop when multi foldmarkers are in the same line.
-        break
-      endif
-      call self._register_headtext(getline('.'))
-      if foldlevel('.') == 1
-        break
-      endif
-      let row = line('.')
-    endwhile
-  catch
-    throw 'See: g:foldtext_errmsg'
-    let g:foldtext_errmsg = v:exception
-  endtry
-endfunction
-
-function! s:FoldGatherer.gather_headtexts() abort "{{{3
-  let closed_row = foldclosed('.')
-
-  if closed_row == -1
-    call self._gather_outer_headtexts()
-    return
-  endif
-
-  call self._register_headtext(getline(closed_row))
-
-  if foldlevel('.') == 1 | return | endif
-
-  keepj norm! [z
-
-  if foldclosed('.') == closed_row | return | endif
-
-  call self._gather_outer_headtexts()
-  return
-endfunction
-
-function! s:FoldGatherer.get_headtexts() abort "{{{3
-  return self.headtexts
+function! s:colwidth() abort "{{{2
+  return winwidth(0) - &foldcolumn - (!&number ? 0 : max([&numberwidth, len(line('$'))]) ) - 1
 endfunction
 
 " restore 'cpoptions' {{{1
