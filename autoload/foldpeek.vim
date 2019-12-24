@@ -35,6 +35,9 @@ set cpo&vim
 let g:foldpeek#maxchars        = get(g:, 'foldpeek#maxchars', 78)
 let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
 
+let g:foldpeek#skipline_chars  = get(g:, 'foldpeek#skipline_chars',
+      \ '\-=#/{\t\\ ')
+
 let g:foldpeek#head = get(g:, 'foldpeek#head',
       \ "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes ")
 let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
@@ -42,7 +45,6 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ 2: "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
       \ })
 
-let g:foldpeek#skipline_chars = get(g:, 'foldpeek#skipline_chars', '\-=#/{\t\\ ')
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&fdc - 1)
@@ -78,7 +80,7 @@ function! s:shown_line() abort "{{{2
   return [getline(v:foldstart), 1]
 endfunction
 
-function! s:decorations(num) abort "{{{1
+function! s:decorations(num) abort "{{{2
   if type(g:foldpeek#head) == type({})
     for num in sort(keys(g:foldpeek#head))
       if num > a:num | break | endif
@@ -126,14 +128,14 @@ function! s:adjust_textlen(headtext, reducelen) abort "{{{2
   return (strdisplaywidth(ret) == truncatelen) ? ret : ret .' '
 endfunction
 
-function! s:remove_cms_and_fdm(str) abort "{{{2
+function! s:remove_cms_and_fdm(str) abort "{{{3
   let cms = matchlist(&commentstring, '\(.\{-}\)%s\(.\{-}\)')
   let [cmsbgn, cmsend] = (cms == [] )? ['', ''] : [substitute(cms[1], '\s', '', 'g'), cms[2] ]
   let fdm = split(&foldmarker, ',')
   return substitute(a:str, '\%('. cmsbgn .'\)\?\s*'. fdm[0] .'\%(\d\+\)\?\s*\%('. cmsend .'\)\?', '','')
 endfunction
 
-function! s:colwidth() abort "{{{2
+function! s:colwidth() abort "{{{3
   return winwidth(0) - &foldcolumn - (!&number ? 0 : max([&numberwidth, len(line('$'))]) ) - 1
 endfunction
 
