@@ -64,17 +64,17 @@ function! s:shown_line() abort "{{{2
   let add  = 0
   let line = getline(v:foldstart)
   " Note: insert whitespace here for `pattern`
-  let cms = substitute(&commentstring, '%s', '', '')
+  let cms  = substitute(&commentstring, '%s', '', '')
 
   while add <= (v:foldend - v:foldstart)
-    let chars = cms . g:foldpeek#skipline_chars
+    let chars   = cms . g:foldpeek#skipline_chars
     let pattern = '^['. chars .']*$'
     " Note: in [], `\s` only indicates a backslash and a 'literal s'
     " Note: have to use regexp (un)matches with [] between `^` and `$`
     if line !~# pattern | return [line, add + 1] | endif
 
-    let add += 1
-    let line   = getline(v:foldstart + add)
+    let add  += 1
+    let line  = getline(v:foldstart + add)
   endwhile
 
   return [getline(v:foldstart), 1]
@@ -106,23 +106,24 @@ function! s:decorations(num) abort "{{{2
   return [head, tail]
 endfunction
 
-function! s:adjust_textlen(headtext, reducelen) abort "{{{2
-  let headtext = s:remove_cms_and_fdm(a:headtext)
-  let colwidth = s:colwidth()
-  let truncatelen = ((colwidth < g:foldpeek#maxchars) ? colwidth : g:foldpeek#maxchars) - a:reducelen
-  let dispwidth = strdisplaywidth(headtext)
+function! s:adjust_textlen(shown_text, reducelen) abort "{{{2
+  let shown_text = substitute(a:shown_text, '\t', repeat(' ', &ts), 'g')
+  let shown_text = s:remove_cms_and_fdm(shown_text)
+  let foldwidth  = winwidth(0) - &foldcolumn
+        \ - (!&number ? 0 : max([&numberwidth, len(line('$'))]))
+  let foldwidth   = min([foldwidth, g:foldpeek#maxchars])
+  let truncatelen = foldwidth - a:reducelen
+  let dispwidth   = strdisplaywidth(shown_text)
   if dispwidth < truncatelen
-    let multibyte_widthgap = strlen(headtext) - dispwidth
-    let headtextwidth = truncatelen + multibyte_widthgap
-    return printf('%-*s', headtextwidth, headtext)
-  end
+    let multibyte_widthgap = strlen(shown_text) - dispwidth
+    let shown_width   = truncatelen + multibyte_widthgap
+    return printf('%-*s', shown_width, shown_text)
+  endif
   let ret = ''
   let len = 0
-  for char in split(headtext, '\zs')
+  for char in split(shown_text, '\zs')
     let len += strdisplaywidth(char)
-    if len > truncatelen
-      break
-    end
+    if len > truncatelen | break | endif
     let ret .= char
   endfor
   return (strdisplaywidth(ret) == truncatelen) ? ret : ret .' '
@@ -130,13 +131,13 @@ endfunction
 
 function! s:remove_cms_and_fdm(str) abort "{{{3
   let cms = matchlist(&commentstring, '\(.\{-}\)%s\(.\{-}\)')
-  let [cmsbgn, cmsend] = (cms == [] )? ['', ''] : [substitute(cms[1], '\s', '', 'g'), cms[2] ]
+  let [cmsbgn, cmsend] = (cms == [])
+        \ ? ['', '']
+        \ : [substitute(cms[1], '\s', '', 'g'), cms[2]]
   let fdm = split(&foldmarker, ',')
-  return substitute(a:str, '\%('. cmsbgn .'\)\?\s*'. fdm[0] .'\%(\d\+\)\?\s*\%('. cmsend .'\)\?', '','')
-endfunction
-
-function! s:colwidth() abort "{{{3
-  return winwidth(0) - &foldcolumn - (!&number ? 0 : max([&numberwidth, len(line('$'))]) ) - 1
+  return substitute(a:str,
+        \ '\%('. cmsbgn .'\)\?\s*'. fdm[0] .'\%(\d\+\)\?\s*\%('. cmsend .'\)\?',
+        \ '','')
 endfunction
 
 " restore 'cpoptions' {{{1
@@ -144,4 +145,5 @@ let &cpo = s:save_cpo
 unlet s:save_cpo
 
 " modeline "{{{1
-" vim: ts=2 sts=2 sw=2 et fdm=marker
+" vim: expandtab tabstop=2 softtabstop=2 shiftwidth=2
+" vim: foldmethod=marker textwidth=78
