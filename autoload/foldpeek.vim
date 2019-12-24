@@ -54,7 +54,6 @@ function! foldpeek#text() abort "{{{1
 
   let shown_text = s:adjust_textlen(shown_text, strlen(head) + strlen(tail) + 1)
 
-  " TODO: virtually replace indent with `head`
   " keep indent before `head`
   return substitute(shown_text, '^\s*\ze', '\0'. head, '') . tail
 endfunction
