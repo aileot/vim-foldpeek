@@ -1,5 +1,5 @@
 " ============================================================================
-" File: plugin/foldtext.vim
+" File: plugin/foldpeek.vim
 " Author: kaile256
 " License: MIT license {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
@@ -25,4 +25,4 @@
 
 if v:version < 700 | finish | endif
 
-set foldtext=foldtext#text()
+set foldtext=foldpeek#text()

@@ -1,5 +1,5 @@
 " ============================================================================
-" File: autoload/foldtext.vim
+" File: autoload/foldpeek.vim
 " Author: kaile256
 " License: MIT license {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
@@ -25,33 +25,33 @@
 
 if v:version < 700 | finish | endif
 
-if exists('g:loaded_foldtext') | finish | endif
-let g:loaded_foldtext = 1
+if exists('g:loaded_foldpeek') | finish | endif
+let g:loaded_foldpeek = 1
 " save 'cpoptions' {{{
 let s:save_cpo = &cpo
 set cpo&vim
 "}}}
 
-let g:foldtext#maxchars        = get(g:, 'foldtext#maxchars', 78)
-let g:foldtext#auto_foldcolumn = get(g:, 'foldtext#auto_foldcolumn', 0)
+let g:foldpeek#maxchars        = get(g:, 'foldpeek#maxchars', 78)
+let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
 
-let g:foldtext#head = get(g:, 'foldtext#head',
+let g:foldpeek#head = get(g:, 'foldpeek#head',
       \ "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes ")
-let g:foldtext#tail = get(g:, 'foldtext#tail',
+let g:foldpeek#tail = get(g:, 'foldpeek#tail',
       \ "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'")
 
-let g:foldtext#head_in_indent = get(g:, 'foldtext#head_in_indent', 0)
-let g:foldtext#nextline_chars = get(g:, 'foldtext#nextline_chars', '=#/{')
+let g:foldpeek#head_in_indent = get(g:, 'foldpeek#head_in_indent', 0)
+let g:foldpeek#nextline_chars = get(g:, 'foldpeek#nextline_chars', '=#/{')
 
-function! foldtext#text() abort "{{{1
-  if g:foldtext#auto_foldcolumn && v:foldlevel > (&fdc - 1)
+function! foldpeek#text() abort "{{{1
+  if g:foldpeek#auto_foldcolumn && v:foldlevel > (&fdc - 1)
     let &fdc = v:foldlevel + 1
   endif
 
   let [shown_text, shown_lnum] = s:shown_line()
 
-  let head = get(b:, 'foldtext_head', eval(g:foldtext#head))
-  let tail = get(b:, 'foldtext_tail', eval(g:foldtext#tail))
+  let head = get(b:, 'foldpeek_head', eval(g:foldpeek#head))
+  let tail = get(b:, 'foldpeek_tail', eval(g:foldpeek#tail))
 
   " Note: makes sure head/tail not to show '0'
   let head = empty(head) ? '' : substitute(head, '%lnum%', shown_lnum, 'g')
@@ -71,7 +71,7 @@ function! s:shown_line() abort "{{{2
   let cms = substitute(&commentstring, '%s', ' ', '')
 
   while add <= (v:foldend - v:foldstart)
-    let chars = cms . g:foldtext#nextline_chars
+    let chars = cms . g:foldpeek#nextline_chars
     let pattern = '^['. chars .'\t\\]*$'
     " Note: in [], `\s` only indicates a backslash and a 'literal s'
     " Note: have to use regexp (un)matches with [] between `^` and `$`
@@ -87,7 +87,7 @@ endfunction
 function! s:adjust_textlen(headtext, reducelen) abort "{{{2
   let headtext = s:remove_cms_and_fdm(a:headtext)
   let colwidth = s:colwidth()
-  let truncatelen = ((colwidth < g:foldtext#maxchars) ? colwidth : g:foldtext#maxchars) - a:reducelen
+  let truncatelen = ((colwidth < g:foldpeek#maxchars) ? colwidth : g:foldpeek#maxchars) - a:reducelen
   let dispwidth = strdisplaywidth(headtext)
   if dispwidth < truncatelen
     let multibyte_widthgap = strlen(headtext) - dispwidth
