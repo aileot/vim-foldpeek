@@ -35,18 +35,19 @@ set cpo&vim
 let g:foldtext#maxchars        = get(g:, 'foldtext#maxchars', 78)
 let g:foldtext#auto_foldcolumn = get(g:, 'foldtext#auto_foldcolumn', 0)
 
-let g:foldtext#head_in_indent  = get(g:, 'foldtext#head_in_indent', 0)
 let g:foldtext#head = get(g:, 'foldtext#head',
       \ "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes ")
 let g:foldtext#tail = get(g:, 'foldtext#tail',
       \ "' ['. (v:foldend - v:foldstart + 1) .']'")
+
+let g:foldtext#head_in_indent = get(g:, 'foldtext#head_in_indent', 0)
+let g:foldtext#nextline_chars = get(g:, 'foldtext#nextline_chars', '=#/{')
 
 function! foldtext#text() abort "{{{1
   if g:foldtext#auto_foldcolumn && v:foldlevel > (&fdc - 1)
     let &fdc = v:foldlevel + 1
   endif
 
-  let headtext = getline(v:foldstart)
   let head = get(b:, 'foldtext_head', eval(g:foldtext#head))
   let tail = get(b:, 'foldtext_head', eval(g:foldtext#tail))
 
@@ -54,10 +55,32 @@ function! foldtext#text() abort "{{{1
   let head = empty(head) ? '' : head
   let tail = empty(tail) ? '' : tail
 
-  let headtext = s:adjust_textlen(headtext, strlen(head) + strlen(tail) + 1)
+  let shown_line = foldtext#shown_line()
+  let shown_line = s:adjust_textlen(shown_line, strlen(head) + strlen(tail) + 1)
 
+  " TODO: virtually replace indent with `head`
   " Note: keep indent before `head`
-  return substitute(headtext, '^\s*\ze', '\0'. head, '') . tail
+  return substitute(shown_line, '^\s*\ze', '\0'. head, '') . tail
+endfunction
+
+function! foldtext#shown_line() abort "{{{2
+  let next = 0
+  let ret  = getline(v:foldstart)
+  " Note: insert whitespace here for `pattern`
+  let cms = substitute(&commentstring, '%s', ' ', '')
+
+  while next <= (v:foldend - v:foldstart)
+    let chars = cms . g:foldtext#nextline_chars
+    let pattern = '^['. chars .'\t\\]*$'
+    " Note: in [], `\s` only indicates a backslash and a 'literal s'
+    " Note: have to use regexp (un)matches with [] between `^` and `$`
+    if ret !~# pattern | return ret | endif
+
+    let next += 1
+    let ret   = getline(v:foldstart + next)
+  endwhile
+
+  return getline(v:foldstart)
 endfunction
 
 function! s:adjust_textlen(headtext, reducelen) abort "{{{2
