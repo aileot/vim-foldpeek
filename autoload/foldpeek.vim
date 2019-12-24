@@ -37,11 +37,12 @@ let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
 
 let g:foldpeek#head = get(g:, 'foldpeek#head',
       \ "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes ")
-let g:foldpeek#tail = get(g:, 'foldpeek#tail',
-      \ "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'")
+let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
+      \ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
+      \ 2: "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
+      \ })
 
-let g:foldpeek#head_in_indent = get(g:, 'foldpeek#head_in_indent', 0)
-let g:foldpeek#nextline_chars = get(g:, 'foldpeek#nextline_chars', '=#/{')
+let g:foldpeek#skipline_chars = get(g:, 'foldpeek#skipline_chars', '=#/{\t\\ ')
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&fdc - 1)
@@ -49,30 +50,24 @@ function! foldpeek#text() abort "{{{1
   endif
 
   let [shown_text, shown_lnum] = s:shown_line()
-
-  let head = get(b:, 'foldpeek_head', eval(g:foldpeek#head))
-  let tail = get(b:, 'foldpeek_tail', eval(g:foldpeek#tail))
-
-  " Note: makes sure head/tail not to show '0'
-  let head = empty(head) ? '' : substitute(head, '%lnum%', shown_lnum, 'g')
-  let tail = empty(tail) ? '' : substitute(tail, '%lnum%', shown_lnum, 'g')
+  let [head, tail] = s:decorations(shown_lnum)
 
   let shown_text = s:adjust_textlen(shown_text, strlen(head) + strlen(tail) + 1)
 
   " TODO: virtually replace indent with `head`
-  " Note: keep indent before `head`
+  " keep indent before `head`
   return substitute(shown_text, '^\s*\ze', '\0'. head, '') . tail
 endfunction
 
 function! s:shown_line() abort "{{{2
-  let add = 0
-  let line  = getline(v:foldstart)
+  let add  = 0
+  let line = getline(v:foldstart)
   " Note: insert whitespace here for `pattern`
-  let cms = substitute(&commentstring, '%s', ' ', '')
+  let cms = substitute(&commentstring, '%s', '', '')
 
   while add <= (v:foldend - v:foldstart)
-    let chars = cms . g:foldpeek#nextline_chars
-    let pattern = '^['. chars .'\t\\]*$'
+    let chars = cms . g:foldpeek#skipline_chars
+    let pattern = '^['. chars .']*$'
     " Note: in [], `\s` only indicates a backslash and a 'literal s'
     " Note: have to use regexp (un)matches with [] between `^` and `$`
     if line !~# pattern | return [line, add + 1] | endif
@@ -82,6 +77,32 @@ function! s:shown_line() abort "{{{2
   endwhile
 
   return [getline(v:foldstart), 1]
+endfunction
+
+function! s:decorations(num) abort "{{{1
+  if type(g:foldpeek#head) == type({})
+    for num in sort(keys(g:foldpeek#head))
+      if num > a:num | break | endif
+      let head = eval(g:foldpeek#head[num])
+    endfor
+  else
+    let head = get(b:, 'foldpeek_head', eval(g:foldpeek#head))
+  endif
+
+  if type(g:foldpeek#tail) == type({})
+    for num in sort(keys(g:foldpeek#tail))
+      if num > a:num | break | endif
+      let tail = eval(g:foldpeek#tail[num])
+    endfor
+  else
+    let tail = get(b:, 'foldpeek_tail', eval(g:foldpeek#tail))
+  endif
+
+  " Note: empty() makes sure head/tail not to show '0'
+  let head = empty(head) ? '' : substitute(head, '%lnum%', a:num, 'g')
+  let tail = empty(tail) ? '' : substitute(tail, '%lnum%', a:num, 'g')
+
+  return [head, tail]
 endfunction
 
 function! s:adjust_textlen(headtext, reducelen) abort "{{{2
