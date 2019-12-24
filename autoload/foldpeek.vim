@@ -42,7 +42,7 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ 2: "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
       \ })
 
-let g:foldpeek#skipline_chars = get(g:, 'foldpeek#skipline_chars', '=#/{\t\\ ')
+let g:foldpeek#skipline_chars = get(g:, 'foldpeek#skipline_chars', '\-=#/{\t\\ ')
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&fdc - 1)
