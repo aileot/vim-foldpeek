@@ -47,8 +47,8 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
 
 
 function! foldpeek#text() abort "{{{1
-  if g:foldpeek#auto_foldcolumn && v:foldlevel > (&fdc - 1)
-    let &fdc = v:foldlevel + 1
+  if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
+    let &foldcolumn = v:foldlevel + 1
   endif
 
   let [shown_text, shown_lnum] = s:shown_line()
