@@ -33,7 +33,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 "}}}
 
-let g:foldpeek#maxchars        = get(g:, 'foldpeek#maxchars', 78)
+let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth', 78)
 let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
 
 let g:foldpeek#skipline_chars  = get(g:, 'foldpeek#skipline_chars',
@@ -46,7 +46,6 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ 2: "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
       \ })
 
-
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
     let &foldcolumn = v:foldlevel + 1
@@ -55,8 +54,7 @@ function! foldpeek#text() abort "{{{1
   let [body, peeklnum] = s:peekline()
   let [head, tail] = s:decorations(peeklnum)
 
-  " keep indent before `head`
-  return substitute(shown_text, '^\s*\ze', '\0'. head, '') . tail
+  return s:return_text(body, [head, tail])
 endfunction
 
 function! s:peekline() abort "{{{2
@@ -110,38 +108,64 @@ function! s:decorations(num) abort "{{{2
   return [head, tail]
 endfunction
 
-function! s:adjust_textlen(shown_text, reducelen) abort "{{{2
-  let shown_text = substitute(a:shown_text, '\t', repeat(' ', &ts), 'g')
-  let shown_text = s:remove_cms_and_fdm(shown_text)
-  let foldwidth  = winwidth(0) - &foldcolumn
-        \ - (!&number ? 0 : max([&numberwidth, len(line('$'))]))
-  let foldwidth   = min([foldwidth, g:foldpeek#maxchars])
-  let truncatelen = foldwidth - a:reducelen
-  let dispwidth   = strdisplaywidth(shown_text)
-  if dispwidth < truncatelen
-    let multibyte_widthgap = strlen(shown_text) - dispwidth
-    let shown_width   = truncatelen + multibyte_widthgap
-    return printf('%-*s', shown_width, shown_text)
-  endif
-  let ret = ''
-  let len = 0
-  for char in split(shown_text, '\zs')
-    let len += strdisplaywidth(char)
-    if len > truncatelen | break | endif
-    let ret .= char
-  endfor
-  return (strdisplaywidth(ret) == truncatelen) ? ret : ret .' '
+function! s:return_text(text, decor) abort "{{{2
+  let [head, tail] = a:decor
+
+  let body = s:adjust_bodylen(a:text, strlen(head) + strlen(tail))
+
+  return substitute(body, '^\s*\ze',
+        \ (get(g:, 'foldpeek#indent_head', 0) ? '\0'. head : head .'\0'),
+        \ '') . tail
 endfunction
 
-function! s:remove_cms_and_fdm(str) abort "{{{3
-  let cms = matchlist(&commentstring, '\(.\{-}\)%s\(.\{-}\)')
-  let [cmsbgn, cmsend] = (cms == [])
-        \ ? ['', '']
-        \ : [substitute(cms[1], '\s', '', 'g'), cms[2]]
-  let fdm = split(&foldmarker, ',')
-  return substitute(a:str,
-        \ '\%('. cmsbgn .'\)\?\s*'. fdm[0] .'\%(\d\+\)\?\s*\%('. cmsend .'\)\?',
-        \ '','')
+function! s:adjust_bodylen(str, decor_width) abort "{{{3
+  let body = s:white_replace(a:str)
+
+  let availablewidth = s:availablewidth()
+  let bodywidth      = availablewidth - a:decor_width
+  let displaywidth   = strdisplaywidth(body)
+  if displaywidth < bodywidth
+    " TODO: show in correct width for multibyte characters
+    let lacklen = strlen(body) - displaywidth
+    let bodywidth += lacklen
+    return printf('%-*s', bodywidth, body)
+  endif
+
+  let [len, ret] = [0, '']
+  for char in split(body, '\zs')
+    let len += strdisplaywidth(char)
+    if len > bodywidth | break | endif
+    let ret .= char
+  endfor
+  return strdisplaywidth(ret) == bodywidth ? ret : ret .' '
+endfunction
+
+function! s:white_replace(str) abort "{{{4
+  let cms     = split(&commentstring, '%s')
+  let fdmleft = substitute(&foldmarker, ',.*', '', '')
+
+  let pattern = empty(cms)     ? fdmleft .'\%[\d]'
+        \ : '\%['. cms[0] .' ]'. fdmleft .'\%[\d]\%[ '. cms[len(cms) - 1] .']'
+
+  let str = substitute(a:str, pattern, repeat(' ', len(fdmleft)), 'g')
+  return substitute(str, '\t', repeat(' ', &tabstop), 'g')
+endfunction
+
+function! s:availablewidth() abort "{{{1
+  let numberwidth = &number ? max([&numberwidth, len(line('$'))]) : 0
+
+  let signcolwidth = 0
+  if !empty(sign_getplaced('%')[0].signs) || &signcolumn =~# 'yes'
+    let signcolwidth = matchstr(&signcolumn, '\d')
+    if empty(signcolwidth)
+      let signcolwidth = 1
+    endif
+  endif
+
+  let availablewidth = winwidth(0) - &foldcolumn - numberwidth - signcolwidth
+  return g:foldpeek#maxwidth > 0
+        \ ? min([availablewidth, g:foldpeek#maxwidth])
+        \ : availablewidth
 endfunction
 
 " restore 'cpoptions' {{{1
