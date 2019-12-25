@@ -23,7 +23,8 @@
 " }}}
 " ============================================================================
 
-if v:version < 700 | finish | endif
+if v:version < 730 | finish | endif
+" v7.3: for strdisplaywidth()
 
 if exists('g:loaded_foldpeek') | finish | endif
 let g:loaded_foldpeek = 1
