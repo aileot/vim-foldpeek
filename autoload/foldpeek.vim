@@ -52,16 +52,14 @@ function! foldpeek#text() abort "{{{1
     let &foldcolumn = v:foldlevel + 1
   endif
 
-  let [shown_text, shown_lnum] = s:shown_line()
-  let [head, tail] = s:decorations(shown_lnum)
-
-  let shown_text = s:adjust_textlen(shown_text, strlen(head) + strlen(tail) + 1)
+  let [body, peeklnum] = s:peekline()
+  let [head, tail] = s:decorations(peeklnum)
 
   " keep indent before `head`
   return substitute(shown_text, '^\s*\ze', '\0'. head, '') . tail
 endfunction
 
-function! s:shown_line() abort "{{{2
+function! s:peekline() abort "{{{2
   let add  = 0
   let line = getline(v:foldstart)
   " Note: insert whitespace here for `pattern`
@@ -82,22 +80,27 @@ function! s:shown_line() abort "{{{2
 endfunction
 
 function! s:decorations(num) abort "{{{2
-  if type(g:foldpeek#head) == type({})
-    for num in sort(keys(g:foldpeek#head))
+  " TODO: bundle head and tail in for-loop
+  " TODO: buflocal config
+  let head = get(b:, 'foldpeek_head', g:foldpeek#head)
+  let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
+
+  if type(head) == type({})
+    for num in sort(keys(head))
       if num > a:num | break | endif
-      let head = eval(g:foldpeek#head[num])
+      let head = eval(get(b:, 'forkpeek_head.'. num, g:foldpeek#head[num]))
     endfor
   else
-    let head = get(b:, 'foldpeek_head', eval(g:foldpeek#head))
+    let head = eval(get(b:, 'foldpeek_head', head))
   endif
 
-  if type(g:foldpeek#tail) == type({})
-    for num in sort(keys(g:foldpeek#tail))
+  if type(tail) == type({})
+    for num in sort(keys(tail))
       if num > a:num | break | endif
-      let tail = eval(g:foldpeek#tail[num])
+      let tail = eval(get(b:, 'forkpeek_tail.'. num, g:foldpeek#tail[num]))
     endfor
   else
-    let tail = get(b:, 'foldpeek_tail', eval(g:foldpeek#tail))
+    let tail = eval(get(b:, 'foldpeek_tail', tail))
   endif
 
   " Note: empty() makes sure head/tail not to show '0'
