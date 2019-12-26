@@ -37,7 +37,7 @@ VARIABLES												  *foldpeek-variable*
 g:foldpeek#local_only								  *g:foldpeek#local_only*
 	(default: 0)
 	|foldpeek#text()| won't be set in &foldtext unless
-	`setl foldtext=foldpeek#text()` in your vimrc or in commandline.
+	`setlocal foldtext=foldpeek#text()` in your vimrc or in commandline.
 
 g:foldpeek#maxwidth										*g:foldpeek#maxwidth*
 	(default: 78)
