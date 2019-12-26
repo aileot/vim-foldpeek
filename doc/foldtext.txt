@@ -5,12 +5,12 @@ Author: kaile256 <kaile256acc at gmail.com>
 License: MIT license
 
 ==============================================================================
-CONTENTS													*foldpeek-contents*
+CONTENTS												  *foldpeek-contents*
 
-Introduction											|foldpeek-introduction|
-Usage														|foldpeek-usage|
-	function											|foldpeek-function|
-	variable											 |foldpeek-variable|
+Introduction										|foldpeek-introduction|
+Usage												|foldpeek-usage|
+	function										|foldpeek-function|
+	variable										|foldpeek-variable|
 
 ==============================================================================
 INTRODUCTION												*foldpeek-intro*
@@ -19,22 +19,22 @@ INTRODUCTION												*foldpeek-intro*
 Latest version:
 https://github.com/kaile256/vim-foldpeek
 ==============================================================================
-USAGE														*foldpeek-usage*
+USAGE														 *foldpeek-usage*
 
 Just install this repository under plugin/ or use your favorite
 plugin-manager.
 
 ------------------------------------------------------------------------------
-FUNCTION													*foldpeek-function*
+FUNCTION												   *foldpeek-function*
 
-foldpeek#text()										*foldpeek-foldpeek#text*
+foldpeek#text()										 *foldpeek-foldpeek#text*
 	Unless g:foldpeek#local_only = 1, this function is set in &foldtext.
 	For local use, add `setl foldtext=foldpeek#text()` in your vimrc.
 
 ------------------------------------------------------------------------------
-VARIABLES													*foldpeek-variable*
+VARIABLES												  *foldpeek-variable*
 
-g:foldpeek#local_only									*g:foldpeek#local_only*
+g:foldpeek#local_only								  *g:foldpeek#local_only*
 	(default: 0)
 	|foldpeek#text()| won't be set in &foldtext unless
 	`setl foldtext=foldpeek#text()` in your vimrc or in commandline.
@@ -42,8 +42,8 @@ g:foldpeek#local_only									*g:foldpeek#local_only*
 g:foldpeek#maxwidth										*g:foldpeek#maxwidth*
 	(default: 78)
 
-g:foldpeek#skip_patterns							*g:foldpeek#skip_patterns*
-b:foldpeek_skip_patterns							*b:foldpeek_skip_patterns*
+g:foldpeek#skip_patterns						   *g:foldpeek#skip_patterns*
+b:foldpeek_skip_patterns						   *b:foldpeek_skip_patterns*
 	(default: ['^[\-=/{! ]*$'])
 	Set in |List|.
 	This value will be compared to the folded lines in regexp match.
