@@ -33,17 +33,18 @@ let s:save_cpo = &cpo
 set cpo&vim
 "}}}
 
-let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth', 78)
-let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
-
-let g:foldpeek#skipline_chars  = get(g:, 'foldpeek#skipline_chars',
-      \ '\-=#/{\t\\ ')
+let g:foldpeek#maxwidth          = get(g:, 'foldpeek#maxwidth', 78)
+let g:foldpeek#maxspaces         = get(g:, 'foldpeek#maxspaces', &tabstop)
+let g:foldpeek#auto_foldcolumn   = get(g:, 'foldpeek#auto_foldcolumn', 0)
+let g:foldpeek#skip_patterns = get(g:, 'foldpeek#skip_patterns', [
+      \ '^[\-=/{! ]*$',
+      \ ])
 
 let g:foldpeek#head = get(g:, 'foldpeek#head',
       \ "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes ")
 let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
-      \ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
-      \ 2: "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
+      \ 1: "'['. (v:foldend - v:foldstart + 1) .']'",
+      \ 2: "'[%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
       \ })
 
 function! foldpeek#text() abort "{{{1
