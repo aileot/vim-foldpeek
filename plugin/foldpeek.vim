@@ -23,6 +23,12 @@
 " }}}
 " ============================================================================
 
-if v:version < 700 | finish | endif
+if v:version < 730 | finish | endif
+" v7.3: for strdisplaywidth()
+
+if !has('nvim-0.4.0') && !has('patch-8.1.0614') | finish | endif
+" for sign_getplaced()
+
+if get(g:, 'foldpeek#local_only', 0) | finish | endif
 
 set foldtext=foldpeek#text()
