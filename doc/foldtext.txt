@@ -42,6 +42,12 @@ g:foldpeek#local_only								  *g:foldpeek#local_only*
 
 g:foldpeek#maxwidth										*g:foldpeek#maxwidth*
 	(default: 78)
+	To disable, set `-1`.
+
+g:foldpeek#auto_foldcolumn						 *g:foldpeek#auto_foldcolumn*
+	(default: 0)
+	If not `0`, increase |&foldcolumn| as the highest v:foldlevel of current
+	buffer.
 
 g:foldpeek#skip_patterns						   *g:foldpeek#skip_patterns*
 b:foldpeek_skip_patterns						   *b:foldpeek_skip_patterns*
