@@ -56,7 +56,7 @@ function! foldpeek#text() abort "{{{1
   endif
 
   let [body, peeklnum] = s:peekline()
-  let [head, tail] = s:decorations(peeklnum)
+  let [head, tail]     = s:decorations(peeklnum)
 
   return s:return_text(body, [head, tail])
 endfunction
@@ -144,26 +144,28 @@ function! s:return_text(text, decor) abort "{{{2
         \ '') . tail
 endfunction
 
-function! s:adjust_bodylen(str, decor_width) abort "{{{3
-  let body = s:white_replace(a:str)
+function! s:adjust_bodylen(body, decor_width) abort "{{{3
+  " Note: the replacement of some chars by whitespaces is done in the selection
+  "   of peekline.
+  let nocolwidth = s:nocolwidth()
+  let bodywidth  = nocolwidth - a:decor_width
+  " Note: strdisplaywidth() returns up to &tabstop, &display and &ambiwidth
+  let displaywidth = strdisplaywidth(a:body)
 
-  let availablewidth = s:availablewidth()
-  let bodywidth      = availablewidth - a:decor_width
-  let displaywidth   = strdisplaywidth(body)
-  if displaywidth < bodywidth
-    " TODO: show in correct width for multibyte characters
-    let lacklen = strlen(body) - displaywidth
-    let bodywidth += lacklen
-    return printf('%-*s', bodywidth, body)
+  if bodywidth < displaywidth
+    let [len, ret] = [0, '']
+    for char in split(a:body, '\zs')
+      let len += strdisplaywidth(char)
+      if len > bodywidth | break | endif
+      let ret .= char
+    endfor
+    return strdisplaywidth(ret) == bodywidth ? ret : ret .' '
   endif
 
-  let [len, ret] = [0, '']
-  for char in split(body, '\zs')
-    let len += strdisplaywidth(char)
-    if len > bodywidth | break | endif
-    let ret .= char
-  endfor
-  return strdisplaywidth(ret) == bodywidth ? ret : ret .' '
+  " TODO: show in correct width for multibyte characters
+  let lacklen = strlen(a:body) - displaywidth
+  let bodywidth += lacklen
+  return printf('%-*s', bodywidth, a:body)
 endfunction
 
 function! s:nocolwidth() abort "{{{4
