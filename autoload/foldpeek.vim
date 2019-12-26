@@ -26,6 +26,9 @@
 if v:version < 730 | finish | endif
 " v7.3: for strdisplaywidth()
 
+if !has('nvim-0.4.0') && !has('patch-8.1.0614') | finish | endif
+" for sign_getplaced()
+
 if exists('g:loaded_foldpeek') | finish | endif
 let g:loaded_foldpeek = 1
 " save 'cpoptions' {{{
@@ -71,6 +74,8 @@ function! s:peekline() abort "{{{2
   endwhile
 
   return [getline(v:foldstart), 1]
+endfunction
+
 function! s:white_replace(line) abort "{{{3
   let ret = a:line
   let cms = split(&commentstring, '%s')
@@ -96,8 +101,6 @@ function! s:skippattern(line) abort "{{{3
     if a:line =~# pat | return 1 | endif
   endfor
   return 0
-endfunction
-
 endfunction
 
 function! s:decorations(num) abort "{{{2
