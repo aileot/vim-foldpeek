@@ -173,14 +173,15 @@ function! s:nocolwidth() abort "{{{4
 
   let signcolwidth = 0
 
-  if !empty(sign_getplaced('%')[0].signs) || &signcolumn =~# 'yes'
+  if &signcolumn =~# 'yes'
     let signcolwidth = matchstr(&signcolumn, '\d')
 
-    if &signcolumn =~# 'auto'
+  elseif &signcolumn =~# 'auto'
+    if has('nvim-0.4.0') || has('patch-8.1.0614')
+      " the version/patch requires for sign_getplaced()
       let signlnum = map(sign_getplaced('%')[0].signs, 'v:val.lnum')
 
       let [i, duptimes] = [0, 1]
-      let maxduptimes   = duptimes
       "while i < len(signlnum)
       "" FIXME: calc signcolwidth
       "  if signlnum[i] == signlnum[i + 1]
@@ -190,17 +191,13 @@ function! s:nocolwidth() abort "{{{4
       "      let duptimes += 1
       "      let i += 1
       "    endwhile
-      "    let maxduptimes = max(maxduptimes, duptimes)
+      "    let signcolwidth = max(signcolwidth, duptimes)
       "  endif
       "endwhile
-      let signcolwidth = maxduptimes
-    endif
-
-    if empty(signcolwidth)
-      let signcolwidth = 1
     endif
   endif
 
+  " FIXME: when auto_foldcolumn is true, &foldcolumn could be increased later.
   let nocolwidth = winwidth(0) - &foldcolumn - numberwidth - signcolwidth
   return g:foldpeek#maxwidth > 0
         \ ? min([nocolwidth, g:foldpeek#maxwidth])
