@@ -61,21 +61,43 @@ endfunction
 function! s:peekline() abort "{{{2
   let add  = 0
   let line = getline(v:foldstart)
-  " Note: insert whitespace here for `pattern`
-  let cms  = substitute(&commentstring, '%s', '', '')
 
   while add <= (v:foldend - v:foldstart)
-    let chars   = cms . g:foldpeek#skipline_chars
-    let pattern = '^['. chars .']*$'
-    " Note: in [], `\s` only indicates a backslash and a 'literal s'
-    " Note: have to use regexp (un)matches with [] between `^` and `$`
-    if line !~# pattern | return [line, add + 1] | endif
-
+    " Note: replacement of whitespaces here for simpler pattern match
+    let line = s:white_replace(line)
+    if ! s:skippattern(line) | return [line, add + 1] | endif
     let add  += 1
     let line  = getline(v:foldstart + add)
   endwhile
 
   return [getline(v:foldstart), 1]
+function! s:white_replace(line) abort "{{{3
+  let ret = a:line
+  let cms = split(&commentstring, '%s')
+  let markers = map(split(&foldmarker, ','),
+        \ "'['. cms[0] .' ]*'.  v:val .'\\d*[ '. cms[len(cms) - 1] .']*'")
+
+  for pat in markers
+    let ret = substitute(ret, pat, repeat(' ', len(matchstr(ret, pat))), 'g')
+  endfor
+
+  "if g:foldpeek#maxspaces >= 0
+  "" FIXME: adjust the length of spaces
+  "  return substitute(ret, '\s\+', len('\0') > g:foldpeek#maxspaces
+  "        \ ? repeat(' ', g:foldpeek#maxspaces)
+  "        \ : '\0', 'g')
+  "endif
+
+  return substitute(ret, '\t', repeat(' ', &tabstop), 'g')
+endfunction
+
+function! s:skippattern(line) abort "{{{3
+  for pat in get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip_patterns)
+    if a:line =~# pat | return 1 | endif
+  endfor
+  return 0
+endfunction
+
 endfunction
 
 function! s:decorations(num) abort "{{{2
