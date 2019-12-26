@@ -166,32 +166,43 @@ function! s:adjust_bodylen(str, decor_width) abort "{{{3
   return strdisplaywidth(ret) == bodywidth ? ret : ret .' '
 endfunction
 
-function! s:white_replace(str) abort "{{{4
-  let cms     = split(&commentstring, '%s')
-  let fdmleft = substitute(&foldmarker, ',.*', '', '')
-
-  let pattern = empty(cms)     ? fdmleft .'\%[\d]'
-        \ : '\%['. cms[0] .' ]'. fdmleft .'\%[\d]\%[ '. cms[len(cms) - 1] .']'
-
-  let str = substitute(a:str, pattern, repeat(' ', len(fdmleft)), 'g')
-  return substitute(str, '\t', repeat(' ', &tabstop), 'g')
-endfunction
-
-function! s:availablewidth() abort "{{{1
+function! s:nocolwidth() abort "{{{4
   let numberwidth = &number ? max([&numberwidth, len(line('$'))]) : 0
 
   let signcolwidth = 0
+
   if !empty(sign_getplaced('%')[0].signs) || &signcolumn =~# 'yes'
     let signcolwidth = matchstr(&signcolumn, '\d')
+
+    if &signcolumn =~# 'auto'
+      let signlnum = map(sign_getplaced('%')[0].signs, 'v:val.lnum')
+
+      let [i, duptimes] = [0, 1]
+      let maxduptimes   = duptimes
+      "while i < len(signlnum)
+      "" FIXME: calc signcolwidth
+      "  if signlnum[i] == signlnum[i + 1]
+      "    let duplnum   = signlnum[i]
+      "    let i += 2
+      "    while duplnum  == signlnum[i]
+      "      let duptimes += 1
+      "      let i += 1
+      "    endwhile
+      "    let maxduptimes = max(maxduptimes, duptimes)
+      "  endif
+      "endwhile
+      let signcolwidth = maxduptimes
+    endif
+
     if empty(signcolwidth)
       let signcolwidth = 1
     endif
   endif
 
-  let availablewidth = winwidth(0) - &foldcolumn - numberwidth - signcolwidth
+  let nocolwidth = winwidth(0) - &foldcolumn - numberwidth - signcolwidth
   return g:foldpeek#maxwidth > 0
-        \ ? min([availablewidth, g:foldpeek#maxwidth])
-        \ : availablewidth
+        \ ? min([nocolwidth, g:foldpeek#maxwidth])
+        \ : nocolwidth
 endfunction
 
 " restore 'cpoptions' {{{1
