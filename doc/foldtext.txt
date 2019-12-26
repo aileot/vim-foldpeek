@@ -58,12 +58,12 @@ g:foldpeek#auto_foldcolumn			 *g:foldpeek#auto_foldcolumn*
 
 g:foldpeek#skip_patterns			   *g:foldpeek#skip_patterns*
 b:foldpeek_skip_patterns			   *b:foldpeek_skip_patterns*
-	(default: ['^[\-=/{! ]*$'])
+	(default: ['^[\-=/{!* ]*$'])
 	Set in |List|.
 	This value will be compared to the folded lines in regexp match.
 	Check the doc by `:help /[]`
 
-	Note: <Tab>, the pair of foldmarker, and &commentstring (without `%s`)
+	Note: <Tab> and the pair of foldmarker with &commentstring (without `%s`)
 	is regarded as whitespaces on the comparison.
 
 g:foldpeek#head						    *g:foldpeek#head*

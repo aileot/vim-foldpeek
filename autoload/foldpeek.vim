@@ -40,7 +40,7 @@ let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth', 78)
 let g:foldpeek#maxspaces       = get(g:, 'foldpeek#maxspaces', &tabstop)
 let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
 let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
-      \ '^[\-=/{! ]*$',
+      \ '^[\-=/{!* ]*$',
       \ ])
 
 let g:foldpeek#head = get(g:, 'foldpeek#head',
