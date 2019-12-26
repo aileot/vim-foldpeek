@@ -46,8 +46,8 @@ let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
 let g:foldpeek#head = get(g:, 'foldpeek#head',
       \ "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes ")
 let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
-      \ 1: "'['. (v:foldend - v:foldstart + 1) .']'",
-      \ 2: "'[%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
+      \ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
+      \ 2: "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
       \ })
 
 function! foldpeek#text() abort "{{{1
@@ -105,7 +105,6 @@ endfunction
 
 function! s:decorations(num) abort "{{{2
   " TODO: bundle head and tail in for-loop
-  " TODO: buflocal config
   let head = get(b:, 'foldpeek_head', g:foldpeek#head)
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
@@ -177,6 +176,8 @@ function! s:nocolwidth() abort "{{{4
     let signcolwidth = matchstr(&signcolumn, '\d')
 
   elseif &signcolumn =~# 'auto'
+    let signcolwidth = 1
+
     if has('nvim-0.4.0') || has('patch-8.1.0614')
       " the version/patch requires for sign_getplaced()
       let signlnum = map(sign_getplaced('%')[0].signs, 'v:val.lnum')
