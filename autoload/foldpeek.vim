@@ -87,10 +87,10 @@ function! s:white_replace(line) abort "{{{3
   endfor
 
   "if g:foldpeek#maxspaces >= 0
-  "" FIXME: adjust the length of spaces
-  "  return substitute(ret, '\s\+', len('\0') > g:foldpeek#maxspaces
-  "        \ ? repeat(' ', g:foldpeek#maxspaces)
-  "        \ : '\0', 'g')
+  "  " FIXME: keep the entire text length
+  "  return substitute(ret,
+  "        \ repeat('\s', g:foldpeek#maxspaces)  .'\+',
+  "        \ repeat(' ',  g:foldpeek#maxspaces), 'g')
   "endif
 
   return substitute(ret, '\t', repeat(' ', &tabstop), 'g')
