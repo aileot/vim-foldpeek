@@ -79,6 +79,7 @@ endfunction
 function! s:white_replace(line) abort "{{{3
   let ret = a:line
   let cms = split(&commentstring, '%s')
+  " Note: only replace cms which is besides foldmarker
   let markers = map(split(&foldmarker, ','),
         \ "'['. cms[0] .' ]*'.  v:val .'\\d*[ '. cms[len(cms) - 1] .']*'")
 
