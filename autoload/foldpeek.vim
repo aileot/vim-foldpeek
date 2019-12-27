@@ -43,8 +43,9 @@ let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
       \ '^[\-=/{!* ]*$',
       \ ])
 
-let g:foldpeek#head = get(g:, 'foldpeek#head',
-      \ "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes ")
+let g:foldpeek#head = get(g:, 'foldpeek#head', {
+      \ 1: "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes "
+      \ })
 let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
       \ 2: "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
@@ -105,31 +106,49 @@ function! s:skippattern(line) abort "{{{3
 endfunction
 
 function! s:decorations(num) abort "{{{2
-  " TODO: bundle head and tail in for-loop
   let head = get(b:, 'foldpeek_head', g:foldpeek#head)
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
-  if type(head) == type({})
-    for num in sort(keys(head))
-      if num > a:num | break | endif
-      let head = eval(get(b:, 'forkpeek_head.'. num, g:foldpeek#head[num]))
-    endfor
-  else
-    let head = eval(get(b:, 'foldpeek_head', head))
-  endif
+  for num in sort(keys(head))
+    if a:num >= num
+      " overrides return value
+      let head = eval(exists('b:foldpeek_head')
+            \ ? get(b:foldpeek_head, num, g:foldpeek#head[num])
+            \ : g:foldpeek#head[num]
+            \ )
+    endif
+  endfor
 
-  if type(tail) == type({})
-    for num in sort(keys(tail))
-      if num > a:num | break | endif
-      let tail = eval(get(b:, 'forkpeek_tail.'. num, g:foldpeek#tail[num]))
-    endfor
-  else
-    let tail = eval(get(b:, 'foldpeek_tail', tail))
-  endif
+  for num in sort(keys(tail))
+    if a:num >= num
+      let tail = eval(exists('b:foldpeek_tail')
+            \ ? get(b:foldpeek_tail, num, g:foldpeek#tail[num])
+            \ : g:foldpeek#tail[num]
+            \ )
+    endif
+  endfor
 
   " Note: empty() makes sure head/tail not to show '0'
   let head = empty(head) ? '' : substitute(head, '%lnum%', a:num, 'g')
   let tail = empty(tail) ? '' : substitute(tail, '%lnum%', a:num, 'g')
+
+  "" TODO: bundle head and tail in for-loop
+  "for part in ['head', 'tail']
+  "exe 'let' part "=
+  "      \ get(b:, eval('foldpeek_'. part), eval('g:foldpeek#'. part)
+  "      \ )"
+  "  for num in sort(keys(part))
+  "    if a:num >= num
+  "      " overrides return value
+  "      exe 'let' part "= eval(exists('b:foldpeek_'. part)
+  "            \ ? get(eval('b:foldpeek_'. part), num, eval('g:foldpeek#'. part)[num])
+  "            \ : eval('g:foldpeek#'. part)[num]
+  "            \ )"
+  "    endif
+  "  endfor
+  "exe 'let' part "= empty(part) ? ''
+  "      \ : substitute(part, '%lnum%', a:num, 'g')"
+  "endfor
 
   return [head, tail]
 endfunction
