@@ -23,11 +23,11 @@
 " }}}
 " ============================================================================
 
-if v:version < 730 | finish | endif
-" v7.3: for strdisplaywidth()
+"if v:version < 730 | finish | endif
+"" v7.3: for strdisplaywidth()
 
-if !has('nvim-0.4.0') && !has('patch-8.1.0614') | finish | endif
-" for sign_getplaced()
+if !has('patch-7.4.156') | finish | endif
+" v:7.4.156: for func-abort
 
 if get(g:, 'foldpeek#local_only', 0) | finish | endif
 
