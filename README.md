@@ -35,7 +35,8 @@ call dein#add('kaile256/vim-foldpeek')
 | ------------------------------------------------------------------------------------------------------------------- |
 | ![tarai_text](https://user-images.githubusercontent.com/46470475/71542809-3b0d5800-29ae-11ea-9d34-297d9ab86514.png) |
 
-See more detail in [doc/foldtext.txt](https://github.com/kaile256/vim-foldpeek/blob/master/doc/foldtext.txt)
+For more detail, type `:h foldpeek` in vim's command line and see
+[doc/foldtext.txt](https://github.com/kaile256/vim-foldpeek/blob/master/doc/foldtext.txt).
 
 ## License
 
