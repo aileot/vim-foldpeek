@@ -14,7 +14,7 @@ Usage				|foldpeek-usage|
 
 ==============================================================================
 INTRODUCTION						     *foldpeek-intro*
-	custom your foldtext simpler
+	customize your foldtext
 
 Latest version:
 https://github.com/kaile256/vim-foldpeek
@@ -29,8 +29,8 @@ plugin-manager.
 FUNCTION						   *foldpeek-function*
 
 foldpeek#text()					      *foldpeek-foldpeek#text*
-	Unless g:foldpeek#local_only = 1, this function is set in &foldtext.
-	For local use, add
+	Unless g:foldpeek#local_only is set to 1, this function will be set in
+	&foldtext. For local use, add
 >
 	setlocal foldtext=foldpeek#text()
 <
