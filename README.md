@@ -1,7 +1,6 @@
 # vim-foldpeek
 
-vim-foldpeek helps you with folded text info.
-It starts from a partial fork of
+vim-foldpeek starts from a partial fork of
 [LeafCage/foldCC.vim](https://github.com/LeafCage/foldCC.vim).
 Thanks!
 
@@ -17,7 +16,7 @@ call dein#add('kaile256/vim-foldpeek')
 
 ## Features
 
-- You can skip lines to peek which have few information.
+- You can peek another line, skipping lines which have few information.
 
   > Set skip-pattern in g:foldpeek#skip_patterns or b:foldpeek_skip_patterns.  
   > The default is `'^[\-=/{!* ]*$'`.
@@ -35,6 +34,8 @@ call dein#add('kaile256/vim-foldpeek')
 | with foldtext() (default)                                                                                           |
 | ------------------------------------------------------------------------------------------------------------------- |
 | ![tarai_text](https://user-images.githubusercontent.com/46470475/71542809-3b0d5800-29ae-11ea-9d34-297d9ab86514.png) |
+
+See more detail in [doc/foldtext.txt](https://github.com/kaile256/vim-foldpeek/blob/master/doc/foldtext.txt)
 
 ## License
 
