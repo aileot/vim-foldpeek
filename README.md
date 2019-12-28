@@ -1,10 +1,19 @@
 # vim-foldpeek
-![foldpeek_return_text](https://user-images.githubusercontent.com/46470475/71477391-150c7a00-282d-11ea-909a-4d7f19f56a75.jpg)
 
 vim-foldpeek helps you with folded text info.
 It starts from a partial fork of
 [LeafCage/foldCC.vim](https://github.com/LeafCage/foldCC.vim).
 Thanks!
+
+## Demo
+
+| with foldpeek#text() (in vim-foldpeek)                                                                              |
+| ------------------------------------------------------------------------------------------------------------------- |
+| ![tarai_peek](https://user-images.githubusercontent.com/46470475/71542810-3b0d5800-29ae-11ea-88aa-05d7246935c9.png) |
+
+| with foldtext() (default)                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------- |
+| ![tarai_text](https://user-images.githubusercontent.com/46470475/71542809-3b0d5800-29ae-11ea-9d34-297d9ab86514.png) |
 
 ## Installation
 
