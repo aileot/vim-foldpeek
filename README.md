@@ -6,7 +6,7 @@ Thanks!
 
 ## Installation
 
-Install the plugin using your favorite package manager
+Install the plugin using your favorite package manager.
 
 ### For dein.vim
 
@@ -36,7 +36,7 @@ call dein#add('kaile256/vim-foldpeek')
 | ![tarai_text](https://user-images.githubusercontent.com/46470475/71542809-3b0d5800-29ae-11ea-9d34-297d9ab86514.png) |
 
 For more detail, type `:h foldpeek` in vim's command line and see
-[doc/foldtext.txt](https://github.com/kaile256/vim-foldpeek/blob/master/doc/foldtext.txt).
+[doc/foldpeek.txt](https://github.com/kaile256/vim-foldpeek/blob/master/doc/foldpeek.txt).
 
 ## License
 
