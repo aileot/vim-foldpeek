@@ -199,13 +199,13 @@ function! s:nocolwidth() abort "{{{4
 endfunction
 
 function! s:signcolwidth() abort "{{{5
-  let signcolwidth = 0
+  let ret = 0
 
   if &signcolumn =~# 'yes'
-    let signcolwidth = matchstr(&signcolumn, '\d')
-    return
+    let ret = matchstr(&signcolumn, '\d')
+    return ret
 
-  elseif &signcolumn !~# 'auto' | return | endif
+  elseif &signcolumn !~# 'auto' | return ret | endif
 
   let maxwidth = matchstr(&signcolumn, '\d')
   if maxwidth < 1 | let maxwidth = 1 | endif
@@ -220,25 +220,29 @@ function! s:signcolwidth() abort "{{{5
   for info in signlist
     call add(signlnum, matchstr(info, 'line=\zs\d\+'))
   endfor
-  let g:signlnum = signlnum
 
   let i = 0
+  " stop the loop at the second last in comparison with the first last
   while i < len(signlnum) - 2
-    " stop the loop at the second last in comparison with the first last
-    if signlnum[i] == signlnum[i + 1]
-      let duptimes = 1
-      if duptimes > maxwidth | break | endif
 
-      let duplnum  = signlnum[i]
+    let ret = 1
+    if ret >= maxwidth | break | endif
+
+    if signlnum[i] == signlnum[i + 1]
+      let duplnum   = signlnum[i]
+      " count starts from twice
+      let duptimes = 2
       let i += 2
-      while duplnum  == signlnum[i]
+      while duplnum == signlnum[i]
         let duptimes += 1
         let i += 1
       endwhile
 
-      let signcolwidth = max(signcolwidth, duptimes)
+      let ret = max(ret, duptimes)
     endif
   endwhile
+
+  return ret
 endfunction
 
 " restore 'cpoptions' {{{1
