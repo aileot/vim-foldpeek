@@ -189,40 +189,56 @@ endfunction
 
 function! s:nocolwidth() abort "{{{4
   let numberwidth = &number ? max([&numberwidth, len(line('$'))]) : 0
-
-  let signcolwidth = 0
-
-  if &signcolumn =~# 'yes'
-    let signcolwidth = matchstr(&signcolumn, '\d')
-
-  elseif &signcolumn =~# 'auto'
-    let signcolwidth = 1
-
-    if has('nvim-0.4.0') || has('patch-8.1.0614')
-      " the version/patch requires for sign_getplaced()
-      let signlnum = map(sign_getplaced('%')[0].signs, 'v:val.lnum')
-
-      let [i, duptimes] = [0, 1]
-      "while i < len(signlnum)
-      "" FIXME: calc signcolwidth
-      "  if signlnum[i] == signlnum[i + 1]
-      "    let duplnum   = signlnum[i]
-      "    let i += 2
-      "    while duplnum  == signlnum[i]
-      "      let duptimes += 1
-      "      let i += 1
-      "    endwhile
-      "    let signcolwidth = max(signcolwidth, duptimes)
-      "  endif
-      "endwhile
-    endif
-  endif
+  let signcolwidth = s:signcolwidth()
 
   " FIXME: when auto_foldcolumn is true, &foldcolumn could be increased later.
   let nocolwidth = winwidth(0) - &foldcolumn - numberwidth - signcolwidth
   return g:foldpeek#maxwidth > 0
         \ ? min([nocolwidth, g:foldpeek#maxwidth])
         \ : nocolwidth
+endfunction
+
+function! s:signcolwidth() abort "{{{5
+  let signcolwidth = 0
+
+  if &signcolumn =~# 'yes'
+    let signcolwidth = matchstr(&signcolumn, '\d')
+    return
+
+  elseif &signcolumn !~# 'auto' | return | endif
+
+  let maxwidth = matchstr(&signcolumn, '\d')
+  if maxwidth < 1 | let maxwidth = 1 | endif
+
+  redir => signs
+  exe 'silent sign place buffer='. bufnr()
+  redir END
+  let signlist = split(signs, "\n")[2:]
+
+  "let signlnum = map(signlist, "matchstr(v:val, 'line=\zs\d\+')")
+  let signlnum = []
+  for info in signlist
+    call add(signlnum, matchstr(info, 'line=\zs\d\+'))
+  endfor
+  let g:signlnum = signlnum
+
+  let i = 0
+  while i < len(signlnum) - 2
+    " stop the loop at the second last in comparison with the first last
+    if signlnum[i] == signlnum[i + 1]
+      let duptimes = 1
+      if duptimes > maxwidth | break | endif
+
+      let duplnum  = signlnum[i]
+      let i += 2
+      while duplnum  == signlnum[i]
+        let duptimes += 1
+        let i += 1
+      endwhile
+
+      let signcolwidth = max(signcolwidth, duptimes)
+    endif
+  endwhile
 endfunction
 
 " restore 'cpoptions' {{{1
