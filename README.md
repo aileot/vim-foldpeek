@@ -16,16 +16,28 @@ call dein#add('kaile256/vim-foldpeek')
 
 ## Features
 
-- You can peek another line, skipping lines which have few information.
+- [x] You can peek another line, skipping lines which have few information.
 
-  > Set skip-pattern in g:foldpeek#skip_patterns or b:foldpeek_skip_patterns.  
-  > The default is `'^[\-=/{!* ]*$'`.
+  Set some skip-patterns in
+  g:foldpeek#skip_patterns or b:foldpeek_skip_patterns.  
+  The default value is `'^[\-=/{!* \t]*$'` in list.
+  Values will be compared to each folded line in regexp match.
+  Customize it like below:
 
-- As default, you will get the number of folded lines at tail.
+```vim
+  " '```.*$' for markdown,  '[# \t]*\[\[plugins]]' for dein users
+  let g:foldpeek#skip_patterns = [
+        \ '^[\-=/{!* \t]*$',
+        \ '^```.*$'
+        \ '[# \t]*\[\[plugins]]',
+        \ ]
+```
 
-  > Addition to that, when each of numbers are 2 or more,
-  > you can get the number of `foldlevel` at head
-  > and the `number` of peeked line as the top of folded lines is 1.
+- [x] As default, you will get the number of folded lines at tail.
+
+  Addition to that, when each of numbers are 2 or more,
+  you can get the number of `foldlevel` at head
+  and the `number` of peeked line as the top of folded lines is 1.
 
 | with foldpeek#text() (in vim-foldpeek)                                                                              |
 | ------------------------------------------------------------------------------------------------------------------- |
