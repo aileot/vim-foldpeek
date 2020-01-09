@@ -1,4 +1,5 @@
 " ============================================================================
+" Repo: kaile256/vim-foldpeek
 " File: autoload/foldpeek.vim
 " Author: kaile256
 " License: MIT license {{{
@@ -36,11 +37,14 @@ let s:save_cpo = &cpo
 set cpo&vim
 "}}}
 
-let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth', 78)
 let g:foldpeek#maxspaces       = get(g:, 'foldpeek#maxspaces', &tabstop)
 let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
+
+let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth',
+      \ '&textwidth > 0 ? &tw : 79'
+      \ )
 let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
-      \ '^[\-=/{!* ]*$',
+      \ '^[\-=/{!* \t]*$',
       \ ])
 
 let g:foldpeek#head = get(g:, 'foldpeek#head', {
@@ -109,46 +113,25 @@ function! s:decorations(num) abort "{{{2
   let head = get(b:, 'foldpeek_head', g:foldpeek#head)
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
-  for num in sort(keys(head))
+  for num in keys(head)
     if a:num >= num
-      " overrides return value
-      let head = eval(exists('b:foldpeek_head')
-            \ ? get(b:foldpeek_head, num, g:foldpeek#head[num])
+      let head = exists('b:foldpeek_head')
+            \ ? b:foldpeek_head[num]
             \ : g:foldpeek#head[num]
-            \ )
     endif
   endfor
 
-  for num in sort(keys(tail))
+  for num in keys(tail)
     if a:num >= num
-      let tail = eval(exists('b:foldpeek_tail')
-            \ ? get(b:foldpeek_tail, num, g:foldpeek#tail[num])
+      let tail = exists('b:foldpeek_tail')
+            \ ? b:foldpeek_tail[num]
             \ : g:foldpeek#tail[num]
-            \ )
     endif
   endfor
 
   " Note: empty() makes sure head/tail not to show '0'
-  let head = empty(head) ? '' : substitute(head, '%lnum%', a:num, 'g')
-  let tail = empty(tail) ? '' : substitute(tail, '%lnum%', a:num, 'g')
-
-  "" TODO: bundle head and tail in for-loop
-  "for part in ['head', 'tail']
-  "exe 'let' part "=
-  "      \ get(b:, eval('foldpeek_'. part), eval('g:foldpeek#'. part)
-  "      \ )"
-  "  for num in sort(keys(part))
-  "    if a:num >= num
-  "      " overrides return value
-  "      exe 'let' part "= eval(exists('b:foldpeek_'. part)
-  "            \ ? get(eval('b:foldpeek_'. part), num, eval('g:foldpeek#'. part)[num])
-  "            \ : eval('g:foldpeek#'. part)[num]
-  "            \ )"
-  "    endif
-  "  endfor
-  "exe 'let' part "= empty(part) ? ''
-  "      \ : substitute(part, '%lnum%', a:num, 'g')"
-  "endfor
+  let head = empty(head) ? '' : eval(substitute(head, '%lnum%', a:num, 'g'))
+  let tail = empty(tail) ? '' : eval(substitute(tail, '%lnum%', a:num, 'g'))
 
   return [head, tail]
 endfunction
@@ -164,14 +147,15 @@ function! s:return_text(text, decor) abort "{{{2
 endfunction
 
 function! s:adjust_bodylen(body, decor_width) abort "{{{3
-  " Note: the replacement of some chars by whitespaces is done in the selection
-  "   of peekline.
+  " Note: the replacement of some chars with whitespaces has be done in the
+  "   selection of peekline.
   let nocolwidth = s:nocolwidth()
   let bodywidth  = nocolwidth - a:decor_width
   " Note: strdisplaywidth() returns up to &tabstop, &display and &ambiwidth
   let displaywidth = strdisplaywidth(a:body)
 
   if bodywidth < displaywidth
+    " set a line which includes ambiwidth chars
     let [len, ret] = [0, '']
     for char in split(a:body, '\zs')
       let len += strdisplaywidth(char)
@@ -188,13 +172,14 @@ function! s:adjust_bodylen(body, decor_width) abort "{{{3
 endfunction
 
 function! s:nocolwidth() abort "{{{4
-  let numberwidth = &number ? max([&numberwidth, len(line('$'))]) : 0
+  let numberwidth  = &number ? max([&numberwidth, len(line('$'))]) : 0
   let signcolwidth = s:signcolwidth()
 
   " FIXME: when auto_foldcolumn is true, &foldcolumn could be increased later.
-  let nocolwidth = winwidth(0) - &foldcolumn - numberwidth - signcolwidth
-  return g:foldpeek#maxwidth > 0
-        \ ? min([nocolwidth, g:foldpeek#maxwidth])
+  let nocolwidth = winwidth(0) - &foldcolumn - signcolwidth - numberwidth
+  let maxwidth   = eval(g:foldpeek#maxwidth)
+  return maxwidth > 0
+        \ ? min([nocolwidth, maxwidth])
         \ : nocolwidth
 endfunction
 
@@ -251,4 +236,4 @@ unlet s:save_cpo
 
 " modeline "{{{1
 " vim: expandtab tabstop=2 softtabstop=2 shiftwidth=2
-" vim: foldmethod=marker textwidth=78
+" vim: foldmethod=marker textwidth=79
