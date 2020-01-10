@@ -8,7 +8,7 @@ License: MIT license
 CONTENTS						  *foldpeek-contents*
 
 Introduction			|foldpeek-introduction|
-Usage				|foldpeek-usage|
+Interface			|foldpeek-interface|
 	function			|foldpeek-function|
 	variable			|foldpeek-variable|
 
@@ -20,7 +20,7 @@ Latest version:
 https://github.com/kaile256/vim-foldpeek
 
 ==============================================================================
-USAGE							      *foldpeek-usage*
+INTERFACE						 *foldpeek-interface*
 
 Just install this repository under plugin/ or use your favorite
 plugin-manager.
