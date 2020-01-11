@@ -29,10 +29,10 @@ let s:save_cpo = &cpo
 set cpo&vim
 "}}}1
 
-let g:foldpeek#format#variables = get(g:, 'foldpeek#format#variables', {})
+let g:foldpeek#format#table = get(g:, 'foldpeek#format#table', {})
 
 function! foldpeek#format#substitute(line) abort "{{{1
-  let dict = g:foldpeek#format#variables
+  let dict = g:foldpeek#format#table
 
   if empty(a:line)
     return ''
@@ -50,7 +50,7 @@ function! foldpeek#format#substitute(line) abort "{{{1
 
     " TODO: enable 'expr' in recursive substituttion, for example,
     "   make {'result' : (%baz% > 0 ? '%foo% / %bar% : %foobar%)'} work at '%result%'
-    let pat = substitute(l:key, '^\d\+', '', 'g')
+    let pat = substitute(l:key, '^\d\d', '', 'g')
     "while len(matchstr(ret, pat))
       let ret = substitute(ret, '%'. pat .'%', l:val, 'g')
     "endwhile
