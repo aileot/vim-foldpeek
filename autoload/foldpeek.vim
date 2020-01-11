@@ -46,6 +46,10 @@ let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth',
 let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
       \ '^[\-=/{!* \t]*$',
       \ ])
+let g:foldpeek#whiteout_patterns_fill =
+      \ get(g:, 'foldpeek#whiteout_patterns_fill', [])
+let g:foldpeek#whiteout_patterns_omit =
+      \ get(g:, 'foldpeek#whiteout_patterns_omit', [])
 
 let g:foldpeek#head = get(g:, 'foldpeek#head', {
       \ 1: "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes "
@@ -88,8 +92,20 @@ function! s:white_replace(line) abort "{{{3
   let markers = map(split(&foldmarker, ','),
         \ "'['. cms[0] .' ]*'.  v:val .'\\d*[ '. cms[len(cms) - 1] .']*'")
 
-  for pat in markers
+  let patterns_fill = get(b:, 'foldpeek_whiteout_patterns_fill',
+        \ g:foldpeek#whiteout_patterns_fill)
+  let patterns_omit    = get(b:, 'foldpeek_whiteout_patterns_omit',
+        \ g:foldpeek#whiteout_patterns_omit)
+
+  for pat in patterns_fill + markers
     let ret = substitute(ret, pat, repeat(' ', len(matchstr(ret, pat))), 'g')
+  endfor
+
+  for pat in patterns_omit
+    while len(matchstr(ret, pat))
+      let ret .= repeat(' ', len(matchstr(ret, pat)))
+      let ret  = substitute(ret, pat, '', '')
+    endwhile
   endfor
 
   "if g:foldpeek#maxspaces >= 0
@@ -189,6 +205,9 @@ function! s:signcolwidth() abort "{{{5
   if &signcolumn =~# 'yes'
     let ret = matchstr(&signcolumn, '\d')
     return ret
+    " ambiwidth fills twice a width
+    " ambiwidth fills twice a width
+    " ambiwidth fills twice a width
 
   elseif &signcolumn !~# 'auto' | return ret | endif
 
