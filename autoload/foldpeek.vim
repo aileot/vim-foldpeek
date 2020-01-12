@@ -37,7 +37,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 "}}}
 
-let g:foldpeek#maxspaces       = get(g:, 'foldpeek#maxspaces', &tabstop)
+let g:foldpeek#maxspaces       = get(g:, 'foldpeek#maxspaces', &shiftwidth)
 let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
 
 let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth',
@@ -62,7 +62,7 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ 2: "' [%PEEK%/'. (v:foldend - v:foldstart + 1) .']'",
       \ })
 
-let g:foldpeek#format#table = get(g:, 'foldpeek#format#table', {})
+let g:foldpeek#table = get(g:, 'foldpeek#table', {})
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
@@ -199,7 +199,7 @@ function! s:decorations(num) abort "{{{2
 endfunction
 
 function! s:substitute_as_table(line) abort "{{{3
-  let dict = g:foldpeek#format#table
+  let dict = g:foldpeek#table
 
   if empty(a:line)
     return ''
