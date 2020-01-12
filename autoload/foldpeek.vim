@@ -56,7 +56,7 @@ let g:foldpeek#head = get(g:, 'foldpeek#head', {
       \ })
 let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
-      \ 2: "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
+      \ 2: "' [%PEEK%/'. (v:foldend - v:foldstart + 1) .']'",
       \ })
 
 function! foldpeek#text() abort "{{{1
@@ -145,11 +145,38 @@ function! s:decorations(num) abort "{{{2
     endif
   endfor
 
-  " Note: empty() makes sure head/tail not to show '0'
-  let head = empty(head) ? '' : eval(substitute(head, '%lnum%', a:num, 'g'))
-  let tail = empty(tail) ? '' : eval(substitute(tail, '%lnum%', a:num, 'g'))
+  let head = foldpeek#format#substitute(head)
+  let tail = foldpeek#format#substitute(tail)
+  let head = substitute(head, '%PEEK%', a:num, 'g')
+  let tail = substitute(tail, '%PEEK%', a:num, 'g')
 
-  return [head, tail]
+  "for part in ['head', 'tail']
+  "  let {part} = get(b:, {'foldpeek_'. part}, {'g:foldpeek#'. part})
+
+  "  for num in keys(part)
+  "    if a:num >= num
+  "      let {part} = exists({'b:foldpeek_'. part})
+  "            \ ? {'b:foldpeek_'. part}[num]
+  "            \ : {'g:foldpeek#'. part}[num]
+  "    endif
+  "  endfor
+
+  "  " Note: if empty(), head/tail shows '0'
+  "  let {part} = empty(part) ? '' : eval(substitute(part, '%PEEK%', a:num, 'g'))
+  "endfor
+
+  let ret = []
+  for part in [head, tail]
+    try
+      " Note: at failure of eval(), 0 is added to 'ret'
+      call add(ret, eval(part))
+    catch
+      call add(ret, part)
+    endtry
+    call filter(ret, 'type(v:val) == type('')')
+  endfor
+
+  return ret
 endfunction
 
 function! s:return_text(text, decor) abort "{{{2
@@ -178,6 +205,7 @@ function! s:adjust_bodylen(body, decor_width) abort "{{{3
       if len > bodywidth | break | endif
       let ret .= char
     endfor
+    " ambiwidth fills twice a width
     return strdisplaywidth(ret) == bodywidth ? ret : ret .' '
   endif
 
