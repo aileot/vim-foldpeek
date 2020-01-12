@@ -53,6 +53,7 @@ let g:foldpeek#whiteout_patterns_omit =
 
 let g:foldpeek#head = get(g:, 'foldpeek#head', {
       \ 1: "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes "
+let g:foldpeek#indent_with_head = get(g:, 'foldpeek#indent_with_head', 0)
       \ })
 let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
@@ -229,10 +230,11 @@ function! s:return_text(head, body, tail) abort "{{{2
     return strdisplaywidth(ret) == bodywidth ? ret : ret .' '
   endif
 
-  " TODO: show in correct width for multibyte characters
-  let lacklen = strlen(a:body) - displaywidth
-  let bodywidth += lacklen
-  return printf('%-*s', bodywidth, a:body)
+  let indent_with_head = get(b:, 'foldpeek_indent_with_head',
+        \ g:foldpeek#indent_with_head)
+  return substitute(body, '^\s*\ze',
+        \ (indent_with_head ? '\0'. a:head : a:head .'\0'),
+        \ '') . a:tail
 endfunction
 
 function! s:nocolwidth() abort "{{{4
