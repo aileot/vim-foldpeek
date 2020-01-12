@@ -59,6 +59,8 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ 2: "' [%PEEK%/'. (v:foldend - v:foldstart + 1) .']'",
       \ })
 
+let g:foldpeek#format#table = get(g:, 'foldpeek#format#table', {})
+
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
     let &foldcolumn = v:foldlevel + 1
@@ -145,8 +147,8 @@ function! s:decorations(num) abort "{{{2
     endif
   endfor
 
-  let head = foldpeek#format#substitute(head)
-  let tail = foldpeek#format#substitute(tail)
+  let head = s:substitute_as_table(head)
+  let tail = s:substitute_as_table(tail)
   let head = substitute(head, '%PEEK%', a:num, 'g')
   let tail = substitute(tail, '%PEEK%', a:num, 'g')
 
@@ -179,14 +181,33 @@ function! s:decorations(num) abort "{{{2
   return ret
 endfunction
 
-function! s:return_text(text, decor) abort "{{{2
-  let [head, tail] = a:decor
+function! s:substitute_as_table(line) abort "{{{3
+  let dict = g:foldpeek#format#table
 
-  let body = s:adjust_bodylen(a:text, strlen(head) + strlen(tail))
+  if empty(a:line)
+    return ''
+  elseif empty(dict)
+    return a:line
+  endif
 
-  return substitute(body, '^\s*\ze',
-        \ (get(g:, 'foldpeek#indent_head', 0) ? '\0'. head : head .'\0'),
-        \ '') . tail
+  let ret = a:line
+  for l:key in sort(keys(dict), 'N')
+    try
+      " FIXME: only use eval() after this function outside
+      let l:val = eval(dict[l:key])
+    catch
+      let l:val = string(dict[l:key])
+    endtry
+
+    " TODO: enable 'expr' in recursive substituttion, for example,
+    "   make {'result' : (%baz% > 0 ? '%foo% / %bar% : %foobar%)'} work at '%result%'
+    let pat = substitute(l:key, '^\d\d', '', 'g')
+    "while len(matchstr(ret, pat))
+    let ret = substitute(ret, '%'. pat .'%', l:val, 'g')
+    "endwhile
+  endfor
+
+  return ret
 endfunction
 
 function! s:adjust_bodylen(body, decor_width) abort "{{{3
