@@ -68,8 +68,7 @@ function! foldpeek#text() abort "{{{1
 
   let [body, peeklnum] = s:peekline()
   let [head, tail]     = s:decorations(peeklnum)
-
-  return s:return_text(body, [head, tail])
+  return s:return_text(head, body, tail)
 endfunction
 
 function! s:peekline() abort "{{{2
@@ -210,7 +209,7 @@ function! s:substitute_as_table(line) abort "{{{3
   return ret
 endfunction
 
-function! s:adjust_bodylen(body, decor_width) abort "{{{3
+function! s:return_text(head, body, tail) abort "{{{2
   " Note: the replacement of some chars with whitespaces has be done in the
   "   selection of peekline.
   let nocolwidth = s:nocolwidth()
