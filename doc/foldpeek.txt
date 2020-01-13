@@ -156,6 +156,21 @@ let s:foldlevel = string(s:foldlevel_dict) .'[v:foldlevel]'
 let g:foldpeek#table = {
       \ '20percent' : "(100  * %PEEK% / %foldlines%) .'%'",
       \ '30permill' : "(1000 * %PEEK% / %foldlines%) .'‰ ''",
+------------------------------------------------------------------------------
+EXAMPLE-VARIABLE				   *foldpeek-example-variable*
+
+------------------------------------------------------------------------------
+EXAMPLE-VARIABLE				   *foldpeek-example-variable*
+
+------------------------------------------------------------------------------
+EXAMPLE-VARIABLE				   *foldpeek-example-variable*
+
+------------------------------------------------------------------------------
+EXAMPLE-VARIABLE				   *foldpeek-example-variable*
+
+------------------------------------------------------------------------------
+EXAMPLE-VARIABLE				   *foldpeek-example-variable*
+
       \
       \ '50foldlevel' : string(s:foldlevel),
       \ '50foldlines' : 'v:foldend - v:foldstart + 1',
@@ -178,5 +193,37 @@ let g:foldpeek#tail = {
       \ 1: "' '. (%permill%) . (%foldlevel%)",
       \ }
 
-==============================================================================
-vim:ft=help:tw=78:ts=8:sts=8:sw=8:noet:norl:fen
+foldpeek#whiteout			  *foldpeek-example-foldpeek#whiteout*
+
+In your vimrc,
+>
+	let g:foldpeek#skip_patterns = [
+	      \ '^[\-=/{!* \t]*$',
+	      \ "\[\[plugins]]",
+	      \ ]
+
+	let g:foldpeek#whiteout_patterns_omit = [
+	      \ 'repo = ',
+	      \ ]
+
+<
+Say, in your toml as a style of dein (a vim's plugin manager) and set
+'foldmethod' to "marker", you would write like below:
+>
+	[[plugin]] #{{{1
+	repo = 'kaile256/vim-foldpeek'
+
+	#[[plugin]] #{{{1
+	#repo = 'foo/bar'
+<
+while |g:foldpeek#whiteout_style_for_foldmarker| is set to "fill", you will see
+>
+	-       'kaile256/vim-foldpeek'                                  [2/3]
+	-#       'foo/bar'                                               [2/2]
+<
+otherwise, |g:fold#whiteout_style_for_foldmarker| is always set to "omit" (this
+is default); thus, you will get like below:
+>
+	-'kaile256/vim-foldpeek'                                         [2/3]
+	-#'foo/bar'                                                      [2/2]
+<
