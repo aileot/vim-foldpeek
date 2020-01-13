@@ -79,8 +79,8 @@ b:foldpeek_head						    *b:foldpeek_head*
 	The keys should be a number which represents lnum of the peeked line
 	as the lnum of v:foldstart is `1`. The value of the highest key under
 	the peeked lnum will be evaluated.
-	You can set it buffer-locally by |b:foldpeek_head|. If you dislike the
-	change of indent in folded text, add
+
+	If you dislike the change of indent in folded text, add
 >
 		let g:foldpeek#head = ''
 <
@@ -97,8 +97,8 @@ b:foldpeek_tail						    *b:foldpeek_tail*
 	\ 2: "' [%PEEK%/'. (v:foldend - v:foldstart + 1) .']'",
 	\ })
 	Set in |Dictionary| for tail of folded text.
-	You can set it buffer-locally by |b:foldpeek_tail|. For more detail,
-	see |b:foldpeek_head|.
+	For more detail, see |g:foldpeek#head| or see |g:foldpeek#table|
+	especially for the detail about %PEEK% and for advanced customization.
 
 g:foldpeek#table					    *g:foldpeek#table*
 	(default: {})
@@ -106,12 +106,15 @@ g:foldpeek#table					    *g:foldpeek#table*
 	and leave those for |b:foldpeek_head| or |b:foldpeek_tail|, unused.
 
 	Both keys and values must be {expr} which returns in |String|.
-	Optionally, each keys can contain a double digit number at head like
-	'10foldlevel'. The numbers is only used to specify priority of
-	substitution.
+	Optionally, each keys can contain a double digit number at head.
 
-	You can use the keys as if a variable, with "%" at the both end.
-	Ignore any 2-digit number to use as a variable.
+	The number is only used to specify priority of substitution and you
+	can use the keys as if a variable, with "%" at the both end, in
+	|g:foldpeek#head| and so on.
+
+	So you must ignore any 2-digit number to use as a variable. Thus,
+	write "%foldlevel%" if you have "50foldlevel" as a key in
+	|g:foldpeek#table|.
 
 	See |foldpeek-example-foldpeek#table|.
 
@@ -132,7 +135,7 @@ b:foldpeek_whiteout_patterns_omit	  *b:foldpeek_whiteout_patterns_omit*
 	(default: [])
 	Set in |List|.
 	Omit all patterns in given list from foldtext virtually.
-	To white-out by filling is slightly faster than by omitting; if you
+	To white-out by filling is a bit faster than by omitting; if you
 	prefer fastness to steadier appearance, use
 	|g:foldpeek#whiteout_patterns_fill| instead.
 
@@ -142,7 +145,7 @@ g:foldpeek#whiteout_patterns_fill	  *g:foldpeek#whiteout_patterns_fill*
 b:foldpeek_whiteout_patterns_fill	  *g:foldpeek_whiteout_patterns_fill*
 	(default: [])
 	Set in |List|.
-	Replace all patterns in given list from foldtext with whitespaces
+	Replace all patterns in given list in foldtext with whitespaces
 	virtually.
 	For more detail, see |g:foldpeek#whiteout_patterns_omit|.
 
