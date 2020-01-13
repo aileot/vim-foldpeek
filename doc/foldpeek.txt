@@ -178,6 +178,8 @@ foldpeek#table				     *foldpeek-example-foldpeek#table*
 " table {{{1
 " Note: unicode fills double width of ascii, so we have a space after roman
 "  numeral in this example.
+" Notice: unicode or any other ambiwidth characters in head/tail will ruin the
+"  included foldtext length at present.
 let s:foldlevel_dict = {
       \ 1: 'Ⅰ ',
       \ 2: 'Ⅱ  ',
