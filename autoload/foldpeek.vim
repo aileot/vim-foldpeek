@@ -209,19 +209,24 @@ function! s:substitute_as_table(line) abort "{{{3
 
   let ret = a:line
   for l:key in sort(keys(dict), 'N')
+    let l:val = dict[l:key]
+    let pat = '%'. substitute(l:key, '^\d\d', '', 'g') .'%'
+    if l:val =~# pat
+      " FIXME: make the `:echoerr` work
+      echoerr 'You set a recursive value in g:foldpeek#table at' l:key
+    endif
+
     try
       " FIXME: only use eval() after this function outside
-      let l:val = eval(dict[l:key])
+      let wanted = eval(l:val)
     catch
-      let l:val = dict[l:key]
+      let wanted = l:val
     endtry
 
-    " TODO: enable 'expr' in recursive substituttion, for example,
-    "   make {'result' : (%baz% > 0 ? '%foo% / %bar% : %foobar%)'} work at '%result%'
-    let pat = substitute(l:key, '^\d\d', '', 'g')
-    "while len(matchstr(ret, pat))
-    let ret = substitute(ret, '%'. pat .'%', l:val, 'g')
-    "endwhile
+    " TODO: enable 'expr' in recursive substitution, for example,
+    "   {'result' : (%baz% > 0 ? '%foo% / %bar% : %foobar%)'} will work as
+    "   '%result%'.
+    let ret = substitute(ret, pat, wanted, 'g')
   endfor
 
   return ret
