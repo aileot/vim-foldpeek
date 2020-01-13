@@ -46,12 +46,6 @@ let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth',
 let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
       \ '^[\-=/{!* \t]*$',
       \ ])
-let g:foldpeek#whiteout_patterns_fill =
-      \ get(g:, 'foldpeek#whiteout_patterns_fill', [])
-let g:foldpeek#whiteout_patterns_omit =
-      \ get(g:, 'foldpeek#whiteout_patterns_omit', [])
-let g:foldpeek#whiteout_style_for_foldmarker =
-      \ get(g:, 'foldpeek#whiteout_style_for_foldmarker', 'omit')
 
 let g:foldpeek#indent_with_head = get(g:, 'foldpeek#indent_with_head', 0)
 let g:foldpeek#head = get(g:, 'foldpeek#head', {
@@ -63,6 +57,16 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ })
 
 let g:foldpeek#table = get(g:, 'foldpeek#table', {})
+
+let s:whiteout_styles = ['omit', 'fill']
+let g:foldpeek#disable_whiteout = get(g:, 'foldpeek#disable_whiteout', 0)
+let g:foldpeek#whiteout_patterns_omit =
+      \ get(g:, 'foldpeek#whiteout_patterns_omit', [])
+let g:foldpeek#whiteout_patterns_fill =
+      \ get(g:, 'foldpeek#whiteout_patterns_fill', [])
+
+let g:foldpeek#whiteout_style_for_foldmarker =
+      \ get(g:, 'foldpeek#whiteout_style_for_foldmarker', 'omit')
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
@@ -79,9 +83,14 @@ function! s:peekline() abort "{{{2
   let line = getline(v:foldstart)
 
   while add <= (v:foldend - v:foldstart)
-    " Note: replacement of whitespaces here for simpler pattern match
-    let line = s:white_replace(line)
+    if ! g:foldpeek#disable_whiteout
+      " Profile: s:whiteout_at_patterns() is a bottle-neck according to
+      "   `:profile`
+      let line = s:whiteout_at_patterns(line)
+    endif
+
     if ! s:skippattern(line) | return [line, add + 1] | endif
+    " Note: keep `+ 1` after s:skippattern()
     let add  += 1
     let line  = getline(v:foldstart + add)
   endwhile
@@ -89,52 +98,58 @@ function! s:peekline() abort "{{{2
   return [getline(v:foldstart), 1]
 endfunction
 
-function! s:white_replace(line) abort "{{{3
-  let ret = a:line
-  let cms = split(&commentstring, '%s')
-  " Note:  at end-of-line, replace cms which is besides foldmarker
-  let markers = map(split(&foldmarker, ','),
-        \ "'['. cms[0] .' ]*'.  v:val .'\\d*[ '. cms[len(cms) - 1] .' \t]*$'")
-  " TODO: except at end-of-line, constantly make a whitespace replace markers
-  let markers += map(split(&foldmarker, ','),
-        \ "'\\s*'.  v:val .'\\d*'")
-
-  let patterns_fill    = get(b:, 'foldpeek_whiteout_patterns_fill',
-        \ g:foldpeek#whiteout_patterns_fill)
-  let patterns_omit    = get(b:, 'foldpeek_whiteout_patterns_omit',
-        \ g:foldpeek#whiteout_patterns_omit)
+function! s:whiteout_at_patterns(line) abort "{{{3
+  " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. omit/fill} will
+  "   increase their values almost infinitely
+  let patterns_omit = deepcopy(get(b:, 'foldpeek_whiteout_patterns_omit',
+        \   g:foldpeek#whiteout_patterns_omit))
+  let patterns_fill = deepcopy(get(b:, 'foldpeek_whiteout_patterns_fill',
+        \   g:foldpeek#whiteout_patterns_fill))
 
   let style_for_foldmarker = get(b:, 'foldpeek_whiteout_style_for_foldmarker',
         \ g:foldpeek#whiteout_style_for_foldmarker)
-
-  if index(['omit', 'fill'], style_for_foldmarker)
+  if index(s:whiteout_styles, style_for_foldmarker) < 0
     let style_for_foldmarker = 'omit'
   endif
+  " Note: whether 'omit' or 'fill', no visual effect on the marker at end of
+  "   lines; only on those at head of lines or the others
+  let {'patterns_'. style_for_foldmarker} += s:foldmarkers_on_buffer()
 
-  " Note: no visual effect on the marker at end of lines; only on those at
-  "   head of lines or the others
-  let {'patterns_'. style_for_foldmarker} += markers
-
-  for pat in patterns_fill
-    let ret = substitute(ret, pat, repeat(' ', len(matchstr(ret, pat))), 'g')
-  endfor
-
+  let ret = a:line
   for pat in patterns_omit
-    while len(matchstr(ret, pat))
-      let ret .= repeat(' ', len(matchstr(ret, pat)))
+    let matchlen = len(matchstr(ret, pat))
+    while matchlen > 0
+      let ret .= repeat(' ', matchlen)
       let ret  = substitute(ret, pat, '', '')
+      let matchlen  = len(matchstr(ret, pat))
     endwhile
   endfor
 
-  "if g:foldpeek#maxspaces >= 0
-  "  " FIXME: keep the entire text length
-  "  return substitute(ret,
-  "        \ repeat('\s', g:foldpeek#maxspaces)  .'\+',
-  "        \ repeat(' ',  g:foldpeek#maxspaces), 'g')
-  "endif
+  for pat in patterns_fill
+    let ret = substitute(ret, pat, repeat(' ', len('\0')), 'g')
+  endfor
 
-  let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
-  return    substitute(ret,  '\t', repeat(' ', &shiftwidth), 'g')
+  if &ts != &sw
+    let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
+  endif
+  return substitute(ret, '\t', repeat(' ', &shiftwidth), 'g')
+endfunction
+
+function! s:foldmarkers_on_buffer() abort "{{{4
+  if exists('b:foldpeek__foldmarkers')
+    return b:foldpeek__foldmarkers
+  endif
+
+  let cms = split(&commentstring, '%s')
+  " Note:  at end-of-line, replace cms which is besides foldmarker
+  let foldmarkers = map(split(&foldmarker, ','),
+        \ "'['. cms[0] .' ]*'.  v:val .'\\d*['. cms[len(cms) - 1] .' ]*$'")
+  " TODO: except at end-of-line, constantly make a whitespace replace markers
+  let foldmarkers += map(split(&foldmarker, ','),
+        \ "'\\s*'.  v:val .'\\d*'")
+
+  let b:foldpeek__foldmarkers = foldmarkers
+  return b:foldpeek__foldmarkers
 endfunction
 
 function! s:skippattern(line) abort "{{{3
