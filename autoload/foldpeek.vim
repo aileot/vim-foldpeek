@@ -213,7 +213,7 @@ function! s:substitute_as_table(line) abort "{{{3
       " FIXME: only use eval() after this function outside
       let l:val = eval(dict[l:key])
     catch
-      let l:val = string(dict[l:key])
+      let l:val = dict[l:key]
     endtry
 
     " TODO: enable 'expr' in recursive substituttion, for example,
