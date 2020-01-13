@@ -45,10 +45,6 @@ g:foldpeek#local_only				      *g:foldpeek#local_only*
 <
 	in your vimrc or in commandline.
 
-g:foldpeek#maxwidth					*g:foldpeek#maxwidth*
-	(default: 78)
-	To disable, set `-1`.
-
 g:foldpeek#auto_foldcolumn			 *g:foldpeek#auto_foldcolumn*
 	(default: 0)
 	If not `0`, increase |&foldcolumn| as the highest v:foldlevel of current
@@ -77,7 +73,7 @@ b:foldpeek_indent_with_head			*b:foldpeek_indent_with_head*
 
 g:foldpeek#head						    *g:foldpeek#head*
 b:foldpeek_head						    *b:foldpeek_head*
-	(default: {1: "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes "})
+	(default: {1: "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes"})
 	Set in |Dictionary| for head of folded text.
 	The keys should be a number which represents lnum of the peeked line
 	as the lnum of v:foldstart is `1`. The value of the highest key under
