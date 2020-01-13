@@ -1,6 +1,6 @@
 *foldpeek.txt*
 
-Version: 1.1.0
+Version: 1.2.0
 Author: kaile256 <kaile256acc at gmail.com>
 License: MIT license
 
@@ -9,9 +9,10 @@ CONTENTS						  *foldpeek-contents*
 
 Introduction			|foldpeek-introduction|
 Interface			|foldpeek-interface|
-	function			|foldpeek-function|
-	variable			|foldpeek-variable|
+	Function			|foldpeek-function|
+	Variable			|foldpeek-variable|
 Example				|foldpeek-example|
+	Example-Variable		|foldpeek-example-variable|
 
 ==============================================================================
 INTRODUCTION						     *foldpeek-intro*
@@ -58,8 +59,8 @@ b:foldpeek_skip_patterns			   *b:foldpeek_skip_patterns*
 	the doc by `:help /[]`
 
 	Note:
-	<Tab> and the pair of foldmarker with &commentstring (without `%s`) is
-	regarded as whitespaces on the comparison.
+	<Tab> and pair out of 'foldmarker' with &commentstring (without `%s`)
+	close to those is regarded as whitespaces on the comparison.
 
 g:foldpeek#indent_with_head			*g:foldpeek#indent_with_head*
 b:foldpeek_indent_with_head			*b:foldpeek_indent_with_head*
@@ -118,8 +119,56 @@ g:foldpeek#table					    *g:foldpeek#table*
 	Though %PEEK% isn't in the dictionary, "%PEEK%" is reserved as the
 	line number that is peeked as the lnum of v:foldstart is equal to `1`.
 
+g:foldpeek#disable_whiteout			*g:foldpeek#disable_whiteout*
+b:foldpeek_disable_whiteout			*b:foldpeek_disable_whiteout*
+	(default: 0)
+	Set in |Number|.
+	Because this white-out feature is a bottle neck at speed of this
+	plugin, you can disable it.
+	The more a tab has folds, the slower vim will be.
+
+g:foldpeek#whiteout_patterns_omit	  *g:foldpeek#whiteout_patterns_omit*
+b:foldpeek_whiteout_patterns_omit	  *b:foldpeek_whiteout_patterns_omit*
+	(default: [])
+	Set in |List|.
+	Omit all patterns in given list from foldtext virtually.
+	To white-out by filling is slightly faster than by omitting; if you
+	prefer fastness to steadier appearance, use
+	|g:foldpeek#whiteout_patterns_fill| instead.
+
+	See |foldpeek-example-foldpeek#whiteout|.
+
+g:foldpeek#whiteout_patterns_fill	  *g:foldpeek#whiteout_patterns_fill*
+b:foldpeek_whiteout_patterns_fill	  *g:foldpeek_whiteout_patterns_fill*
+	(default: [])
+	Set in |List|.
+	Replace all patterns in given list from foldtext with whitespaces
+	virtually.
+	For more detail, see |g:foldpeek#whiteout_patterns_omit|.
+
+				   *g:foldpeek#whiteout_style_for_foldmarker*
+g:foldpeek#whiteout_style_for_foldmarker
+				   *b:foldpeek_whiteout_style_for_foldmarker*
+b:foldpeek_whiteout_style_for_foldmarker
+	(default: "omit")
+	(available: ["omit", "fill"])
+	Set in |String|.
+	Decide the style of white-out for pair out of 'foldmarker'. This
+	variable is especially for such users who use foldmarkers at head
+	of line like
+>
+	"}}}1 foo bar
+	let foobar = 1
+<
+	Unless explicitly set "fill" in this variable, it is always set to
+	"omit"; the behavior is the same as |g:foldpeek#whiteout_patterns_omit|
+	and so on.
+
 ==============================================================================
 EXAMPLE							    *foldpeek-example*
+
+------------------------------------------------------------------------------
+EXAMPLE-VARIABLE				   *foldpeek-example-variable*
 
 foldpeek#table				     *foldpeek-example-foldpeek#table*
 
@@ -156,21 +205,6 @@ let s:foldlevel = string(s:foldlevel_dict) .'[v:foldlevel]'
 let g:foldpeek#table = {
       \ '20percent' : "(100  * %PEEK% / %foldlines%) .'%'",
       \ '30permill' : "(1000 * %PEEK% / %foldlines%) .'‰ ''",
-------------------------------------------------------------------------------
-EXAMPLE-VARIABLE				   *foldpeek-example-variable*
-
-------------------------------------------------------------------------------
-EXAMPLE-VARIABLE				   *foldpeek-example-variable*
-
-------------------------------------------------------------------------------
-EXAMPLE-VARIABLE				   *foldpeek-example-variable*
-
-------------------------------------------------------------------------------
-EXAMPLE-VARIABLE				   *foldpeek-example-variable*
-
-------------------------------------------------------------------------------
-EXAMPLE-VARIABLE				   *foldpeek-example-variable*
-
       \
       \ '50foldlevel' : string(s:foldlevel),
       \ '50foldlines' : 'v:foldend - v:foldstart + 1',
@@ -216,14 +250,16 @@ Say, in your toml as a style of dein (a vim's plugin manager) and set
 	#[[plugin]] #{{{1
 	#repo = 'foo/bar'
 <
-while |g:foldpeek#whiteout_style_for_foldmarker| is set to "fill", you will see
+while the whiteout_patterns contains "repo = " in
+|g:foldpeek#whiteout_patterns_fill|, you will see as below:
 >
 	-       'kaile256/vim-foldpeek'                                  [2/3]
 	-#       'foo/bar'                                               [2/2]
 <
-otherwise, |g:fold#whiteout_style_for_foldmarker| is always set to "omit" (this
-is default); thus, you will get like below:
+but in |g:foldpeek#whiteout_patterns_omit| instead, you will see as below:
 >
 	-'kaile256/vim-foldpeek'                                         [2/3]
 	-#'foo/bar'                                                      [2/2]
 <
+==============================================================================
+vim:ft=help:tw=78:ts=8:sts=8:sw=8:noet:norl:fen
