@@ -11,6 +11,7 @@ Introduction			|foldpeek-introduction|
 Interface			|foldpeek-interface|
 	function			|foldpeek-function|
 	variable			|foldpeek-variable|
+Example				|foldpeek-example|
 
 ==============================================================================
 INTRODUCTION						     *foldpeek-intro*
@@ -21,9 +22,6 @@ https://github.com/kaile256/vim-foldpeek
 
 ==============================================================================
 INTERFACE						 *foldpeek-interface*
-
-Just install this repository under plugin/ or use your favorite
-plugin-manager.
 
 ------------------------------------------------------------------------------
 FUNCTION						   *foldpeek-function*
@@ -67,6 +65,16 @@ b:foldpeek_skip_patterns			   *b:foldpeek_skip_patterns*
 	<Tab> and the pair of foldmarker with &commentstring (without `%s`) is
 	regarded as whitespaces on the comparison.
 
+g:foldpeek#indent_with_head			*g:foldpeek#indent_with_head*
+b:foldpeek_indent_with_head			*b:foldpeek_indent_with_head*
+	(default: 0)
+	Set in |Number|.
+	If 0, head of foldtext which is returned by |g:foldpeek#head| or
+	|b:foldpeek_head| will be also indented, i.e., head will be located at
+	the first non-blank character where you get by "^" in normal mode;
+	otherwise, head will be shown at the first character of the line where
+	you get by "0" in normal mode.
+
 g:foldpeek#head						    *g:foldpeek#head*
 b:foldpeek_head						    *b:foldpeek_head*
 	(default: {1: "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes "})
@@ -81,15 +89,98 @@ b:foldpeek_head						    *b:foldpeek_head*
 <
 	in your vimrc and keep it empty.
 
+	Note: Ambiwidth with a following space
+	You should append a space to ambiwidth character for keep the width of
+	shown fold text.
+
 g:foldpeek#tail						    *g:foldpeek#tail*
 b:foldpeek_tail						    *b:foldpeek_tail*
 	(default: {
 	\ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
-	\ 2: "' [%lnum%/'. (v:foldend - v:foldstart + 1) .']'",
+	\ 2: "' [%PEEK%/'. (v:foldend - v:foldstart + 1) .']'",
 	\ })
 	Set in |Dictionary| for tail of folded text.
-	You can set it buffer-locally by |b:foldpeek_tail|. See more detail at
-	|b:foldpeek_head|.
+	You can set it buffer-locally by |b:foldpeek_tail|. For more detail,
+	see |b:foldpeek_head|.
+
+g:foldpeek#table					    *g:foldpeek#table*
+	(default: {})
+	Set in |Dictionary| for head/tail in foldtext. No b:var; fill in g:var
+	and leave those for |b:foldpeek_head| or |b:foldpeek_tail|, unused.
+
+	Both keys and values must be {expr} which returns in |String|.
+	Optionally, each keys can contain a double digit number at head like
+	'10foldlevel'. The numbers is only used to specify priority of
+	substitution.
+
+	You can use the keys as if a variable, with "%" at the both end.
+	Ignore any 2-digit number to use as a variable.
+
+	See |foldpeek-example-foldpeek#table|.
+
+	Note: %PEEK%					    *foldpeek-%PEEK%*
+	Though %PEEK% isn't in the dictionary, "%PEEK%" is reserved as the
+	line number that is peeked as the lnum of v:foldstart is equal to `1`.
+
+==============================================================================
+EXAMPLE							    *foldpeek-example*
+
+foldpeek#table				     *foldpeek-example-foldpeek#table*
+
+" table {{{1
+" Note: unicode fills double width of ascii, so we have a space after roman
+"  numeral in this example.
+let s:foldlevel_dict = {
+      \ 1: 'Ⅰ ',
+      \ 2: 'Ⅱ  ',
+      \ 3: 'Ⅲ  ',
+      \ 4: 'Ⅳ  ',
+      \ 5: 'Ⅴ  ',
+      \ 6: 'Ⅵ  ',
+      \ 7: 'Ⅶ  ',
+      \ 8: 'Ⅷ  ',
+      \ 9: 'Ⅸ  '
+      \ }
+
+let s:foldlevel_dict = {
+      \ 1: 'ⅰ ',
+      \ 2: 'ⅱ ',
+      \ 3: 'ⅲ ',
+      \ 4: 'ⅳ ',
+      \ 5: 'ⅴ ',
+      \ 6: 'ⅵ ',
+      \ 7: 'ⅶ ',
+      \ 8: 'ⅷ,',
+      \ }
+
+let s:foldlevel = string(s:foldlevel_dict) .'[v:foldlevel]'
+
+" Note: the more complicated, the slower vim will be
+" Note: use string() for s:var
+let g:foldpeek#table = {
+      \ '20percent' : "(100  * %PEEK% / %foldlines%) .'%'",
+      \ '30permill' : "(1000 * %PEEK% / %foldlines%) .'‰ ''",
+      \
+      \ '50foldlevel' : string(s:foldlevel),
+      \ '50foldlines' : 'v:foldend - v:foldstart + 1',
+      \ }
+
+" show which line is peeked in tail {{{1
+" just write %foo%, ignoring 2-digit number in head-position in the keys
+let g:foldpeek#tail = {
+      \ 1: "' '. (%foldlines%) . (%foldlevel%)",
+      \ 2: "' '. (%PEEK%) . '/' . (%foldlines%) . (%foldlevel%)",
+      \ }
+
+" show in percent {{{1
+let g:foldpeek#tail = {
+      \ 1: "' '. (%percent%) . (%foldlevel%)",
+      \ }
+
+" show in permill {{{1
+let g:foldpeek#tail = {
+      \ 1: "' '. (%permill%) . (%foldlevel%)",
+      \ }
 
 ==============================================================================
 vim:ft=help:tw=78:ts=8:sts=8:sw=8:noet:norl:fen
