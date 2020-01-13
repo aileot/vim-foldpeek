@@ -248,33 +248,30 @@ function! s:substitute_as_table(line) abort "{{{3
 endfunction
 
 function! s:return_text(head, body, tail) abort "{{{2
+  " TODO: show all the text in correct width.
+  "   len() only returns according to hex numbers which you can see by `g8`;
+  "   thus, ambiwidth in len() returns 2 and unicode returns 3.
   " Note: the replacement of some chars with whitespaces has be done in the
   "   selection of peekline.
-  let nocolwidth = s:nocolwidth()
-  let bodywidth  = nocolwidth - a:decor_width
-  " Note: strdisplaywidth() returns up to &tabstop, &display and &ambiwidth
-  let displaywidth = strdisplaywidth(a:body)
+  let foldtextwidth = s:width_without_col()
+  " TODO: get correct width of head and tail;
+  let headwidth = len(a:head)
+  let tailwidth = len(a:tail)
+  let decorwidth = headwidth + tailwidth
+  let bodywidth  = foldtextwidth - decorwidth
 
-  if bodywidth < displaywidth
-    " set a line which includes ambiwidth chars
-    let [len, ret] = [0, '']
-    for char in split(a:body, '\zs')
-      let len += strdisplaywidth(char)
-      if len > bodywidth | break | endif
-      let ret .= char
-    endfor
-    " ambiwidth fills twice a width
-    return strdisplaywidth(ret) == bodywidth ? ret : ret .' '
-  endif
+  let body = s:adjust_textlen(a:body, bodywidth)
+  "let head = s:adjust_textlen(a:head, headwidth)
+  "let tail = s:adjust_textlen(a:tail, tailwidth)
 
   let indent_with_head = get(b:, 'foldpeek_indent_with_head',
         \ g:foldpeek#indent_with_head)
-  return substitute(body, '^\s*\ze',
-        \ (indent_with_head ? '\0'. a:head : a:head .'\0'),
-        \ '') . a:tail
+
+  let without_tail = indent_with_head ? (body . a:head) : (a:head . body)
+  return without_tail . a:tail
 endfunction
 
-function! s:nocolwidth() abort "{{{4
+function! s:width_without_col() abort "{{{3
   let numberwidth  = &number ? max([&numberwidth, len(line('$'))]) : 0
   let signcolwidth = s:signcolwidth()
 
@@ -286,15 +283,12 @@ function! s:nocolwidth() abort "{{{4
         \ : nocolwidth
 endfunction
 
-function! s:signcolwidth() abort "{{{5
+function! s:signcolwidth() abort "{{{4
   let ret = 0
 
   if &signcolumn =~# 'yes'
     let ret = matchstr(&signcolumn, '\d')
     return ret
-    " ambiwidth fills twice a width
-    " ambiwidth fills twice a width
-    " ambiwidth fills twice a width
 
   elseif &signcolumn !~# 'auto' | return ret | endif
 
@@ -334,6 +328,30 @@ function! s:signcolwidth() abort "{{{5
   endwhile
 
   return ret
+endfunction
+
+function! s:adjust_textlen(body, bodywidth) abort "{{{3
+  " Note: strdisplaywidth() returns up to &tabstop, &display and &ambiwidth
+  let displaywidth = strdisplaywidth(a:body)
+  if  a:bodywidth < displaywidth
+    return s:ambiwidth_into_double(a:body, a:bodywidth)
+  endif
+
+  let lacklen    = strlen(a:body) - displaywidth
+  let bodywidth += lacklen
+  return printf('%-*s', a:bodywidth, a:body)
+endfunction
+
+function! s:ambiwidth_into_double(text, textwidth) abort "{{{4
+  let [len, ret] = [0, '']
+  for char in split(a:text, '\zs')
+    " Note: strdisplaywidth() depends on &ambiwidth
+    let len += strdisplaywidth(char)
+    if len > a:textwidth | break | endif
+    let ret .= char
+  endfor
+  " ambiwidth fills twice a width so that add a space for lack of length
+  return strdisplaywidth(ret) ==# a:textwidth ? ret : ret .' '
 endfunction
 
 " restore 'cpoptions' {{{1
