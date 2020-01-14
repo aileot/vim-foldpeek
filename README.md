@@ -50,6 +50,10 @@ call dein#add('kaile256/vim-foldpeek')
 For more detail, type `:h foldpeek` in vim's command line and see
 [doc/foldpeek.txt](https://github.com/kaile256/vim-foldpeek/blob/master/doc/foldpeek.txt).
 
+## TODO
+
+- [ ] Adjust width for unicode character
+
 ## License
 
 MIT
