@@ -174,65 +174,71 @@ EXAMPLE							    *foldpeek-example*
 EXAMPLE-VARIABLE				   *foldpeek-example-variable*
 
 foldpeek#table				     *foldpeek-example-foldpeek#table*
+	(reference: |g:foldpeek#table|, |g:foldpeek#head|, |g:foldpeek#tail|)
+>
+	" table
+	" Note: unicode fills double width of ascii, so we have a space after
+	"	roman numeral in this example.
+	" Note: most of unicode or digraph ambiwidth characters in head/tail
+	"	will ruin the included foldtext length at present when
+	"	'ambiwidth' is set to "double".
+	let s:foldlevel_dict = {
+		\ 1: 'Ⅰ ',
+		\ 2: 'Ⅱ  ',
+		\ 3: 'Ⅲ  ',
+		\ 4: 'Ⅳ  ',
+		\ 5: 'Ⅴ  ',
+		\ 6: 'Ⅵ  ',
+		\ 7: 'Ⅶ  ',
+		\ 8: 'Ⅷ  ',
+		\ 9: 'Ⅸ  '
+		\ }
 
-" table {{{1
-" Note: unicode fills double width of ascii, so we have a space after roman
-"  numeral in this example.
-" Notice: unicode or any other ambiwidth characters in head/tail will ruin the
-"  included foldtext length at present.
-let s:foldlevel_dict = {
-      \ 1: 'Ⅰ ',
-      \ 2: 'Ⅱ  ',
-      \ 3: 'Ⅲ  ',
-      \ 4: 'Ⅳ  ',
-      \ 5: 'Ⅴ  ',
-      \ 6: 'Ⅵ  ',
-      \ 7: 'Ⅶ  ',
-      \ 8: 'Ⅷ  ',
-      \ 9: 'Ⅸ  '
-      \ }
+	let s:foldlevel_dict = {
+		\ 1: 'ⅰ ',
+		\ 2: 'ⅱ ',
+		\ 3: 'ⅲ ',
+		\ 4: 'ⅳ ',
+		\ 5: 'ⅴ ',
+		\ 6: 'ⅵ ',
+		\ 7: 'ⅶ ',
+		\ 8: 'ⅷ,',
+		\ }
 
-let s:foldlevel_dict = {
-      \ 1: 'ⅰ ',
-      \ 2: 'ⅱ ',
-      \ 3: 'ⅲ ',
-      \ 4: 'ⅳ ',
-      \ 5: 'ⅴ ',
-      \ 6: 'ⅵ ',
-      \ 7: 'ⅶ ',
-      \ 8: 'ⅷ,',
-      \ }
+	let s:foldlevel = string(s:foldlevel_dict) .'[v:foldlevel]'
 
-let s:foldlevel = string(s:foldlevel_dict) .'[v:foldlevel]'
+	" Note: the more complicated, the slower vim will be.
+	" Note: use string() for s:var.
+	let g:foldpeek#table = {
+		\ '20percent' : "(100  * %PEEK% / %foldlines%) .'%'",
+		\ '30permill' : "(1000 * %PEEK% / %foldlines%) .'‰ ''",
+		\
+		\ '50foldlevel' : string(s:foldlevel),
+		\ '50foldlines' : 'v:foldend - v:foldstart + 1',
+		\ }
 
-" Note: the more complicated, the slower vim will be
-" Note: use string() for s:var
-let g:foldpeek#table = {
-      \ '20percent' : "(100  * %PEEK% / %foldlines%) .'%'",
-      \ '30permill' : "(1000 * %PEEK% / %foldlines%) .'‰ ''",
-      \
-      \ '50foldlevel' : string(s:foldlevel),
-      \ '50foldlines' : 'v:foldend - v:foldstart + 1',
-      \ }
+	" show which line is peeked in tail; just write %foo%, ignoring
+	" 2-digit number in head-position in the keys.
+	let g:foldpeek#tail = {
+		\ 1: "' '. (%foldlines%) . (%foldlevel%)",
+		\ 2: "' '. (%PEEK%) . '/' . (%foldlines%) . (%foldlevel%)",
+		\ }
 
-" show which line is peeked in tail {{{1
-" just write %foo%, ignoring 2-digit number in head-position in the keys
-let g:foldpeek#tail = {
-      \ 1: "' '. (%foldlines%) . (%foldlevel%)",
-      \ 2: "' '. (%PEEK%) . '/' . (%foldlines%) . (%foldlevel%)",
-      \ }
+	" show in percent
+	let g:foldpeek#tail = {
+		\ 1: "' '. (%percent%) . (%foldlevel%)",
+		\ }
 
-" show in percent {{{1
-let g:foldpeek#tail = {
-      \ 1: "' '. (%percent%) . (%foldlevel%)",
-      \ }
-
-" show in permill {{{1
-let g:foldpeek#tail = {
-      \ 1: "' '. (%permill%) . (%foldlevel%)",
-      \ }
-
+	" show in permill
+	let g:foldpeek#tail = {
+		\ 1: "' '. (%permill%) . (%foldlevel%)",
+		\ }
+<
 foldpeek#whiteout			  *foldpeek-example-foldpeek#whiteout*
+	(reference: |g:foldpeek#skip_patterns|,
+	|g:foldpeek#whiteout_patterns_omit|,
+	|g:foldpeek#whiteout_patterns_fill|,
+	|g:foldpeek#whiteout_style_for_foldmarker|)
 
 In your vimrc,
 >
@@ -261,7 +267,7 @@ while the whiteout_patterns contains "repo = " in
 	-       'kaile256/vim-foldpeek'                                  [2/3]
 	-#       'foo/bar'                                               [2/2]
 <
-but in |g:foldpeek#whiteout_patterns_omit| instead, you will see as below:
+in |g:foldpeek#whiteout_patterns_omit| instead, you will see as below:
 >
 	-'kaile256/vim-foldpeek'                                         [2/3]
 	-#'foo/bar'                                                      [2/2]
