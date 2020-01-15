@@ -40,11 +40,17 @@ VARIABLES						  *foldpeek-variable*
 
 g:foldpeek#local_only				      *g:foldpeek#local_only*
 	(default: 0)
-	|foldpeek#text()| won't be set in &foldtext unless
+	If not 0, |foldpeek#text()| won't be set in &foldtext unless
 >
 	setlocal foldtext=foldpeek#text()
 <
 	in your vimrc or in commandline.
+
+g:foldpeek#maxwidth					*g:foldpeek#maxwidth*
+	(default: "&textwidth > 0 ? &tw : 79")
+	Set in |Number| or |String|. The value will be evaluated.
+	|foldpeek#text()| will keep foldtext, including head and tail, within
+	the column as is evaluated.
 
 g:foldpeek#auto_foldcolumn			 *g:foldpeek#auto_foldcolumn*
 	(default: 0)
