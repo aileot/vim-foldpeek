@@ -53,7 +53,7 @@ g:foldpeek#auto_foldcolumn			 *g:foldpeek#auto_foldcolumn*
 
 g:foldpeek#skip_patterns			   *g:foldpeek#skip_patterns*
 b:foldpeek_skip_patterns			   *b:foldpeek_skip_patterns*
-	(default: ['^[\-=/{!* \t]*$'])
+	(default: ['^[>#\-=/{!* \t]*$'])
 	Set in |List|.
 	This value will be compared to the folded lines in regexp match. Check
 	the doc by `:help /[]`

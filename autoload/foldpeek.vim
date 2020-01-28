@@ -44,7 +44,7 @@ let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth',
       \ '&textwidth > 0 ? &tw : 79'
       \ )
 let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
-      \ '^[\-=/{!* \t]*$',
+      \ '^[>#\-=/{!* \t]*$',
       \ ])
 
 let g:foldpeek#indent_with_head = get(g:, 'foldpeek#indent_with_head', 0)
