@@ -183,18 +183,6 @@ foldpeek#table				     *foldpeek-example-foldpeek#table*
 	"	will ruin the included foldtext length at present when
 	"	'ambiwidth' is set to "double".
 	let s:foldlevel_dict = {
-		\ 1: 'Ⅰ ',
-		\ 2: 'Ⅱ  ',
-		\ 3: 'Ⅲ  ',
-		\ 4: 'Ⅳ  ',
-		\ 5: 'Ⅴ  ',
-		\ 6: 'Ⅵ  ',
-		\ 7: 'Ⅶ  ',
-		\ 8: 'Ⅷ  ',
-		\ 9: 'Ⅸ  '
-		\ }
-
-	let s:foldlevel_dict = {
 		\ 1: 'ⅰ ',
 		\ 2: 'ⅱ ',
 		\ 3: 'ⅲ ',
@@ -204,6 +192,20 @@ foldpeek#table				     *foldpeek-example-foldpeek#table*
 		\ 7: 'ⅶ ',
 		\ 8: 'ⅷ,',
 		\ }
+
+	" or simply,
+	let s:foldlevel_dict = {
+		\ 1: '[-]',
+		\ 2: '[2]',
+		\ 3: '[3]',
+		\ 4: '[4]',
+		\ 5: '[5]',
+		\ 6: '[6]',
+		\ 7: '[7]',
+		\ 8: '[8]',
+		\ 9: '[9]',
+		\ }
+
 
 	let s:foldlevel = string(s:foldlevel_dict) .'[v:foldlevel]'
 
@@ -216,6 +218,7 @@ foldpeek#table				     *foldpeek-example-foldpeek#table*
 		\ '50foldlevel' : string(s:foldlevel),
 		\ '50foldlines' : 'v:foldend - v:foldstart + 1',
 		\ }
+
 
 	" show which line is peeked in tail; just write %foo%, ignoring
 	" 2-digit number in head-position in the keys.
