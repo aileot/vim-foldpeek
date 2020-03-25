@@ -105,6 +105,8 @@ function! s:whiteout_at_patterns(line) abort "{{{3
         \   g:foldpeek#whiteout_patterns_omit))
   let patterns_fill = deepcopy(get(b:, 'foldpeek_whiteout_patterns_fill',
         \   g:foldpeek#whiteout_patterns_fill))
+  let patterns_substitute = deepcopy(get(b:, 'foldpeek_whiteout_patterns_substitute',
+        \   g:foldpeek#whiteout_patterns_substitute))
 
   let style_for_foldmarker = get(b:, 'foldpeek_whiteout_style_for_foldmarker',
         \ g:foldpeek#whiteout_style_for_foldmarker)
@@ -146,7 +148,7 @@ function! s:foldmarkers_on_buffer() abort "{{{4
         \ "'['. cms[0] .' ]*'.  v:val .'\\d*['. cms[len(cms) - 1] .' ]*$'")
   " TODO: except at end-of-line, constantly make a whitespace replace markers
   let foldmarkers += map(split(&foldmarker, ','),
-        \ "'\\s*'.  v:val .'\\d*'")
+        \ "'\\<'.  v:val .'\\d*\\>'")
 
   let b:foldpeek__foldmarkers = foldmarkers
   return b:foldpeek__foldmarkers
@@ -337,9 +339,9 @@ function! s:adjust_textlen(body, bodywidth) abort "{{{3
     return s:ambiwidth_into_double(a:body, a:bodywidth)
   endif
 
-  let lacklen    = strlen(a:body) - displaywidth
-  let bodywidth += lacklen
-  return printf('%-*s', a:bodywidth, a:body)
+  let lacklen       = strlen(a:body) - displaywidth
+  let adjustedwidth = a:bodywidth + lacklen
+  return printf('%-*s', adjustedwidth, a:body)
 endfunction
 
 function! s:ambiwidth_into_double(text, textwidth) abort "{{{4
