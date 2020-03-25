@@ -337,9 +337,9 @@ function! s:adjust_textlen(body, bodywidth) abort "{{{3
     return s:ambiwidth_into_double(a:body, a:bodywidth)
   endif
 
-  let lacklen    = strlen(a:body) - displaywidth
-  let bodywidth += lacklen
-  return printf('%-*s', a:bodywidth, a:body)
+  let lacklen       = strlen(a:body) - displaywidth
+  let adjustedwidth = a:bodywidth + lacklen
+  return printf('%-*s', adjustedwidth, a:body)
 endfunction
 
 function! s:ambiwidth_into_double(text, textwidth) abort "{{{4
