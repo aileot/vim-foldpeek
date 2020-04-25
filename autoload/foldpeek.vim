@@ -58,8 +58,10 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
 
 let g:foldpeek#table = get(g:, 'foldpeek#table', {})
 
-let s:whiteout_styles = ['omit', 'fill']
+let s:whiteout_styles = ['left', 'omit', 'fill']
 let g:foldpeek#disable_whiteout = get(g:, 'foldpeek#disable_whiteout', 0)
+let g:foldpeek#whiteout_patterns_left =
+      \ get(g:, 'foldpeek#whiteout_patterns_left', [])
 let g:foldpeek#whiteout_patterns_omit =
       \ get(g:, 'foldpeek#whiteout_patterns_omit', [])
 let g:foldpeek#whiteout_patterns_fill =
@@ -101,6 +103,8 @@ endfunction
 function! s:whiteout_at_patterns(line) abort "{{{3
   " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. omit/fill} will
   "   increase their values almost infinitely
+  let patterns_left = deepcopy(get(b:, 'foldpeek_whiteout_patterns_left',
+        \   g:foldpeek#whiteout_patterns_left))
   let patterns_omit = deepcopy(get(b:, 'foldpeek_whiteout_patterns_omit',
         \   g:foldpeek#whiteout_patterns_omit))
   let patterns_fill = deepcopy(get(b:, 'foldpeek_whiteout_patterns_fill',
@@ -108,28 +112,39 @@ function! s:whiteout_at_patterns(line) abort "{{{3
   let patterns_substitute = deepcopy(get(b:, 'foldpeek_whiteout_patterns_substitute',
         \   g:foldpeek#whiteout_patterns_substitute))
 
-  let style_for_foldmarker = get(b:, 'foldpeek_whiteout_style_for_foldmarker',
-        \ g:foldpeek#whiteout_style_for_foldmarker)
-  if index(s:whiteout_styles, style_for_foldmarker) < 0
-    let style_for_foldmarker = 'omit'
-  endif
-  " Note: whether 'omit' or 'fill', no visual effect on the marker at end of
-  "   lines; only on those at head of lines or the others
-  let {'patterns_'. style_for_foldmarker} += s:foldmarkers_on_buffer()
-
   let ret = a:line
-  for pat in patterns_omit
-    let matchlen = len(matchstr(ret, pat))
-    while matchlen > 0
-      let ret .= repeat(' ', matchlen)
-      let ret  = substitute(ret, pat, '', '')
-      let matchlen  = len(matchstr(ret, pat))
-    endwhile
+  for pat in patterns_left
+    let l:match = matchstr(ret, pat)
+    if !empty(l:match) | break | endif
   endfor
 
-  for pat in patterns_fill
-    let ret = substitute(ret, pat, repeat(' ', len('\0')), 'g')
-  endfor
+  if !empty(l:match)
+    let g:match = l:match
+    let ret = l:match
+
+  else
+    let style_for_foldmarker = get(b:, 'foldpeek_whiteout_style_for_foldmarker',
+          \ g:foldpeek#whiteout_style_for_foldmarker)
+    if index(s:whiteout_styles, style_for_foldmarker) < 0
+      let style_for_foldmarker = 'omit'
+    endif
+    " Note: whether 'omit' or 'fill', no visual effect on the marker at end of
+    "   lines; only on those at head of lines or the others
+    let {'patterns_'. style_for_foldmarker} += s:foldmarkers_on_buffer()
+
+    for pat in patterns_omit
+      let matchlen = len(matchstr(ret, pat))
+      while matchlen > 0
+        let ret .= repeat(' ', matchlen)
+        let ret  = substitute(ret, pat, '', '')
+        let matchlen  = len(matchstr(ret, pat))
+      endwhile
+    endfor
+
+    for pat in patterns_fill
+      let ret = substitute(ret, pat, repeat(' ', len('\0')), 'g')
+    endfor
+  endif
 
   if &ts != &sw
     let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
