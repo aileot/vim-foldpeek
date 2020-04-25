@@ -113,14 +113,30 @@ function! s:whiteout_at_patterns(line) abort "{{{3
         \   g:foldpeek#whiteout_patterns_substitute))
 
   let ret = a:line
+
+  let match_for_left = ''
   for pat in patterns_left
-    let l:match = matchstr(ret, pat)
-    if !empty(l:match) | break | endif
+    if type(pat) == type('')
+      let match_for_left = matchstr(ret, pat)
+    elseif type(pat) == type([])
+      for p in pat
+        let l:match = matchstr(ret, p)
+        if empty(l:match)
+          let match_for_left = ''
+          continue
+        endif
+        let match_for_left .= l:match
+      endfor
+    else
+      throw "type of pattern to be left must be either String or List"
+    endif
+
+    if !empty(match_for_left) | break | endif
   endfor
 
-  if !empty(l:match)
-    let g:match = l:match
-    let ret = l:match
+  if !empty(match_for_left)
+    let g:match = match_for_left
+    let ret = match_for_left
 
   else
     let style_for_foldmarker = get(b:, 'foldpeek_whiteout_style_for_foldmarker',
