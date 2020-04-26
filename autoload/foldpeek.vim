@@ -101,16 +101,9 @@ function! s:peekline() abort "{{{2
 endfunction
 
 function! s:whiteout_at_patterns(line) abort "{{{3
-  " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. omit/fill} will
-  "   increase their values almost infinitely
-  let patterns_left = deepcopy(get(b:, 'foldpeek_whiteout_patterns_left',
-        \   g:foldpeek#whiteout_patterns_left))
-  let patterns_omit = deepcopy(get(b:, 'foldpeek_whiteout_patterns_omit',
-        \   g:foldpeek#whiteout_patterns_omit))
-  let patterns_fill = deepcopy(get(b:, 'foldpeek_whiteout_patterns_fill',
-        \   g:foldpeek#whiteout_patterns_fill))
-  let patterns_substitute = deepcopy(get(b:, 'foldpeek_whiteout_patterns_substitute',
-        \   g:foldpeek#whiteout_patterns_substitute))
+  for type in s:whiteout_styles
+    let {'patterns_'. type} = s:set_whiteout_patterns(type)
+  endfor
 
   let ret = a:line
 
@@ -166,6 +159,13 @@ function! s:whiteout_at_patterns(line) abort "{{{3
     let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
   endif
   return substitute(ret, '\t', repeat(' ', &shiftwidth), 'g')
+endfunction
+
+function! s:set_whiteout_patterns(type) abort
+  " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. (a:type)} will
+  " increase their values infinitely.
+  return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
+        \ 'g:foldpeek#whiteout_patterns_'. a:type))
 endfunction
 
 function! s:foldmarkers_on_buffer() abort "{{{4
