@@ -137,25 +137,7 @@ function! s:whiteout_at_patterns(line) abort "{{{3
 
   let ret = a:line
 
-  let match_for_left = ''
-  for pat in patterns_left
-    if type(pat) == type('')
-      let match_for_left = matchstr(ret, pat)
-    elseif type(pat) == type([])
-      for p in pat
-        let l:match = matchstr(ret, p)
-        if empty(l:match)
-          let match_for_left = ''
-          continue
-        endif
-        let match_for_left .= l:match
-      endfor
-    else
-      throw "type of pattern to be left must be either String or List"
-    endif
-
-    if !empty(match_for_left) | break | endif
-  endfor
+  let match_for_left = s:whiteout_left(ret, patterns_left)
 
   if !empty(match_for_left)
     let ret = match_for_left
@@ -187,6 +169,35 @@ function! s:set_whiteout_patterns(type) abort "{{{4
   " increase their values infinitely.
   return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
         \ {'g:foldpeek#whiteout_patterns_'. a:type}))
+endfunction
+
+function! s:whiteout_left(text, patterns) abort "{{{4
+  let ret = ''
+
+  for pat in a:patterns
+    if type(pat) == type('')
+      let ret = matchstr(a:text, pat)
+
+    elseif type(pat) == type([])
+      for p in pat
+        let l:match = matchstr(a:text, p)
+
+        if empty(l:match)
+          let ret = ''
+          continue
+        endif
+
+        let ret .= l:match
+      endfor
+
+    else
+      throw 'type of pattern to be left must be either String or List'
+    endif
+
+    if !empty(ret) | break | endif
+  endfor
+
+  return ret
 endfunction
 
 function! s:whiteout_omit(text, patterns) abort "{{{4
