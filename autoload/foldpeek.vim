@@ -101,7 +101,8 @@ let g:foldpeek#whiteout_patterns_substitute =
       \   ['[\s*$', '[...]', ''],
       \   ['(\s*$', '(...)', ''],
       \ ])
-let g:foldpeek#disable_whiteout = get(g:, 'foldpeek#disable_whiteout', 0)
+let g:foldpeek#disabled_whiteout_styles =
+      \ get(g:, 'foldpeek#disabled_whiteout_styles', [])
 
 let g:foldpeek#whiteout_style_for_foldmarker =
       \ get(g:, 'foldpeek#whiteout_style_for_foldmarker', 'omit')
@@ -121,7 +122,8 @@ function! s:peekline() abort "{{{2
   let line = getline(v:foldstart)
 
   while add <= (v:foldend - v:foldstart)
-    if ! get(b:, 'foldpeek_disable_whiteout', g:foldpeek#disable_whiteout)
+    if string(get(b:, 'foldpeek_disabled_whiteout_styles',
+          \ g:foldpeek#disabled_whiteout_styles)) !~# 'ALL'
       " Profile: s:whiteout_at_patterns() is a bottle-neck according to
       "   `:profile`
       let line = s:whiteout_at_patterns(line)
