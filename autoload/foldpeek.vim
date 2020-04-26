@@ -152,10 +152,7 @@ function! s:whiteout_at_patterns(line) abort "{{{3
     "   lines; only on those at head of lines or the others
     let {'patterns_'. style_for_foldmarker} += s:foldmarkers_on_buffer()
     let ret = s:whiteout_omit(ret, patterns_omit)
-
-    for pat in patterns_fill
-      let ret = substitute(ret, pat, repeat(' ', len('\0')), 'g')
-    endfor
+    let ret = s:whiteout_fill(ret, patterns_fill)
   endif
 
   if &ts != &sw
@@ -213,6 +210,14 @@ function! s:whiteout_omit(text, patterns) abort "{{{4
   endfor
 
   return ret
+endfunction
+
+function! s:whiteout_fill(text, patterns) abort "{{{4
+  let ret = a:text
+  for pat in a:patterns
+    let ret = substitute(ret, pat, repeat(' ', len('\0')), 'g')
+  endfor
+  return  ret
 endfunction
 
 function! s:foldmarkers_on_buffer() abort "{{{4
