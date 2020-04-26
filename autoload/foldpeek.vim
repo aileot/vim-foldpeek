@@ -195,7 +195,7 @@ function! s:set_whiteout_patterns(type) abort
   " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. (a:type)} will
   " increase their values infinitely.
   return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
-        \ 'g:foldpeek#whiteout_patterns_'. a:type))
+        \ {'g:foldpeek#whiteout_patterns_'. a:type}))
 endfunction
 
 function! s:foldmarkers_on_buffer() abort "{{{4
