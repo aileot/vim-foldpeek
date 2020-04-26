@@ -158,7 +158,6 @@ function! s:whiteout_at_patterns(line) abort "{{{3
   endfor
 
   if !empty(match_for_left)
-    let g:match = match_for_left
     let ret = match_for_left
 
   else
