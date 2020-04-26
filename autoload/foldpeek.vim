@@ -103,6 +103,8 @@ let g:foldpeek#whiteout_patterns_substitute =
       \ ])
 let g:foldpeek#disabled_whiteout_styles =
       \ get(g:, 'foldpeek#disabled_whiteout_styles', [])
+let g:foldpeek#overrided_whiteout_styles =
+      \ get(g:, 'foldpeek#overrided_whiteout_styles', [])
 
 let g:foldpeek#whiteout_style_for_foldmarker =
       \ get(g:, 'foldpeek#whiteout_style_for_foldmarker', 'omit')
@@ -167,10 +169,23 @@ function! s:whiteout_at_patterns(line) abort "{{{3
 endfunction
 
 function! s:set_whiteout_patterns(type) abort "{{{4
-  " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. (a:type)} will
-  " increase their values infinitely.
-  return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
-        \ {'g:foldpeek#whiteout_patterns_'. a:type}))
+  let disabled_styles = string(get(b:, 'foldpeek_disabled_whiteout_styles',
+        \ g:foldpeek#disabled_whiteout_styles))
+  let overrided_styles = string(get(b:, 'foldpeek_overrided_whiteout_styles',
+        \ g:foldpeek#overrided_whiteout_styles))
+
+  if disabled_styles =~# a:type .'\|ALL'
+    return []
+
+  elseif overrided_styles =~# a:type .'\|ALL'
+    " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. (a:type)} will
+    " increase their values infinitely.
+    return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
+          \ {'g:foldpeek#whiteout_patterns_'. a:type}))
+  endif
+
+  return get(b:, 'foldpeek_whiteout_patterns_'. a:type, [])
+        \ + {'g:foldpeek#whiteout_patterns_'. a:type}
 endfunction
 
 function! s:whiteout_left(text, patterns) abort "{{{4
