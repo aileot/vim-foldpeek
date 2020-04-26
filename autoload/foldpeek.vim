@@ -66,7 +66,7 @@ function! s:set_variables(prefix, suffixes, default) abort
     let var    = a:prefix . sfx
     let suffix = fix . sfx
 
-    let {var} = get(prefix, suffix, a:default)
+    let {var} = get({prefix}, suffix, a:default)
   endfor
 endfunction
 
@@ -92,9 +92,15 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
 
 let g:foldpeek#table = get(g:, 'foldpeek#table', {})
 
-let s:whiteout_styles = ['left', 'omit', 'fill']
+let s:whiteout_styles = ['left', 'omit', 'fill', 'substitute']
 call s:set_variables('g:foldpeek#whiteout_patterns_',
-      \ s:whiteout_styles, [])
+      \ filter(deepcopy(s:whiteout_styles), 'v:val !=# "substitute"'), [])
+let g:foldpeek#whiteout_patterns_substitute =
+      \ get(g:, 'foldpeek#whiteout_patterns_substitute', [
+      \   ['{\s*$', '{...}', ''],
+      \   ['[\s*$', '[...]', ''],
+      \   ['(\s*$', '(...)', ''],
+      \ ])
 let g:foldpeek#disable_whiteout = get(g:, 'foldpeek#disable_whiteout', 0)
 
 let g:foldpeek#whiteout_style_for_foldmarker =
@@ -149,6 +155,8 @@ function! s:whiteout_at_patterns(line) abort "{{{3
     let ret = s:whiteout_omit(ret, patterns_omit)
     let ret = s:whiteout_fill(ret, patterns_fill)
   endif
+
+  let ret = s:whiteout_substitute(ret, patterns_substitute)
 
   if &ts != &sw
     let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
@@ -213,6 +221,20 @@ function! s:whiteout_fill(text, patterns) abort "{{{4
     let ret = substitute(ret, pat, repeat(' ', len('\0')), 'g')
   endfor
   return  ret
+endfunction
+
+function! s:whiteout_substitute(text, lists) abort "{{{4
+  let ret = a:text
+
+  for l:list in a:lists
+    let pat   = l:list[0]
+    let sub   = l:list[1]
+    let flags = l:list[2]
+
+    let ret = substitute(ret, pat, sub, flags)
+  endfor
+
+  return ret
 endfunction
 
 function! s:set_style_for_foldmarker() abort "{{{4
