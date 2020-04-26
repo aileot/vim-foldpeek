@@ -190,7 +190,7 @@ function! s:whiteout_at_patterns(line) abort "{{{3
   return substitute(ret, '\t', repeat(' ', &shiftwidth), 'g')
 endfunction
 
-function! s:set_whiteout_patterns(type) abort
+function! s:set_whiteout_patterns(type) abort "{{{4
   " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. (a:type)} will
   " increase their values infinitely.
   return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
