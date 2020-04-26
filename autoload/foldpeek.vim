@@ -80,6 +80,8 @@ let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth',
 let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
       \ '^[>#\-=/{!* \t]*$',
       \ ])
+let g:foldpeek#override_skip_patterns =
+      \ get(g:, 'foldpeek#override_skip_patterns', 0)
 
 let g:foldpeek#indent_with_head = get(g:, 'foldpeek#indent_with_head', 0)
 let g:foldpeek#head = get(g:, 'foldpeek#head', {
@@ -283,7 +285,14 @@ function! s:foldmarkers_on_buffer() abort "{{{4
 endfunction
 
 function! s:skippattern(line) abort "{{{3
-  for pat in get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip_patterns)
+  if get(b:, 'foldpeek_override_skip_patterns', g:foldpeek#override_skip_patterns)
+    let patterns = get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip_patterns)
+  else
+    let patterns = get(b:, 'foldpeek_skip_patterns', [])
+          \ + g:foldpeek#skip_patterns
+  endif
+
+  for pat in patterns
     if a:line =~# pat | return 1 | endif
   endfor
   return 0
