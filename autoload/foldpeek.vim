@@ -150,7 +150,7 @@ function! s:whiteout_at_patterns(line) abort "{{{3
     let ret = s:whiteout_fill(ret, patterns_fill)
   endif
 
-  let ret = s:whiteout_substitute(ret, pattarns_substitute)
+  let ret = s:whiteout_substitute(ret, patterns_substitute)
 
   if &ts != &sw
     let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
@@ -217,13 +217,13 @@ function! s:whiteout_fill(text, patterns) abort "{{{4
   return  ret
 endfunction
 
-function! s:whiteout_substitute(text, patterns) abort "{{{4
+function! s:whiteout_substitute(text, lists) abort "{{{4
   let ret = a:text
 
-  for list in a:patterns
-    let pat   = list[0]
-    let sub   = list[1]
-    let flags = list[2]
+  for l:list in a:lists
+    let pat   = l:list[0]
+    let sub   = l:list[1]
+    let flags = l:list[2]
 
     let ret = substitute(ret, pat, sub, flags)
   endfor
