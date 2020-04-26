@@ -169,15 +169,7 @@ function! s:whiteout_at_patterns(line) abort "{{{3
     " Note: whether 'omit' or 'fill', no visual effect on the marker at end of
     "   lines; only on those at head of lines or the others
     let {'patterns_'. style_for_foldmarker} += s:foldmarkers_on_buffer()
-
-    for pat in patterns_omit
-      let matchlen = len(matchstr(ret, pat))
-      while matchlen > 0
-        let ret .= repeat(' ', matchlen)
-        let ret  = substitute(ret, pat, '', '')
-        let matchlen  = len(matchstr(ret, pat))
-      endwhile
-    endfor
+    let ret = s:whiteout_omit(ret, patterns_omit)
 
     for pat in patterns_fill
       let ret = substitute(ret, pat, repeat(' ', len('\0')), 'g')
@@ -195,6 +187,21 @@ function! s:set_whiteout_patterns(type) abort "{{{4
   " increase their values infinitely.
   return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
         \ {'g:foldpeek#whiteout_patterns_'. a:type}))
+endfunction
+
+function! s:whiteout_omit(text, patterns) abort "{{{4
+  let ret = a:text
+  for pat in a:patterns
+    let matchlen = len(matchstr(ret, pat))
+
+    while matchlen > 0
+      let ret .= repeat(' ', matchlen)
+      let ret  = substitute(ret, pat, '', '')
+      let matchlen = len(matchstr(ret, pat))
+    endwhile
+  endfor
+
+  return ret
 endfunction
 
 function! s:foldmarkers_on_buffer() abort "{{{4
