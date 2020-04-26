@@ -37,6 +37,40 @@ let s:save_cpo = &cpo
 set cpo&vim
 "}}}
 
+" Define Helper Functions {{{1
+function! s:set_variables(prefix, suffixes, default) abort
+  " TODO: this function returns l:var; defines g:var, b:var, s:var and so on.
+  " (of cource, meaningless for either a:var or v:var)
+
+  " Example:
+  "   a:prefix: 'g:foldpeek#whiteout_patterns_'
+  "     -> pre: 'g:'
+  "     -> fix: 'foldpeek#whiteout_patterns_'
+  "   a:suffixes: ['omit', 'fill']
+  "     -> type: could be either 'omit' and 'fill'
+  "   a:default: []
+
+  let pre = matchstr(a:prefix, '^\w:')
+  let fix = matchstr(a:prefix, pre .'\zs.*')
+
+  if empty(pre) || pre ==# 'l:'
+    throw 'l:var is unsupported'
+  endif
+
+  let prefix = pre
+  for sfx in a:suffixes
+    " Example:
+    "   var:    'g:foldpeek#whiteout_patterns_omit'
+    "   prefix: 'g:'
+    "   suffix: 'foldpeek#whiteout_patterns_omit'
+    let var    = a:prefix . sfx
+    let suffix = fix . sfx
+
+    let {var} = get(prefix, suffix, a:default)
+  endfor
+endfunction
+
+" Initialze Global Variables {{{1
 let g:foldpeek#maxspaces       = get(g:, 'foldpeek#maxspaces', &shiftwidth)
 let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
 
@@ -59,13 +93,9 @@ let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
 let g:foldpeek#table = get(g:, 'foldpeek#table', {})
 
 let s:whiteout_styles = ['left', 'omit', 'fill']
+call s:set_variables('g:foldpeek#whiteout_patterns_',
+      \ s:whiteout_styles, [])
 let g:foldpeek#disable_whiteout = get(g:, 'foldpeek#disable_whiteout', 0)
-let g:foldpeek#whiteout_patterns_left =
-      \ get(g:, 'foldpeek#whiteout_patterns_left', [])
-let g:foldpeek#whiteout_patterns_omit =
-      \ get(g:, 'foldpeek#whiteout_patterns_omit', [])
-let g:foldpeek#whiteout_patterns_fill =
-      \ get(g:, 'foldpeek#whiteout_patterns_fill', [])
 
 let g:foldpeek#whiteout_style_for_foldmarker =
       \ get(g:, 'foldpeek#whiteout_style_for_foldmarker', 'omit')
