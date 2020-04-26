@@ -94,7 +94,13 @@ let g:foldpeek#table = get(g:, 'foldpeek#table', {})
 
 let s:whiteout_styles = ['left', 'omit', 'fill', 'substitute']
 call s:set_variables('g:foldpeek#whiteout_patterns_',
-      \ s:whiteout_styles, [])
+      \ filter(deepcopy(s:whiteout_styles), 'v:val !=# "substitute"'), [])
+let g:foldpeek#whiteout_patterns_substitute =
+      \ get(g:, 'foldpeek#whiteout_patterns_substitute', [
+      \   ['{\s*$', '{...}', ''],
+      \   ['[\s*$', '[...]', ''],
+      \   ['(\s*$', '(...)', ''],
+      \ ])
 let g:foldpeek#disable_whiteout = get(g:, 'foldpeek#disable_whiteout', 0)
 
 let g:foldpeek#whiteout_style_for_foldmarker =
