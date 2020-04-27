@@ -187,8 +187,8 @@ function! s:set_whiteout_patterns(type) abort "{{{4
     return []
 
   elseif overrided_styles =~# a:type .'\|ALL'
-    " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. (a:type)} will
-    " increase their values infinitely.
+    " Note: without deepcopy(), g:foldpeek#whiteout_patterns_foo will increase
+    " their values infinitely.
     return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
           \ {'g:foldpeek#whiteout_patterns_'. a:type}))
   endif
@@ -292,7 +292,8 @@ function! s:foldmarkers_on_buffer() abort "{{{4
 endfunction
 
 function! s:skippattern(line) abort "{{{3
-  if get(b:, 'foldpeek_override_skip_patterns', g:foldpeek#override_skip_patterns)
+  if get(b:, 'foldpeek_override_skip_patterns',
+        \ g:foldpeek#override_skip_patterns)
     let patterns = get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip_patterns)
   else
     let patterns = get(b:, 'foldpeek_skip_patterns', [])
@@ -336,21 +337,6 @@ function! s:decorations(num) abort "{{{2
   endif
   let head = substitute(head, '%HUNK%', hunk_sign, 'g')
   let tail = substitute(tail, '%HUNK%', hunk_sign, 'g')
-
-  "for part in ['head', 'tail']
-  "  let {part} = get(b:, {'foldpeek_'. part}, {'g:foldpeek#'. part})
-
-  "  for num in keys(part)
-  "    if a:num >= num
-  "      let {part} = exists({'b:foldpeek_'. part})
-  "            \ ? {'b:foldpeek_'. part}[num]
-  "            \ : {'g:foldpeek#'. part}[num]
-  "    endif
-  "  endfor
-
-  "  " Note: if empty(), head/tail shows '0'
-  "  let {part} = empty(part) ? '' : eval(substitute(part, '%PEEK%', a:num, 'g'))
-  "endfor
 
   let ret = []
   for part in [head, tail]
