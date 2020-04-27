@@ -85,7 +85,11 @@ let g:foldpeek#override_skip_patterns =
 
 let g:foldpeek#indent_with_head = get(g:, 'foldpeek#indent_with_head', 0)
 let g:foldpeek#head = get(g:, 'foldpeek#head', {
-      \ 1: "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes"
+      \ 1: "v:foldlevel == 1 "
+      \   ." ? (empty('%HUNK%') ? v:folddashes : '%HUNK%')"
+      \   ." : (empty('%HUNK%')"
+      \     ." ? v:foldlevel .') ' : '%HUNK%'. v:foldlevel .')'"
+      \   .")"
       \ })
 let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
       \ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
