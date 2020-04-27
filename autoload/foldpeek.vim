@@ -323,6 +323,13 @@ function! s:decorations(num) abort "{{{2
   let head = substitute(head, '%PEEK%', a:num, 'g')
   let tail = substitute(tail, '%PEEK%', a:num, 'g')
 
+  let changed_mark = ''
+  if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
+    let changed_mark = '(*) '
+  endif
+  let head = substitute(head, '%HUNK%', changed_mark, 'g')
+  let tail = substitute(tail, '%HUNK%', changed_mark, 'g')
+
   "for part in ['head', 'tail']
   "  let {part} = get(b:, {'foldpeek_'. part}, {'g:foldpeek#'. part})
 
