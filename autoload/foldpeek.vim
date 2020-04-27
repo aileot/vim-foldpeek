@@ -437,6 +437,23 @@ function! s:return_text(head, body, tail) abort "{{{2
         \ g:foldpeek#indent_with_head)
 
   let without_tail = indent_with_head ? (body . a:head) : (a:head . body)
+
+  " Deprecation Notices {{{3
+  for part in ['head', 'tail']
+    if type(get(b:, 'foldpeek_'. part)) == type({})
+      return 'Deprecated: b:foldpeek_'. part .' in Dict'
+            \ .'; `:h foldpeek-compatibility` for more detail'
+    elseif type({'g:foldpeek#'. part}) == type({})
+      return 'Deprecated: g:foldpeek#'. part .' in Dict'
+            \ .'; `:h foldpeek-compatibility` for more detail'
+    endif
+  endfor
+
+  if !empty(g:foldpeek#table)
+    return 'Deprecated: g:foldpeek#table'
+          \ .'; `:h foldpeek-compatibility` for more detail'
+  endif
+  " }}}3
   return without_tail . a:tail
 endfunction
 
