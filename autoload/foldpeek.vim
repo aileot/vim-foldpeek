@@ -65,7 +65,17 @@ if !exists('*foldpeek#tail')
   endfunction
 endif
 
-function! s:set_variables(prefix, suffixes, default) abort
+function! s:init_variable(var, default) abort
+  let prefix = matchstr(a:var, '^\w:')
+  let suffix = substitute(a:var, prefix, '', '')
+  if empty(prefix) || prefix ==# 'l:'
+    throw 'l:var is unsupported'
+  endif
+
+  let {a:var} = get({prefix}, suffix, a:default)
+endfunction
+
+function! s:initialize_variables(prefix, suffixes, default) abort
   " TODO: this function returns l:var; defines g:var, b:var, s:var and so on.
   " (of cource, meaningless for either a:var or v:var)
 
@@ -98,41 +108,36 @@ function! s:set_variables(prefix, suffixes, default) abort
 endfunction
 
 " Initialze Global Variables {{{1
-let g:foldpeek#maxspaces       = get(g:, 'foldpeek#maxspaces', &shiftwidth)
-let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
+call s:init_variable('g:foldpeek#maxspaces', &shiftwidth)
+call s:init_variable('g:foldpeek#auto_foldcolumn', 0)
 
-let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth',
+call s:init_variable('g:foldpeek#maxwidth',
       \ '&textwidth > 0 ? &tw : 79'
       \ )
-let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
+call s:init_variable('g:foldpeek#skip_patterns', [
       \ '^[>#\-=/{!* \t]*$',
       \ ])
-let g:foldpeek#override_skip_patterns =
-      \ get(g:, 'foldpeek#override_skip_patterns', 0)
 
-let g:foldpeek#indent_with_head = get(g:, 'foldpeek#indent_with_head', 0)
-let g:foldpeek#hunk_sign = get(g:, 'foldpeek#hunk_sign', '(*) ')
-let g:foldpeek#head = get(g:, 'foldpeek#head', "foldpeek#head('%HUNK%')")
-let g:foldpeek#tail = get(g:, 'foldpeek#tail', "foldpeek#tail(%PEEK%)")
+call s:init_variable('g:foldpeek#override_skip_patterns', 0)
 
-let g:foldpeek#table = get(g:, 'foldpeek#table', {})
+call s:init_variable('g:foldpeek#indent_with_head', 0)
+call s:init_variable('g:foldpeek#hunk_sign', '(*) ')
+call s:init_variable('g:foldpeek#head', "foldpeek#head('%HUNK%')")
+call s:init_variable('g:foldpeek#tail', "foldpeek#tail(%PEEK%)")
+
+call s:init_variable('g:foldpeek#table', {})
 
 let s:whiteout_styles = ['left', 'omit', 'fill', 'substitute']
-call s:set_variables('g:foldpeek#whiteout_patterns_',
+call s:initialize_variables('g:foldpeek#whiteout_patterns_',
       \ filter(deepcopy(s:whiteout_styles), 'v:val !=# "substitute"'), [])
-let g:foldpeek#whiteout_patterns_substitute =
-      \ get(g:, 'foldpeek#whiteout_patterns_substitute', [
+call s:init_variable('g:foldpeek#whiteout_patterns_substitute', [
       \   ['{\s*$', '{...}', ''],
       \   ['[\s*$', '[...]', ''],
       \   ['(\s*$', '(...)', ''],
       \ ])
-let g:foldpeek#disabled_whiteout_styles =
-      \ get(g:, 'foldpeek#disabled_whiteout_styles', [])
-let g:foldpeek#overrided_whiteout_styles =
-      \ get(g:, 'foldpeek#overrided_whiteout_styles', [])
-
-let g:foldpeek#whiteout_style_for_foldmarker =
-      \ get(g:, 'foldpeek#whiteout_style_for_foldmarker', 'omit')
+call s:init_variable('g:foldpeek#disabled_whiteout_styles', [])
+call s:init_variable('g:foldpeek#overrided_whiteout_styles', [])
+call s:init_variable('g:foldpeek#whiteout_style_for_foldmarker', 'omit')
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
