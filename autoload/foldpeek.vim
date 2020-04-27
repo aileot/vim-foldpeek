@@ -38,6 +38,33 @@ set cpo&vim
 "}}}
 
 " Define Helper Functions {{{1
+if !exists('*foldpeek#head')
+  function! foldpeek#head(HUNK) abort
+    if v:foldlevel == 1
+      if empty(a:HUNK)
+        return v:folddashes .' '
+      endif
+      return a:HUNK
+    endif
+
+    let header = v:foldlevel .') '
+    if empty(a:HUNK)
+      return header
+    endif
+    return a:HUNK . header
+  endfunction
+endif
+
+if !exists('*foldpeek#tail')
+  function! foldpeek#tail(PEEK) abort
+    let foldlines = v:foldend - v:foldstart + 1
+    if a:PEEK == 1
+      return ' ['. foldlines .']'
+    endif
+    return ' ['. (a:PEEK) .'/'. foldlines .']'
+  endfunction
+endif
+
 function! s:set_variables(prefix, suffixes, default) abort
   " TODO: this function returns l:var; defines g:var, b:var, s:var and so on.
   " (of cource, meaningless for either a:var or v:var)
@@ -85,17 +112,8 @@ let g:foldpeek#override_skip_patterns =
 
 let g:foldpeek#indent_with_head = get(g:, 'foldpeek#indent_with_head', 0)
 let g:foldpeek#hunk_sign = get(g:, 'foldpeek#hunk_sign', '(*) ')
-let g:foldpeek#head = get(g:, 'foldpeek#head', {
-      \ 1: "v:foldlevel == 1 "
-      \   ." ? (empty('%HUNK%') ? v:folddashes : '%HUNK%')"
-      \   ." : (empty('%HUNK%')"
-      \     ." ? v:foldlevel .') ' : '%HUNK%'. v:foldlevel .')'"
-      \   .")"
-      \ })
-let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
-      \ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
-      \ 2: "' [%PEEK%/'. (v:foldend - v:foldstart + 1) .']'",
-      \ })
+let g:foldpeek#head = get(g:, 'foldpeek#head', "foldpeek#head('%HUNK%')")
+let g:foldpeek#tail = get(g:, 'foldpeek#tail', "foldpeek#tail(%PEEK%)")
 
 let g:foldpeek#table = get(g:, 'foldpeek#table', {})
 
