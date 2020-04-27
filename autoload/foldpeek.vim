@@ -84,6 +84,7 @@ let g:foldpeek#override_skip_patterns =
       \ get(g:, 'foldpeek#override_skip_patterns', 0)
 
 let g:foldpeek#indent_with_head = get(g:, 'foldpeek#indent_with_head', 0)
+let g:foldpeek#hunk_sign = get(g:, 'foldpeek#hunk_sign', '(*) ')
 let g:foldpeek#head = get(g:, 'foldpeek#head', {
       \ 1: "v:foldlevel == 1 "
       \   ." ? (empty('%HUNK%') ? v:folddashes : '%HUNK%')"
@@ -327,12 +328,12 @@ function! s:decorations(num) abort "{{{2
   let head = substitute(head, '%PEEK%', a:num, 'g')
   let tail = substitute(tail, '%PEEK%', a:num, 'g')
 
-  let changed_mark = ''
+  let hunk_sign = ''
   if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
-    let changed_mark = '(*) '
+    let hunk_sign = get(b:, 'foldpeek_hunk_sign', g:foldpeek#hunk_sign)
   endif
-  let head = substitute(head, '%HUNK%', changed_mark, 'g')
-  let tail = substitute(tail, '%HUNK%', changed_mark, 'g')
+  let head = substitute(head, '%HUNK%', hunk_sign, 'g')
+  let tail = substitute(tail, '%HUNK%', hunk_sign, 'g')
 
   "for part in ['head', 'tail']
   "  let {part} = get(b:, {'foldpeek_'. part}, {'g:foldpeek#'. part})
