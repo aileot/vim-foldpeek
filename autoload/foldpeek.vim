@@ -76,34 +76,17 @@ function! s:init_variable(var, default) abort
 endfunction
 
 function! s:initialize_variables(prefix, suffixes, default) abort
-  " TODO: this function returns l:var; defines g:var, b:var, s:var and so on.
-  " (of cource, meaningless for either a:var or v:var)
-
   " Example:
   "   a:prefix: 'g:foldpeek#whiteout_patterns_'
-  "     -> pre: 'g:'
-  "     -> fix: 'foldpeek#whiteout_patterns_'
   "   a:suffixes: ['omit', 'fill']
-  "     -> type: could be either 'omit' and 'fill'
   "   a:default: []
+  "   var will be g:foldpeek#whiteout_patterns_omit and
+  "   g:foldpeek#whiteout_patterns_fill
 
-  let pre = matchstr(a:prefix, '^\w:')
-  let fix = matchstr(a:prefix, pre .'\zs.*')
-
-  if empty(pre) || pre ==# 'l:'
-    throw 'l:var is unsupported'
-  endif
-
-  let prefix = pre
-  for sfx in a:suffixes
+  for suffix in a:suffixes
     " Example:
-    "   var:    'g:foldpeek#whiteout_patterns_omit'
-    "   prefix: 'g:'
-    "   suffix: 'foldpeek#whiteout_patterns_omit'
-    let var    = a:prefix . sfx
-    let suffix = fix . sfx
-
-    let {var} = get({prefix}, suffix, a:default)
+    let var = a:prefix . suffix
+    call s:init_variable(var, a:default)
   endfor
 endfunction
 
