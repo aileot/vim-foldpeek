@@ -38,7 +38,7 @@ set cpo&vim
 "}}}
 
 " Define Helper Functions {{{1
-if !exists('*foldpeek#head')
+if !exists('*foldpeek#head') "{{{2
   function! foldpeek#head(HUNK) abort
     if v:foldlevel == 1
       if empty(a:HUNK)
@@ -55,7 +55,7 @@ if !exists('*foldpeek#head')
   endfunction
 endif
 
-if !exists('*foldpeek#tail')
+if !exists('*foldpeek#tail') "{{{2
   function! foldpeek#tail(PEEK) abort
     let foldlines = v:foldend - v:foldstart + 1
     if a:PEEK == 1
@@ -65,7 +65,7 @@ if !exists('*foldpeek#tail')
   endfunction
 endif
 
-function! s:init_variable(var, default) abort
+function! s:init_variable(var, default) abort "{{{2
   let prefix = matchstr(a:var, '^\w:')
   let suffix = substitute(a:var, prefix, '', '')
   if empty(prefix) || prefix ==# 'l:'
@@ -75,7 +75,7 @@ function! s:init_variable(var, default) abort
   let {a:var} = get({prefix}, suffix, a:default)
 endfunction
 
-function! s:initialize_variables(prefix, suffixes, default) abort
+function! s:initialize_variables(prefix, suffixes, default) abort "{{{2
   " Example:
   "   a:prefix: 'g:foldpeek#whiteout_patterns_'
   "   a:suffixes: ['omit', 'fill']
