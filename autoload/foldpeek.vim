@@ -105,7 +105,7 @@ call s:init_variable('g:foldpeek#hunk_sign', '(*) ')
 call s:init_variable('g:foldpeek#head', "foldpeek#head('%HUNK%')")
 call s:init_variable('g:foldpeek#tail', "foldpeek#tail(%PEEK%)")
 
-call s:init_variable('g:foldpeek#table', {})
+call s:init_variable('g:foldpeek#table', {}) " deprecated
 
 let s:whiteout_styles = ['left', 'omit', 'fill', 'substitute']
 call s:initialize_variables('g:foldpeek#whiteout_patterns_',
