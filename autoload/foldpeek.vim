@@ -39,19 +39,17 @@ set cpo&vim
 
 " Define Helper Functions {{{1
 if !exists('*foldpeek#head') "{{{2
-  function! foldpeek#head(HUNK) abort
-    if v:foldlevel == 1
-      if empty(a:HUNK)
-        return v:folddashes .' '
-      endif
-      return a:HUNK
+  function! foldpeek#head() abort
+    let hunk_sign = ''
+    if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
+      let hunk_sign = get(b:, 'foldpeek_hunk_sign', g:foldpeek#hunk_sign)
     endif
 
-    let header = v:foldlevel .') '
-    if empty(a:HUNK)
-      return header
+    if v:foldlevel == 1
+      return empty(hunk_sign) ? (v:folddashes .' ') : hunk_sign
     endif
-    return a:HUNK . header
+
+    return hunk_sign . v:foldlevel .') '
   endfunction
 endif
 
@@ -95,7 +93,7 @@ call s:init_variable('g:foldpeek#maxspaces', &shiftwidth)
 call s:init_variable('g:foldpeek#auto_foldcolumn', 0)
 call s:init_variable('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 
-call s:init_variable('g:foldpeek#head', "foldpeek#head('%HUNK%')")
+call s:init_variable('g:foldpeek#head', "foldpeek#head()")
 call s:init_variable('g:foldpeek#tail', "foldpeek#tail(%PEEK%)")
 call s:init_variable('g:foldpeek#hunk_sign', '(*) ')
 call s:init_variable('g:foldpeek#table', {}) " deprecated
@@ -125,7 +123,10 @@ function! foldpeek#text() abort "{{{1
 
   let [body, peeklnum] = s:peekline()
   let [head, tail]     = s:decorations(peeklnum)
-  return s:return_text(head, body, tail)
+
+  return !empty(s:deprecation_notice())
+        \ ? s:deprecation_notice()
+        \ : s:return_text(head, body, tail)
 endfunction
 
 function! s:peekline() abort "{{{2
@@ -330,13 +331,6 @@ function! s:decorations(num) abort "{{{2
   let tail = s:substitute_as_table(tail)
   let head = substitute(head, '%PEEK%', a:num, 'g')
   let tail = substitute(tail, '%PEEK%', a:num, 'g')
-
-  let hunk_sign = ''
-  if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
-    let hunk_sign = get(b:, 'foldpeek_hunk_sign', g:foldpeek#hunk_sign)
-  endif
-  let head = substitute(head, '%HUNK%', hunk_sign, 'g')
-  let tail = substitute(tail, '%HUNK%', hunk_sign, 'g')
 
   let ret = []
   for part in [head, tail]
