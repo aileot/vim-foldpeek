@@ -27,7 +27,7 @@ INTERFACE						 *foldpeek-interface*
 ------------------------------------------------------------------------------
 FUNCTION						   *foldpeek-function*
 
-foldpeek#text()					      *foldpeek-foldpeek#text*
+foldpeek#text()					    *foldpeek-foldpeek#text()*
 	Unless g:foldpeek#local_only is set to 1, this function will be set in
 	&foldtext. For local use, add
 >
