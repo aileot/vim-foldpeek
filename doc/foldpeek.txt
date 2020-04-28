@@ -168,6 +168,19 @@ b:foldpeek_whiteout_style_for_foldmarker
 	and so on.
 
 ==============================================================================
+FEATURE							    *foldpeek-feature*
+
+whiteout					   *foldpeek-feature-whiteout*
+	Currently, vim-foldpeek supports the styles:
+
+	left		only show matched patterns.
+	omit		omit matched patterns.
+	fill		replace with whitespaces as matched patterns length.
+	substitute	subsititue as listed.
+
+	For more detail, see g:foldpeek#whiteout_patterns_foo respectively.
+
+==============================================================================
 EXAMPLE							    *foldpeek-example*
 
 ------------------------------------------------------------------------------
