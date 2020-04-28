@@ -130,10 +130,10 @@ function! foldpeek#text() abort "{{{1
 endfunction
 
 function! s:peekline() abort "{{{2
-  let line = getline(v:foldstart)
   let offset = 0
-
   while offset <= (v:foldend - v:foldstart)
+    let line = getline(v:foldstart + offset)
+
     if string(get(b:, 'foldpeek_disabled_whiteout_styles',
           \ g:foldpeek#disabled_whiteout_styles)) !~# 'ALL'
       " Profile: s:whiteout_at_patterns() is a bottle-neck according to
@@ -141,15 +141,15 @@ function! s:peekline() abort "{{{2
       let line = s:whiteout_at_patterns(line)
     endif
 
-    let offset += 1
     if !s:skippattern(line)
-      let g:_foldpeek_offset = offset
+      let g:_foldpeek_lnum = offset + 1
       return line
     endif
-    let line = getline(v:foldstart + offset)
+
+    let offset += 1
   endwhile
 
-  let g:_foldpeek_offset = 1
+  let g:_foldpeek_lnum = 1
   return getline(v:foldstart)
 endfunction
 
@@ -315,7 +315,7 @@ function! s:decorations() abort "{{{2
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
   for num in keys(head)
-    if g:_foldpeek_offset >= num
+    if g:_foldpeek_lnum >= num
       let head = exists('b:foldpeek_head')
             \ ? b:foldpeek_head[num]
             \ : g:foldpeek#head[num]
@@ -323,7 +323,7 @@ function! s:decorations() abort "{{{2
   endfor
 
   for num in keys(tail)
-    if g:_foldpeek_offset >= num
+    if g:_foldpeek_lnum >= num
       let tail = exists('b:foldpeek_tail')
             \ ? b:foldpeek_tail[num]
             \ : g:foldpeek#tail[num]
@@ -332,8 +332,8 @@ function! s:decorations() abort "{{{2
 
   let head = s:substitute_as_table(head)
   let tail = s:substitute_as_table(tail)
-  let head = substitute(head, '%PEEK%', g:_foldpeek_offset, 'g')
-  let tail = substitute(tail, '%PEEK%', g:_foldpeek_offset, 'g')
+  let head = substitute(head, '%PEEK%', g:_foldpeek_lnum, 'g')
+  let tail = substitute(tail, '%PEEK%', g:_foldpeek_lnum, 'g')
 
   let ret = []
   for part in [head, tail]
