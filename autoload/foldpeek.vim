@@ -58,20 +58,17 @@ if !exists('*foldpeek#tail') "{{{2
     let foldlines = v:foldend - v:foldstart + 1
     if g:foldpeek_lnum == 1
       let fold_info = '['. foldlines .']'
+    else
+      let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
     endif
-    let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
 
     let hunk_info = ''
     if foldpeek#has_any_hunks()
-      let hunk_info_row = s:hunk_info()
-      let hunk_added    = hunk_info_row[0]
-      let hunk_modified = hunk_info_row[1]
-      let hunk_removed  = hunk_info_row[2]
-
+      let hunks = s:hunk_info()
       let hunk_info = '(+%a ~%m -%r)'
-      let hunk_info = substitute(hunk_info, '%a', hunk_added,    'g')
-      let hunk_info = substitute(hunk_info, '%m', hunk_modified, 'g')
-      let hunk_info = substitute(hunk_info, '%r', hunk_removed,  'g')
+      let hunk_info = substitute(hunk_info, '%a', hunks.Added,    'g')
+      let hunk_info = substitute(hunk_info, '%m', hunks.Modified, 'g')
+      let hunk_info = substitute(hunk_info, '%r', hunks.Removed,  'g')
     endif
 
     return ' '. hunk_info . fold_info
@@ -530,7 +527,7 @@ function! s:deprecation_notice() abort "{{{2
         \ : msg .'`:h foldpeek-compatibility` for more detail'
 endfunction
 function! foldpeek#hunk_info() abort "{{{1
-  let hunk_info = [0, 0, 0]
+  let hunk_info = s:reset_hunk_info()
   let signs = s:get_signs()
 
   for sign in signs
@@ -540,13 +537,13 @@ function! foldpeek#hunk_info() abort "{{{1
     endif
 
     if sign.name =~# 'Added'
-      let hunk_info[0] += 1
+      let hunk_info.Added += 1
     endif
     if sign.name =~# 'Modified'
-      let hunk_info[1] += 1
+      let hunk_info.Modified += 1
     endif
     if sign.name =~# 'Removed'
-      let hunk_info[2] += 1
+      let hunk_info.Removed += 1
     endif
   endfor
 
@@ -554,7 +551,11 @@ function! foldpeek#hunk_info() abort "{{{1
 endfunction
 
 function! foldpeek#has_any_hunks() abort "{{{1
-  return foldpeek#hunk_info() != [0, 0, 0]
+  return foldpeek#hunk_info() != s:reset_hunk_info()
+endfunction
+
+function! s:reset_hunk_info() abort
+  return {'Added': 0, 'Modified': 0, 'Removed': 0}
 endfunction
 
 function! s:get_signs() abort "{{{2
