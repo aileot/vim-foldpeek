@@ -107,8 +107,8 @@ call s:init_variable('g:foldpeek#maxspaces', &shiftwidth)
 call s:init_variable('g:foldpeek#auto_foldcolumn', 0)
 call s:init_variable('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 
-call s:init_variable('g:foldpeek#head', "foldpeek#head()")
-call s:init_variable('g:foldpeek#tail', "foldpeek#tail()")
+call s:init_variable('g:foldpeek#head', 'foldpeek#head()')
+call s:init_variable('g:foldpeek#tail', 'foldpeek#tail()')
 call s:init_variable('g:foldpeek#table', {}) " deprecated
 call s:init_variable('g:foldpeek#indent_with_head', 0)
 
