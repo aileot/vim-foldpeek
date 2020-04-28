@@ -121,8 +121,8 @@ function! foldpeek#text() abort "{{{1
     let &foldcolumn = v:foldlevel + 1
   endif
 
-  let [body, peeklnum] = s:peekline()
-  let [head, tail]     = s:decorations(peeklnum)
+  let body = s:peekline()
+  let [head, tail] = s:decorations()
 
   return !empty(s:deprecation_notice())
         \ ? s:deprecation_notice()
@@ -144,12 +144,13 @@ function! s:peekline() abort "{{{2
     let offset += 1
     if !s:skippattern(line)
       let g:_foldpeek_offset = offset
-      return [line, offset]
+      return line
     endif
     let line = getline(v:foldstart + offset)
   endwhile
 
-  return [getline(v:foldstart), 1]
+  let g:_foldpeek_offset = 1
+  return getline(v:foldstart)
 endfunction
 
 function! s:whiteout_at_patterns(line) abort "{{{3
@@ -309,12 +310,12 @@ function! s:skippattern(line) abort "{{{3
   return 0
 endfunction
 
-function! s:decorations(num) abort "{{{2
+function! s:decorations() abort "{{{2
   let head = get(b:, 'foldpeek_head', g:foldpeek#head)
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
   for num in keys(head)
-    if a:num >= num
+    if g:_foldpeek_offset >= num
       let head = exists('b:foldpeek_head')
             \ ? b:foldpeek_head[num]
             \ : g:foldpeek#head[num]
@@ -322,7 +323,7 @@ function! s:decorations(num) abort "{{{2
   endfor
 
   for num in keys(tail)
-    if a:num >= num
+    if g:_foldpeek_offset >= num
       let tail = exists('b:foldpeek_tail')
             \ ? b:foldpeek_tail[num]
             \ : g:foldpeek#tail[num]
