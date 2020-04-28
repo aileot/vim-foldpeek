@@ -76,6 +76,7 @@ if !exists('*foldpeek#tail') "{{{2
 
     return ' '. hunk_info . fold_info
   endfunction
+endif
 
 function! s:init_variable(var, default) abort "{{{2
   let prefix = matchstr(a:var, '^\w:')
@@ -582,7 +583,6 @@ function! s:get_signs() abort "{{{2
   endif
   return signs
 endfunction
-endif
 
 " restore 'cpoptions' {{{1
 let &cpo = s:save_cpo
