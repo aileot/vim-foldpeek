@@ -58,8 +58,9 @@ if !exists('*foldpeek#tail') "{{{2
     let foldlines = v:foldend - v:foldstart + 1
     if g:foldpeek_lnum == 1
       let fold_info = '['. foldlines .']'
+    else
+      let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
     endif
-    let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
 
     let hunk_info = ''
     if foldpeek#has_any_hunks()
