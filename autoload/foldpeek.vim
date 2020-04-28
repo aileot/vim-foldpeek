@@ -402,22 +402,6 @@ function! s:return_text(head, body, tail) abort "{{{2
 
   let without_tail = indent_with_head ? (body . a:head) : (a:head . body)
 
-  " Deprecation Notices {{{3
-  for part in ['head', 'tail']
-    if type(get(b:, 'foldpeek_'. part)) == type({})
-      return 'Deprecated: b:foldpeek_'. part .' in Dict'
-            \ .'; `:h foldpeek-compatibility` for more detail'
-    elseif type({'g:foldpeek#'. part}) == type({})
-      return 'Deprecated: g:foldpeek#'. part .' in Dict'
-            \ .'; `:h foldpeek-compatibility` for more detail'
-    endif
-  endfor
-
-  if !empty(g:foldpeek#table)
-    return 'Deprecated: g:foldpeek#table'
-          \ .'; `:h foldpeek-compatibility` for more detail'
-  endif
-  " }}}3
   return without_tail . a:tail
 endfunction
 
@@ -504,6 +488,26 @@ function! s:ambiwidth_into_double(text, textwidth) abort "{{{4
   return strdisplaywidth(ret) ==# a:textwidth ? ret : ret .' '
 endfunction
 
+function! s:deprecation_notice() abort "{{{2
+  let msg = 'Deprecated: '
+  let msg_len = len(msg)
+
+  for part in ['head', 'tail']
+    if type(get(b:, 'foldpeek_'. part)) == type({})
+      let msg .= 'b:foldpeek_'. part .' in Dict; '
+    elseif type({'g:foldpeek#'. part}) == type({})
+      let msg .= 'g:foldpeek#'. part .' in Dict; '
+    endif
+  endfor
+
+  if !empty(g:foldpeek#table)
+    let msg .= 'g:foldpeek#table; '
+  endif
+
+  return msg_len == len(msg)
+        \ ? ''
+        \ : msg .'`:h foldpeek-compatibility` for more detail'
+endfunction
 " restore 'cpoptions' {{{1
 let &cpo = s:save_cpo
 unlet s:save_cpo
