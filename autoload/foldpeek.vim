@@ -42,14 +42,14 @@ if !exists('*foldpeek#head') "{{{2
   function! foldpeek#head() abort
     let hunk_sign = ''
     if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
-      let hunk_sign = get(b:, 'foldpeek_hunk_sign', g:foldpeek#hunk_sign)
+      let hunk_sign = '(*) '
     endif
 
     if v:foldlevel == 1
       return empty(hunk_sign) ? (v:folddashes .' ') : hunk_sign
     endif
 
-    return hunk_sign . v:foldlevel .') '
+    return v:foldlevel .') '. hunk_sign
   endfunction
 endif
 
@@ -95,7 +95,6 @@ call s:init_variable('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 
 call s:init_variable('g:foldpeek#head', "foldpeek#head()")
 call s:init_variable('g:foldpeek#tail', "foldpeek#tail()")
-call s:init_variable('g:foldpeek#hunk_sign', '(*) ')
 call s:init_variable('g:foldpeek#table', {}) " deprecated
 call s:init_variable('g:foldpeek#indent_with_head', 0)
 
