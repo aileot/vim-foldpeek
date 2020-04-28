@@ -330,10 +330,10 @@ function! s:decorations() abort "{{{2
     endif
   endfor
 
-  let head = s:substitute_as_table(head)
-  let tail = s:substitute_as_table(tail)
-  let head = substitute(head, '%PEEK%', g:_foldpeek_lnum, 'g')
-  let tail = substitute(tail, '%PEEK%', g:_foldpeek_lnum, 'g')
+  let head = s:substitute_as_table(head) " deprecated
+  let tail = s:substitute_as_table(tail) " deprecated
+  let head = substitute(head, '%PEEK%', g:_foldpeek_lnum, 'g') " deprecated
+  let tail = substitute(tail, '%PEEK%', g:_foldpeek_lnum, 'g') " deprecated
 
   let ret = []
   for part in [head, tail]
