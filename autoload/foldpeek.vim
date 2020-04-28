@@ -130,10 +130,10 @@ function! foldpeek#text() abort "{{{1
 endfunction
 
 function! s:peekline() abort "{{{2
-  let add  = 0
   let line = getline(v:foldstart)
+  let offset = 0
 
-  while add <= (v:foldend - v:foldstart)
+  while offset <= (v:foldend - v:foldstart)
     if string(get(b:, 'foldpeek_disabled_whiteout_styles',
           \ g:foldpeek#disabled_whiteout_styles)) !~# 'ALL'
       " Profile: s:whiteout_at_patterns() is a bottle-neck according to
@@ -141,10 +141,12 @@ function! s:peekline() abort "{{{2
       let line = s:whiteout_at_patterns(line)
     endif
 
-    if ! s:skippattern(line) | return [line, add + 1] | endif
-    " Note: keep `+ 1` after s:skippattern()
-    let add  += 1
-    let line  = getline(v:foldstart + add)
+    let offset += 1
+    if !s:skippattern(line)
+      let g:_foldpeek_offset = offset
+      return [line, offset]
+    endif
+    let line = getline(v:foldstart + offset)
   endwhile
 
   return [getline(v:foldstart), 1]
@@ -329,8 +331,8 @@ function! s:decorations(num) abort "{{{2
 
   let head = s:substitute_as_table(head)
   let tail = s:substitute_as_table(tail)
-  let head = substitute(head, '%PEEK%', a:num, 'g')
-  let tail = substitute(tail, '%PEEK%', a:num, 'g')
+  let head = substitute(head, '%PEEK%', g:_foldpeek_offset, 'g')
+  let tail = substitute(tail, '%PEEK%', g:_foldpeek_offset, 'g')
 
   let ret = []
   for part in [head, tail]
