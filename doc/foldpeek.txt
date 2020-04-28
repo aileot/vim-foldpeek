@@ -224,5 +224,23 @@ in |g:foldpeek#whiteout_patterns_omit| instead, you will see as below:
 	-'kaile256/vim-foldpeek'                                         [2/3]
 	-#'foo/bar'                                                      [2/2]
 <
+===============================================================================
+COMPATIBILITY					      *foldpeek-compatibility*
+
+Deprecated feature will be all removed in the next update after deprecation
+notice.
+
+2020.04.28
+* Deprecated: g:foldpeek#head/tail and b:foldpeek_head/tail in Dictionary.
+  vim-foldpeek will stop to support them in Dictionary; please use them in
+  String.
+* Deprecated: g:foldpeek#table will be removed; please override or define
+  functions like foldpeek#head() or foldpeek#tail() instead.
+
+2020.04.26
+* Remove g:foldpeek#disable_whiteout and b:foldpeek_disable_whiteout; please
+  use g:foldpeek#disabled_whiteout_styles and
+  b:foldpeek_disabled_whiteout_styles instead.
+
 ==============================================================================
 vim:ft=help:tw=78:ts=8:sts=8:sw=8:noet:norl:fen
