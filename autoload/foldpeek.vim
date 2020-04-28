@@ -54,12 +54,12 @@ if !exists('*foldpeek#head') "{{{2
 endif
 
 if !exists('*foldpeek#tail') "{{{2
-  function! foldpeek#tail(PEEK) abort
+  function! foldpeek#tail() abort
     let foldlines = v:foldend - v:foldstart + 1
-    if a:PEEK == 1
+    if g:foldpeek_lnum == 1
       return ' ['. foldlines .']'
     endif
-    return ' ['. (a:PEEK) .'/'. foldlines .']'
+    return ' ['. (g:foldpeek_lnum) .'/'. foldlines .']'
   endfunction
 endif
 
@@ -94,7 +94,7 @@ call s:init_variable('g:foldpeek#auto_foldcolumn', 0)
 call s:init_variable('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 
 call s:init_variable('g:foldpeek#head', "foldpeek#head()")
-call s:init_variable('g:foldpeek#tail', "foldpeek#tail(%PEEK%)")
+call s:init_variable('g:foldpeek#tail', "foldpeek#tail()")
 call s:init_variable('g:foldpeek#hunk_sign', '(*) ')
 call s:init_variable('g:foldpeek#table', {}) " deprecated
 call s:init_variable('g:foldpeek#indent_with_head', 0)
@@ -142,14 +142,14 @@ function! s:peekline() abort "{{{2
     endif
 
     if !s:skippattern(line)
-      let g:_foldpeek_lnum = offset + 1
+      let g:foldpeek_lnum = offset + 1
       return line
     endif
 
     let offset += 1
   endwhile
 
-  let g:_foldpeek_lnum = 1
+  let g:foldpeek_lnum = 1
   return getline(v:foldstart)
 endfunction
 
@@ -315,7 +315,7 @@ function! s:decorations() abort "{{{2
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
   for num in keys(head)
-    if g:_foldpeek_lnum >= num
+    if g:foldpeek_lnum >= num
       let head = exists('b:foldpeek_head')
             \ ? b:foldpeek_head[num]
             \ : g:foldpeek#head[num]
@@ -323,7 +323,7 @@ function! s:decorations() abort "{{{2
   endfor
 
   for num in keys(tail)
-    if g:_foldpeek_lnum >= num
+    if g:foldpeek_lnum >= num
       let tail = exists('b:foldpeek_tail')
             \ ? b:foldpeek_tail[num]
             \ : g:foldpeek#tail[num]
@@ -500,6 +500,10 @@ function! s:deprecation_notice() abort "{{{2
       let msg .= 'b:foldpeek_'. part .' in Dict; '
     elseif type({'g:foldpeek#'. part}) == type({})
       let msg .= 'g:foldpeek#'. part .' in Dict; '
+    endif
+    let str = get(b:, 'foldpeek_'. part, {'g:foldpeek#'. part})
+    if !empty(matchstr(str, '%PEEK%'))
+      let msg .= '%PEEK% so use g:foldpeek_lnum instead;'
     endif
   endfor
 
