@@ -41,7 +41,7 @@ set cpo&vim
 if !exists('*foldpeek#head') "{{{2
   function! foldpeek#head() abort
     let hunk_sign = ''
-    if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
+    if foldpeek#has_any_hunks()
       let hunk_sign = '(*) '
     endif
 
@@ -62,7 +62,7 @@ if !exists('*foldpeek#tail') "{{{2
     let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
 
     let hunk_info = ''
-    if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
+    if foldpeek#has_any_hunks()
       let hunk_info_row = s:hunk_info()
       let hunk_added    = hunk_info_row[0]
       let hunk_modified = hunk_info_row[1]
@@ -550,6 +550,10 @@ function! foldpeek#hunk_info() abort "{{{1
   endfor
 
   return hunk_info
+endfunction
+
+function! foldpeek#has_any_hunks() abort "{{{1
+  return foldpeek#hunk_info() != [0, 0, 0]
 endfunction
 
 function! s:get_signs() abort "{{{2
