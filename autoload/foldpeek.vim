@@ -38,94 +38,115 @@ set cpo&vim
 "}}}
 
 " Define Helper Functions {{{1
-function! s:set_variables(prefix, suffixes, default) abort
-  " TODO: this function returns l:var; defines g:var, b:var, s:var and so on.
-  " (of cource, meaningless for either a:var or v:var)
+if !exists('*foldpeek#head') "{{{2
+  function! foldpeek#head() abort
+    let hunk_sign = ''
+    if foldpeek#has_any_hunks()
+      let hunk_sign = '(*) '
+    endif
 
-  " Example:
-  "   a:prefix: 'g:foldpeek#whiteout_patterns_'
-  "     -> pre: 'g:'
-  "     -> fix: 'foldpeek#whiteout_patterns_'
-  "   a:suffixes: ['omit', 'fill']
-  "     -> type: could be either 'omit' and 'fill'
-  "   a:default: []
+    if v:foldlevel == 1
+      return empty(hunk_sign) ? (v:folddashes .' ') : hunk_sign
+    endif
 
-  let pre = matchstr(a:prefix, '^\w:')
-  let fix = matchstr(a:prefix, pre .'\zs.*')
+    return v:foldlevel .') '. hunk_sign
+  endfunction
+endif
 
-  if empty(pre) || pre ==# 'l:'
+if !exists('*foldpeek#tail') "{{{2
+  function! foldpeek#tail() abort
+    let foldlines = v:foldend - v:foldstart + 1
+    if g:foldpeek_lnum == 1
+      let fold_info = '['. foldlines .']'
+    endif
+    let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
+
+    let hunk_info = ''
+    if foldpeek#has_any_hunks()
+      let hunk_info_row = s:hunk_info()
+      let hunk_added    = hunk_info_row[0]
+      let hunk_modified = hunk_info_row[1]
+      let hunk_removed  = hunk_info_row[2]
+
+      let hunk_info = '(+%a ~%m -%r)'
+      let hunk_info = substitute(hunk_info, '%a', hunk_added,    'g')
+      let hunk_info = substitute(hunk_info, '%m', hunk_modified, 'g')
+      let hunk_info = substitute(hunk_info, '%r', hunk_removed,  'g')
+    endif
+
+    return ' '. hunk_info . fold_info
+  endfunction
+
+function! s:init_variable(var, default) abort "{{{2
+  let prefix = matchstr(a:var, '^\w:')
+  let suffix = substitute(a:var, prefix, '', '')
+  if empty(prefix) || prefix ==# 'l:'
     throw 'l:var is unsupported'
   endif
 
-  let prefix = pre
-  for sfx in a:suffixes
-    " Example:
-    "   var:    'g:foldpeek#whiteout_patterns_omit'
-    "   prefix: 'g:'
-    "   suffix: 'foldpeek#whiteout_patterns_omit'
-    let var    = a:prefix . sfx
-    let suffix = fix . sfx
+  let {a:var} = get({prefix}, suffix, a:default)
+endfunction
 
-    let {var} = get({prefix}, suffix, a:default)
+function! s:initialize_variables(prefix, suffixes, default) abort "{{{2
+  " Example:
+  "   a:prefix: 'g:foldpeek#whiteout_patterns_'
+  "   a:suffixes: ['omit', 'fill']
+  "   a:default: []
+  "   var will be g:foldpeek#whiteout_patterns_omit and
+  "   g:foldpeek#whiteout_patterns_fill
+
+  for suffix in a:suffixes
+    " Example:
+    let var = a:prefix . suffix
+    call s:init_variable(var, a:default)
   endfor
 endfunction
 
 " Initialze Global Variables {{{1
-let g:foldpeek#maxspaces       = get(g:, 'foldpeek#maxspaces', &shiftwidth)
-let g:foldpeek#auto_foldcolumn = get(g:, 'foldpeek#auto_foldcolumn', 0)
+call s:init_variable('g:foldpeek#maxspaces', &shiftwidth)
+call s:init_variable('g:foldpeek#auto_foldcolumn', 0)
+call s:init_variable('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 
-let g:foldpeek#maxwidth        = get(g:, 'foldpeek#maxwidth',
-      \ '&textwidth > 0 ? &tw : 79'
-      \ )
-let g:foldpeek#skip_patterns   = get(g:, 'foldpeek#skip_patterns', [
+call s:init_variable('g:foldpeek#head', "foldpeek#head()")
+call s:init_variable('g:foldpeek#tail', "foldpeek#tail()")
+call s:init_variable('g:foldpeek#table', {}) " deprecated
+call s:init_variable('g:foldpeek#indent_with_head', 0)
+
+call s:init_variable('g:foldpeek#skip_patterns', [
       \ '^[>#\-=/{!* \t]*$',
       \ ])
-let g:foldpeek#override_skip_patterns =
-      \ get(g:, 'foldpeek#override_skip_patterns', 0)
-
-let g:foldpeek#indent_with_head = get(g:, 'foldpeek#indent_with_head', 0)
-let g:foldpeek#head = get(g:, 'foldpeek#head', {
-      \ 1: "v:foldlevel > 1 ? v:foldlevel .') ' : v:folddashes"
-      \ })
-let g:foldpeek#tail = get(g:, 'foldpeek#tail', {
-      \ 1: "' ['. (v:foldend - v:foldstart + 1) .']'",
-      \ 2: "' [%PEEK%/'. (v:foldend - v:foldstart + 1) .']'",
-      \ })
-
-let g:foldpeek#table = get(g:, 'foldpeek#table', {})
+call s:init_variable('g:foldpeek#override_skip_patterns', 0)
 
 let s:whiteout_styles = ['left', 'omit', 'fill', 'substitute']
-call s:set_variables('g:foldpeek#whiteout_patterns_',
+call s:initialize_variables('g:foldpeek#whiteout_patterns_',
       \ filter(deepcopy(s:whiteout_styles), 'v:val !=# "substitute"'), [])
-let g:foldpeek#whiteout_patterns_substitute =
-      \ get(g:, 'foldpeek#whiteout_patterns_substitute', [
+call s:init_variable('g:foldpeek#whiteout_patterns_substitute', [
       \   ['{\s*$', '{...}', ''],
       \   ['[\s*$', '[...]', ''],
       \   ['(\s*$', '(...)', ''],
       \ ])
-let g:foldpeek#disabled_whiteout_styles =
-      \ get(g:, 'foldpeek#disabled_whiteout_styles', [])
-let g:foldpeek#overrided_whiteout_styles =
-      \ get(g:, 'foldpeek#overrided_whiteout_styles', [])
-
-let g:foldpeek#whiteout_style_for_foldmarker =
-      \ get(g:, 'foldpeek#whiteout_style_for_foldmarker', 'omit')
+call s:init_variable('g:foldpeek#disabled_whiteout_styles', [])
+call s:init_variable('g:foldpeek#overrided_whiteout_styles', [])
+call s:init_variable('g:foldpeek#whiteout_style_for_foldmarker', 'omit')
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
     let &foldcolumn = v:foldlevel + 1
   endif
 
-  let [body, peeklnum] = s:peekline()
-  let [head, tail]     = s:decorations(peeklnum)
-  return s:return_text(head, body, tail)
+  let body = s:peekline()
+  let [head, tail] = s:decorations()
+
+  return !empty(s:deprecation_notice())
+        \ ? s:deprecation_notice()
+        \ : s:return_text(head, body, tail)
 endfunction
 
 function! s:peekline() abort "{{{2
-  let add  = 0
-  let line = getline(v:foldstart)
+  let offset = 0
+  while offset <= (v:foldend - v:foldstart)
+    let line = getline(v:foldstart + offset)
 
-  while add <= (v:foldend - v:foldstart)
     if string(get(b:, 'foldpeek_disabled_whiteout_styles',
           \ g:foldpeek#disabled_whiteout_styles)) !~# 'ALL'
       " Profile: s:whiteout_at_patterns() is a bottle-neck according to
@@ -133,13 +154,16 @@ function! s:peekline() abort "{{{2
       let line = s:whiteout_at_patterns(line)
     endif
 
-    if ! s:skippattern(line) | return [line, add + 1] | endif
-    " Note: keep `+ 1` after s:skippattern()
-    let add  += 1
-    let line  = getline(v:foldstart + add)
+    if !s:skippattern(line)
+      let g:foldpeek_lnum = offset + 1
+      return line
+    endif
+
+    let offset += 1
   endwhile
 
-  return [getline(v:foldstart), 1]
+  let g:foldpeek_lnum = 1
+  return getline(v:foldstart)
 endfunction
 
 function! s:whiteout_at_patterns(line) abort "{{{3
@@ -180,8 +204,8 @@ function! s:set_whiteout_patterns(type) abort "{{{4
     return []
 
   elseif overrided_styles =~# a:type .'\|ALL'
-    " Note: without deepcopy(), {'g:foldpeek#whiteout_patterns_'. (a:type)} will
-    " increase their values infinitely.
+    " Note: without deepcopy(), g:foldpeek#whiteout_patterns_foo will increase
+    " their values infinitely.
     return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
           \ {'g:foldpeek#whiteout_patterns_'. a:type}))
   endif
@@ -285,7 +309,8 @@ function! s:foldmarkers_on_buffer() abort "{{{4
 endfunction
 
 function! s:skippattern(line) abort "{{{3
-  if get(b:, 'foldpeek_override_skip_patterns', g:foldpeek#override_skip_patterns)
+  if get(b:, 'foldpeek_override_skip_patterns',
+        \ g:foldpeek#override_skip_patterns)
     let patterns = get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip_patterns)
   else
     let patterns = get(b:, 'foldpeek_skip_patterns', [])
@@ -298,12 +323,12 @@ function! s:skippattern(line) abort "{{{3
   return 0
 endfunction
 
-function! s:decorations(num) abort "{{{2
+function! s:decorations() abort "{{{2
   let head = get(b:, 'foldpeek_head', g:foldpeek#head)
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
   for num in keys(head)
-    if a:num >= num
+    if g:foldpeek_lnum >= num
       let head = exists('b:foldpeek_head')
             \ ? b:foldpeek_head[num]
             \ : g:foldpeek#head[num]
@@ -311,32 +336,17 @@ function! s:decorations(num) abort "{{{2
   endfor
 
   for num in keys(tail)
-    if a:num >= num
+    if g:foldpeek_lnum >= num
       let tail = exists('b:foldpeek_tail')
             \ ? b:foldpeek_tail[num]
             \ : g:foldpeek#tail[num]
     endif
   endfor
 
-  let head = s:substitute_as_table(head)
-  let tail = s:substitute_as_table(tail)
-  let head = substitute(head, '%PEEK%', a:num, 'g')
-  let tail = substitute(tail, '%PEEK%', a:num, 'g')
-
-  "for part in ['head', 'tail']
-  "  let {part} = get(b:, {'foldpeek_'. part}, {'g:foldpeek#'. part})
-
-  "  for num in keys(part)
-  "    if a:num >= num
-  "      let {part} = exists({'b:foldpeek_'. part})
-  "            \ ? {'b:foldpeek_'. part}[num]
-  "            \ : {'g:foldpeek#'. part}[num]
-  "    endif
-  "  endfor
-
-  "  " Note: if empty(), head/tail shows '0'
-  "  let {part} = empty(part) ? '' : eval(substitute(part, '%PEEK%', a:num, 'g'))
-  "endfor
+  let head = s:substitute_as_table(head) " deprecated
+  let tail = s:substitute_as_table(tail) " deprecated
+  let head = substitute(head, '%PEEK%', g:_foldpeek_lnum, 'g') " deprecated
+  let tail = substitute(tail, '%PEEK%', g:_foldpeek_lnum, 'g') " deprecated
 
   let ret = []
   for part in [head, tail]
@@ -407,6 +417,7 @@ function! s:return_text(head, body, tail) abort "{{{2
         \ g:foldpeek#indent_with_head)
 
   let without_tail = indent_with_head ? (body . a:head) : (a:head . body)
+
   return without_tail . a:tail
 endfunction
 
@@ -492,6 +503,86 @@ function! s:ambiwidth_into_double(text, textwidth) abort "{{{4
   " ambiwidth fills twice a width so that add a space for lack of length
   return strdisplaywidth(ret) ==# a:textwidth ? ret : ret .' '
 endfunction
+
+function! s:deprecation_notice() abort "{{{2
+  let msg = 'Deprecated: '
+  let msg_len = len(msg)
+
+  for part in ['head', 'tail']
+    if type(get(b:, 'foldpeek_'. part)) == type({})
+      let msg .= 'b:foldpeek_'. part .' in Dict; '
+    elseif type({'g:foldpeek#'. part}) == type({})
+      let msg .= 'g:foldpeek#'. part .' in Dict; '
+    endif
+    let str = get(b:, 'foldpeek_'. part, {'g:foldpeek#'. part})
+    if !empty(matchstr(str, '%PEEK%'))
+      let msg .= '%PEEK% so use g:foldpeek_lnum instead;'
+    endif
+  endfor
+
+  if !empty(g:foldpeek#table)
+    let msg .= 'g:foldpeek#table; '
+  endif
+
+  return msg_len == len(msg)
+        \ ? ''
+        \ : msg .'`:h foldpeek-compatibility` for more detail'
+endfunction
+function! foldpeek#hunk_info() abort "{{{1
+  let hunk_info = [0, 0, 0]
+  let signs = s:get_signs()
+
+  for sign in signs
+    if sign.name !~# 'GitGutterLine' | continue | endif
+    if v:foldstart > sign.lnum || sign.lnum > v:foldend
+      continue
+    endif
+
+    if sign.name =~# 'Added'
+      let hunk_info[0] += 1
+    endif
+    if sign.name =~# 'Modified'
+      let hunk_info[1] += 1
+    endif
+    if sign.name =~# 'Removed'
+      let hunk_info[2] += 1
+    endif
+  endfor
+
+  return hunk_info
+endfunction
+
+function! foldpeek#has_any_hunks() abort "{{{1
+  return foldpeek#hunk_info() != [0, 0, 0]
+endfunction
+
+function! s:get_signs() abort "{{{2
+  let bufnr = bufnr('%')
+  if exists('*getbufinfo')
+    let bufinfo = getbufinfo(bufnr)[0]
+    let signs = has_key(bufinfo, 'signs') ? bufinfo.signs : []
+
+  else
+    let signs = []
+
+    redir => signlines
+    silent execute 'sign place buffer='. bufnr
+    redir END
+
+    for signline in filter(split(signlines, '\n')[2:], 'v:val =~# "="')
+      " Typical sign line before v8.1.0614:  line=88 id=1234 name=GitGutterLineAdded
+      " We assume splitting is faster than a regexp.
+      let components = split(signline)
+      call add(signs, {
+            \ 'lnum': str2nr(split(components[0], '=')[1]),
+            \ 'id':   str2nr(split(components[1], '=')[1]),
+            \ 'name':        split(components[2], '=')[1]
+            \ })
+    endfor
+  endif
+  return signs
+endfunction
+endif
 
 " restore 'cpoptions' {{{1
 let &cpo = s:save_cpo
