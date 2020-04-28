@@ -77,7 +77,7 @@ if !exists('*foldpeek#tail') "{{{2
     return ' '. hunk_info . fold_info
   endfunction
 
-  function! s:hunk_info() abort "{{{3
+  function! foldpeek#hunk_info() abort "{{{3
     let hunk_info = [0, 0, 0]
     let signs = s:get_signs()
 
