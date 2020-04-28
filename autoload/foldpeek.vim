@@ -39,31 +39,43 @@ set cpo&vim
 
 " Define Helper Functions {{{1
 if !exists('*foldpeek#head') "{{{2
-  function! foldpeek#head(HUNK) abort
-    if v:foldlevel == 1
-      if empty(a:HUNK)
-        return v:folddashes .' '
-      endif
-      return a:HUNK
+  function! foldpeek#head() abort
+    let hunk_sign = ''
+    if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
+      let hunk_sign = '(*) '
     endif
 
-    let header = v:foldlevel .') '
-    if empty(a:HUNK)
-      return header
+    if v:foldlevel == 1
+      return empty(hunk_sign) ? (v:folddashes .' ') : hunk_sign
     endif
-    return a:HUNK . header
+
+    return v:foldlevel .') '. hunk_sign
   endfunction
 endif
 
 if !exists('*foldpeek#tail') "{{{2
-  function! foldpeek#tail(PEEK) abort
+  function! foldpeek#tail() abort
     let foldlines = v:foldend - v:foldstart + 1
-    if a:PEEK == 1
-      return ' ['. foldlines .']'
+    if g:foldpeek_lnum == 1
+      let fold_info = '['. foldlines .']'
     endif
-    return ' ['. (a:PEEK) .'/'. foldlines .']'
+    let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
+
+    let hunk_info = ''
+    if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
+      let hunk_info_row = s:hunk_info()
+      let hunk_added    = hunk_info_row[0]
+      let hunk_modified = hunk_info_row[1]
+      let hunk_removed  = hunk_info_row[2]
+
+      let hunk_info = '(+%a ~%m -%r)'
+      let hunk_info = substitute(hunk_info, '%a', hunk_added,    'g')
+      let hunk_info = substitute(hunk_info, '%m', hunk_modified, 'g')
+      let hunk_info = substitute(hunk_info, '%r', hunk_removed,  'g')
+    endif
+
+    return ' '. hunk_info . fold_info
   endfunction
-endif
 
 function! s:init_variable(var, default) abort "{{{2
   let prefix = matchstr(a:var, '^\w:')
@@ -95,9 +107,8 @@ call s:init_variable('g:foldpeek#maxspaces', &shiftwidth)
 call s:init_variable('g:foldpeek#auto_foldcolumn', 0)
 call s:init_variable('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 
-call s:init_variable('g:foldpeek#head', "foldpeek#head('%HUNK%')")
-call s:init_variable('g:foldpeek#tail', "foldpeek#tail(%PEEK%)")
-call s:init_variable('g:foldpeek#hunk_sign', '(*) ')
+call s:init_variable('g:foldpeek#head', "foldpeek#head()")
+call s:init_variable('g:foldpeek#tail', "foldpeek#tail()")
 call s:init_variable('g:foldpeek#table', {}) " deprecated
 call s:init_variable('g:foldpeek#indent_with_head', 0)
 
@@ -123,16 +134,19 @@ function! foldpeek#text() abort "{{{1
     let &foldcolumn = v:foldlevel + 1
   endif
 
-  let [body, peeklnum] = s:peekline()
-  let [head, tail]     = s:decorations(peeklnum)
-  return s:return_text(head, body, tail)
+  let body = s:peekline()
+  let [head, tail] = s:decorations()
+
+  return !empty(s:deprecation_notice())
+        \ ? s:deprecation_notice()
+        \ : s:return_text(head, body, tail)
 endfunction
 
 function! s:peekline() abort "{{{2
-  let add  = 0
-  let line = getline(v:foldstart)
+  let offset = 0
+  while offset <= (v:foldend - v:foldstart)
+    let line = getline(v:foldstart + offset)
 
-  while add <= (v:foldend - v:foldstart)
     if string(get(b:, 'foldpeek_disabled_whiteout_styles',
           \ g:foldpeek#disabled_whiteout_styles)) !~# 'ALL'
       " Profile: s:whiteout_at_patterns() is a bottle-neck according to
@@ -140,13 +154,16 @@ function! s:peekline() abort "{{{2
       let line = s:whiteout_at_patterns(line)
     endif
 
-    if ! s:skippattern(line) | return [line, add + 1] | endif
-    " Note: keep `+ 1` after s:skippattern()
-    let add  += 1
-    let line  = getline(v:foldstart + add)
+    if !s:skippattern(line)
+      let g:foldpeek_lnum = offset + 1
+      return line
+    endif
+
+    let offset += 1
   endwhile
 
-  return [getline(v:foldstart), 1]
+  let g:foldpeek_lnum = 1
+  return getline(v:foldstart)
 endfunction
 
 function! s:whiteout_at_patterns(line) abort "{{{3
@@ -306,12 +323,12 @@ function! s:skippattern(line) abort "{{{3
   return 0
 endfunction
 
-function! s:decorations(num) abort "{{{2
+function! s:decorations() abort "{{{2
   let head = get(b:, 'foldpeek_head', g:foldpeek#head)
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
   for num in keys(head)
-    if a:num >= num
+    if g:foldpeek_lnum >= num
       let head = exists('b:foldpeek_head')
             \ ? b:foldpeek_head[num]
             \ : g:foldpeek#head[num]
@@ -319,24 +336,17 @@ function! s:decorations(num) abort "{{{2
   endfor
 
   for num in keys(tail)
-    if a:num >= num
+    if g:foldpeek_lnum >= num
       let tail = exists('b:foldpeek_tail')
             \ ? b:foldpeek_tail[num]
             \ : g:foldpeek#tail[num]
     endif
   endfor
 
-  let head = s:substitute_as_table(head)
-  let tail = s:substitute_as_table(tail)
-  let head = substitute(head, '%PEEK%', a:num, 'g')
-  let tail = substitute(tail, '%PEEK%', a:num, 'g')
-
-  let hunk_sign = ''
-  if exists('g:loaded_gitgutter') && gitgutter#fold#is_changed()
-    let hunk_sign = get(b:, 'foldpeek_hunk_sign', g:foldpeek#hunk_sign)
-  endif
-  let head = substitute(head, '%HUNK%', hunk_sign, 'g')
-  let tail = substitute(tail, '%HUNK%', hunk_sign, 'g')
+  let head = s:substitute_as_table(head) " deprecated
+  let tail = s:substitute_as_table(tail) " deprecated
+  let head = substitute(head, '%PEEK%', g:_foldpeek_lnum, 'g') " deprecated
+  let tail = substitute(tail, '%PEEK%', g:_foldpeek_lnum, 'g') " deprecated
 
   let ret = []
   for part in [head, tail]
@@ -408,22 +418,6 @@ function! s:return_text(head, body, tail) abort "{{{2
 
   let without_tail = indent_with_head ? (body . a:head) : (a:head . body)
 
-  " Deprecation Notices {{{3
-  for part in ['head', 'tail']
-    if type(get(b:, 'foldpeek_'. part)) == type({})
-      return 'Deprecated: b:foldpeek_'. part .' in Dict'
-            \ .'; `:h foldpeek-compatibility` for more detail'
-    elseif type({'g:foldpeek#'. part}) == type({})
-      return 'Deprecated: g:foldpeek#'. part .' in Dict'
-            \ .'; `:h foldpeek-compatibility` for more detail'
-    endif
-  endfor
-
-  if !empty(g:foldpeek#table)
-    return 'Deprecated: g:foldpeek#table'
-          \ .'; `:h foldpeek-compatibility` for more detail'
-  endif
-  " }}}3
   return without_tail . a:tail
 endfunction
 
@@ -509,6 +503,82 @@ function! s:ambiwidth_into_double(text, textwidth) abort "{{{4
   " ambiwidth fills twice a width so that add a space for lack of length
   return strdisplaywidth(ret) ==# a:textwidth ? ret : ret .' '
 endfunction
+
+function! s:deprecation_notice() abort "{{{2
+  let msg = 'Deprecated: '
+  let msg_len = len(msg)
+
+  for part in ['head', 'tail']
+    if type(get(b:, 'foldpeek_'. part)) == type({})
+      let msg .= 'b:foldpeek_'. part .' in Dict; '
+    elseif type({'g:foldpeek#'. part}) == type({})
+      let msg .= 'g:foldpeek#'. part .' in Dict; '
+    endif
+    let str = get(b:, 'foldpeek_'. part, {'g:foldpeek#'. part})
+    if !empty(matchstr(str, '%PEEK%'))
+      let msg .= '%PEEK% so use g:foldpeek_lnum instead;'
+    endif
+  endfor
+
+  if !empty(g:foldpeek#table)
+    let msg .= 'g:foldpeek#table; '
+  endif
+
+  return msg_len == len(msg)
+        \ ? ''
+        \ : msg .'`:h foldpeek-compatibility` for more detail'
+endfunction
+function! foldpeek#hunk_info() abort "{{{1
+  let hunk_info = [0, 0, 0]
+  let signs = s:get_signs()
+
+  for sign in signs
+    if sign.name !~# 'GitGutterLine' | continue | endif
+    if v:foldstart > sign.lnum || sign.lnum > v:foldend
+      continue
+    endif
+
+    if sign.name =~# 'Added'
+      let hunk_info[0] += 1
+    endif
+    if sign.name =~# 'Modified'
+      let hunk_info[1] += 1
+    endif
+    if sign.name =~# 'Removed'
+      let hunk_info[2] += 1
+    endif
+  endfor
+
+  return hunk_info
+endfunction
+
+function! s:get_signs() abort "{{{2
+  let bufnr = bufnr('%')
+  if exists('*getbufinfo')
+    let bufinfo = getbufinfo(bufnr)[0]
+    let signs = has_key(bufinfo, 'signs') ? bufinfo.signs : []
+
+  else
+    let signs = []
+
+    redir => signlines
+    silent execute 'sign place buffer='. bufnr
+    redir END
+
+    for signline in filter(split(signlines, '\n')[2:], 'v:val =~# "="')
+      " Typical sign line before v8.1.0614:  line=88 id=1234 name=GitGutterLineAdded
+      " We assume splitting is faster than a regexp.
+      let components = split(signline)
+      call add(signs, {
+            \ 'lnum': str2nr(split(components[0], '=')[1]),
+            \ 'id':   str2nr(split(components[1], '=')[1]),
+            \ 'name':        split(components[2], '=')[1]
+            \ })
+    endfor
+  endif
+  return signs
+endfunction
+endif
 
 " restore 'cpoptions' {{{1
 let &cpo = s:save_cpo
