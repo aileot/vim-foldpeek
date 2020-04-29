@@ -150,8 +150,8 @@ b:foldpeek_whiteout_patterns_fill	  *g:foldpeek_whiteout_patterns_fill*
 	For more detail, see |g:foldpeek#whiteout_patterns_omit|.
 
 				   *g:foldpeek#whiteout_style_for_foldmarker*
-g:foldpeek#whiteout_style_for_foldmarker
 				   *b:foldpeek_whiteout_style_for_foldmarker*
+g:foldpeek#whiteout_style_for_foldmarker
 b:foldpeek_whiteout_style_for_foldmarker
 	(default: "omit")
 	(available: ["omit", "fill"])
