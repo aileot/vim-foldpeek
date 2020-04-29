@@ -11,6 +11,7 @@ function! foldpeek#git#has_any_hunks() abort "{{{1
 endfunction
 
 function! foldpeek#git#hunk_info() abort "{{{1
+  " TODO: find another way to get correct 'Removed' numbers.
   let hunk_info = s:reset_hunk_info()
   let sign_name = hunk_info.sign_name
   let signs = s:get_signs()
