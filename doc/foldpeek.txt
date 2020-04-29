@@ -98,12 +98,31 @@ INTERFACE						 *foldpeek-interface*
 FUNCTION						   *foldpeek-function*
 
 foldpeek#text()					    *foldpeek-foldpeek#text()*
-	Unless g:foldpeek#local_only is set to 1, this function will be set in
-	&foldtext. For local use, add
+	Unless |g:foldpeek#local_only| is set to 1, this function will be set in
+	'foldtext'. For local use, add
 >
 	setlocal foldtext=foldpeek#text()
 <
 	in your vimrc with |autocmd| or under ftplugin/foo.vim.
+
+foldpeek#head()					    *foldpeek-foldpeek#head()*
+foldpeek#tail()					    *foldpeek-foldpeek#tail()*
+	The default functions for |g:foldpeek#head| and |g:foldpeek#tail|. You
+	can overwrite them with {expr} like
+>
+	let g:foldpeek#head = 'FoldpeekHead()'
+	let g:foldpeek#tail = 'FoldpeekTail()'
+<
+foldpeek#hunk_info()				        *foldpeek#hunk_info()*
+	Returns in |Dictionary|. The keys are "Added", "Modified" and "Removed".
+
+	Note: The feature depends on another plugin; see |foldpeek-overview-git|.
+
+foldpeek#has_any_hunks()			    *foldpeek#has_any_hunks()*
+	Returns |TRUE| if a fold has any changes. Thus, it makes easier to change
+	foldtext format. It should be used in functions related to fold.
+
+	Note: The feature depends on another plugin; see |foldpeek-overview-git|.
 
 ------------------------------------------------------------------------------
 VARIABLES						  *foldpeek-variable*
