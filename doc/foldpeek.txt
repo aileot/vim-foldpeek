@@ -22,6 +22,74 @@ Latest version:
 https://github.com/kaile256/vim-foldpeek
 
 ==============================================================================
+OVERVIEW						   *foldpeek-overview*
+
+vim-foldpeek provides some functions and variables to configure. Read the
+details in |foldpeek-interface|.
+The functions:
+
+| `foldpeek#text()`          | the main function for 'foldtext'   |
+| `foldpeek#head()`          | used in |g:foldpeek#head| as default |
+| `foldpeek#tail()`          | used in |g:foldpeek#tail| as default |
+| `foldpeek#hunk_info()`     | see |foldpeek-overview-git|          |
+| `foldpeek#has_any_hunks()` | see |foldpeek-overview-git|          |
+
+The variables:
+
+| |g:foldpeek#local_only|                    | vim-foldpeek won't set 'foldtext' |
+| |g:foldpeek#auto_foldcolumn|               |                                   |
+| |g:foldpeek#skip_patterns|                 | patterns to the next line in fold |
+| |g:foldpeek#override_skip_patterns|        | only use b:foldpeek_skip_patterns |
+
+| |g:foldpeek#indent_with_head|              | modify fold head as indent        |
+| |g:foldpeek#head|                          | decorate head of folded line      |
+| |g:foldpeek#tail|                          | decorate tail of folded line      |
+
+| |g:foldpeek#disabled_whiteout_styles|      | disable the styles in list |
+| |g:foldpeek#whiteout_patterns_left|        | (omitted)                  |
+| |g:foldpeek#whiteout_patterns_omit|        | (omitted)                  |
+| |g:foldpeek#whiteout_patterns_fill|        | (omitted)                  |
+| |g:foldpeek#whiteout_patterns_substitute|  | (omitted)                  |
+| |g:foldpeek#whiteout_style_for_foldmarker| | (omitted)                  |
+
+| |g:foldpeek#hunk_sign|   | sign at a fold including any hunks |
+| |g:foldpeek#hunk_format| | format of hunk info                |
+
+Most of the variables have buffer-local ones respectively like
+|b:foldpeek_skip_patterns|. Follow the tags for more detail.
+
+whiteout					   *foldpeek-overview-whiteout*
+	Currently, vim-foldpeek supports the styles:
+
+	left		only show matched patterns.
+	omit		omit matched patterns.
+	fill		replace with whitespaces as matched patterns length.
+	substitute	subsititue as listed.
+
+	For more detail, respectively follow the tags:
+
+	|g:foldpeek#whiteout_patterns_left|,
+	|g:foldpeek#whiteout_patterns_omit|,
+	|g:foldpeek#whiteout_patterns_fill|,
+	|g:foldpeek#whiteout_patterns_substitute|,
+
+git							*foldpeek-overview-git*
+	Watch the changes in each folds.
+	Related functions:
+
+	`foldpeek#hunk_info()`
+	`foldpeek#has_any_hunks()`
+
+	Related variables:
+
+	|g:foldpeek#hunk_sign|
+	|g:foldpeek#hunk_format|
+
+	The feature requires another plugin, either
+	"https://github.com/neoclide/coc.nvim" with "coc-git" or
+	"https://github.com/airblade/vim-gitgutter".
+
+==============================================================================
 INTERFACE						 *foldpeek-interface*
 
 ------------------------------------------------------------------------------
