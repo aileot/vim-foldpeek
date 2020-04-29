@@ -8,11 +8,13 @@ License: MIT license
 CONTENTS						  *foldpeek-contents*
 
 Introduction			|foldpeek-introduction|
+Overview			|foldpeek-overview|
 Interface			|foldpeek-interface|
 	Function			|foldpeek-function|
 	Variable			|foldpeek-variable|
 Example				|foldpeek-example|
 	Example-Variable		|foldpeek-example-variable|
+Compatibility			|foldpeek-compatibility|
 
 ==============================================================================
 INTRODUCTION						     *foldpeek-intro*
