@@ -26,7 +26,7 @@ https://github.com/kaile256/vim-foldpeek
 ==============================================================================
 OVERVIEW						   *foldpeek-overview*
 
-vim-foldpeek provides some functions and variables to configure. Read the
+FoldPeek provides some functions and variables to configure. Read the
 details in |foldpeek-interface|.
 The functions:
 
@@ -38,7 +38,7 @@ The functions:
 
 The variables:
 
-| |g:foldpeek#local_only|                    | vim-foldpeek won't set 'foldtext' |
+| |g:foldpeek#local_only|                    | FoldPeek won't set 'foldtext' |
 | |g:foldpeek#auto_foldcolumn|               |                                   |
 | |g:foldpeek#skip_patterns|                 | patterns to the next line in fold |
 | |g:foldpeek#override_skip_patterns|        | only use b:foldpeek_skip_patterns |
@@ -61,7 +61,7 @@ Most of the variables have buffer-local ones respectively like
 |b:foldpeek_skip_patterns|. Follow the tags for more detail.
 
 whiteout					   *foldpeek-overview-whiteout*
-	Currently, vim-foldpeek supports the styles:
+	Currently, FoldPeek supports the styles:
 
 	left		only show matched patterns.
 	omit		omit matched patterns.
@@ -302,7 +302,7 @@ notice.
 
 2020.04.28
 * Deprecated: g:foldpeek#head/tail and b:foldpeek_head/tail in Dictionary.
-  vim-foldpeek will stop to support them in Dictionary; please use them in
+  FoldPeek will stop to support them in Dictionary; please use them in
   String.
 * Deprecated: g:foldpeek#table will be removed; please override or define
   functions like foldpeek#head() or foldpeek#tail() instead.
