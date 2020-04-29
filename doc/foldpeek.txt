@@ -1,6 +1,6 @@
 *foldpeek.txt*
 
-Version: 1.2.0
+Version: 1.3.0
 Author: kaile256 <kaile256acc at gmail.com>
 License: MIT license
 
@@ -154,7 +154,7 @@ b:foldpeek_whiteout_patterns_fill	  *g:foldpeek_whiteout_patterns_fill*
 g:foldpeek#whiteout_style_for_foldmarker
 b:foldpeek_whiteout_style_for_foldmarker
 	(default: "omit")
-	(available: ["omit", "fill"])
+	(available: "omit", "fill")
 	Set in |String|.
 	Decide the style of white-out for pair out of 'foldmarker'. This
 	variable is especially for such users who use foldmarkers at head
