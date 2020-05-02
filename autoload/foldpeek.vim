@@ -135,7 +135,7 @@ function! s:peekline() abort "{{{2
       let line = foldpeek#whiteout#at_patterns(line)
     endif
 
-    if !s:skippattern(line)
+    if !s:has_skip_patterns(line)
       let g:foldpeek_lnum = offset + 1
       return line
     endif
@@ -147,7 +147,7 @@ function! s:peekline() abort "{{{2
   return getline(v:foldstart)
 endfunction
 
-function! s:skippattern(line) abort "{{{3
+function! s:has_skip_patterns(line) abort "{{{3
   if get(b:, 'foldpeek_override_skip_patterns',
         \ g:foldpeek#override_skip_patterns)
     let patterns = get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip_patterns)
