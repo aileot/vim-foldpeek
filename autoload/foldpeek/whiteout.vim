@@ -133,7 +133,7 @@ function! s:set_style_for_foldmarker() abort "{{{2
   let ret = get(b:, 'foldpeek_whiteout_style_for_foldmarker',
         \ g:foldpeek#whiteout_style_for_foldmarker)
 
-  if index(s:whiteout_styles_available, ret) < 0
+  if ret !=# 'fill'
     return 'omit'
   endif
 
