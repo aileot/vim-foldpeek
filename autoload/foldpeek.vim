@@ -94,10 +94,10 @@ call s:set_default('g:foldpeek#head', "foldpeek#head()")
 call s:set_default('g:foldpeek#tail', "foldpeek#tail()")
 call s:set_default('g:foldpeek#table', {}) " deprecated
 call s:set_default('g:foldpeek#indent_with_head', 0)
-call s:set_default('g:foldpeek#skip_patterns', [
+call s:set_default('g:foldpeek#skip#patterns', [
       \ '^[>#\-=/{!* \t]*$',
       \ ])
-call s:set_default('g:foldpeek#override_skip_patterns', 0)
+call s:set_default('g:foldpeek#skip#override_patterns', 0)
 
 call s:set_default('g:foldpeek#whiteout#patterns', {
       \ 'substitute': [
@@ -148,12 +148,12 @@ function! s:peekline() abort "{{{2
 endfunction
 
 function! s:has_skip_patterns(line) abort "{{{3
-  if get(b:, 'foldpeek_override_skip_patterns',
-        \ g:foldpeek#override_skip_patterns)
-    let patterns = get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip_patterns)
+  if get(b:, 'foldpeek_skip_override_patterns',
+        \ g:foldpeek#skip#override_patterns)
+    let patterns = get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip#patterns)
   else
     let patterns = get(b:, 'foldpeek_skip_patterns', [])
-          \ + g:foldpeek#skip_patterns
+          \ + g:foldpeek#skip#patterns
   endif
 
   for pat in patterns
