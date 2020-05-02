@@ -190,11 +190,7 @@ g:foldpeek#table					    *g:foldpeek#table*
 
 g:foldpeek#disable_whiteout			*g:foldpeek#disable_whiteout*
 b:foldpeek_disable_whiteout			*b:foldpeek_disable_whiteout*
-	(default: 0)
-	Set in |Number|.
-	Because this white-out feature is a bottle neck at speed of this
-	plugin, you can disable it.
-	The more a tab has folds, the slower vim will be.
+	(Deprecated)
 
 g:foldpeek#whiteout#patterns			*g:foldpeek#whiteout#patterns*
 b:foldpeek_whiteout_patterns			*b:foldpeek_whiteout_patterns*
