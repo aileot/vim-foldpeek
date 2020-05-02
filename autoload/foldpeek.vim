@@ -149,7 +149,7 @@ function! s:peekline() abort "{{{2
           \ g:foldpeek#disabled_whiteout_styles)) !~# 'ALL'
       " Profile: s:whiteout_at_patterns() is a bottle-neck according to
       "   `:profile`
-      let line = s:whiteout_at_patterns(line)
+      let line = foldpeek#whiteout#at_patterns(line)
     endif
 
     if !s:skippattern(line)
