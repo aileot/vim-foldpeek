@@ -29,10 +29,10 @@ function! foldpeek#whiteout#at_patterns(line) abort "{{{1
 endfunction
 
 function! s:set_whiteout_patterns(type) abort "{{{2
-  let disabled_styles = string(get(b:, 'foldpeek_disabled_whiteout_styles',
-        \ g:foldpeek#disabled_whiteout_styles))
-  let overrided_styles = string(get(b:, 'foldpeek_overrided_whiteout_styles',
-        \ g:foldpeek#overrided_whiteout_styles))
+  let disabled_styles = string(get(b:, 'foldpeek_whiteout_disabled_styles',
+        \ g:foldpeek#whiteout#disabled_styles))
+  let overrided_styles = string(get(b:, 'foldpeek_whiteout_overrided_styles',
+        \ g:foldpeek#whiteout#overrided_styles))
   let g_patterns = get(g:foldpeek#whiteout#patterns, a:type, [])
 
   let ret = []

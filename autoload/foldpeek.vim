@@ -69,8 +69,8 @@ call s:set_default('g:foldpeek#whiteout#patterns', {
       \   ['(\s*$', '(...)', ''],
       \   ],
       \ })
-call s:set_default('g:foldpeek#disabled_whiteout_styles', [])
-call s:set_default('g:foldpeek#overrided_whiteout_styles', [])
+call s:set_default('g:foldpeek#whiteout#disabled_styles', [])
+call s:set_default('g:foldpeek#whiteout#overrided_styles', [])
 call s:set_default('g:foldpeek#whiteout#style_for_foldmarker', 'omit')
 
 function! foldpeek#text() abort "{{{1
@@ -91,8 +91,8 @@ function! s:peekline() abort "{{{2
   while offset <= (v:foldend - v:foldstart)
     let line = getline(v:foldstart + offset)
 
-    if string(get(b:, 'foldpeek_disabled_whiteout_styles',
-          \ g:foldpeek#disabled_whiteout_styles)) !~# 'ALL'
+    if string(get(b:, 'foldpeek_whiteout_disabled_styles',
+          \ g:foldpeek#whiteout#disabled_styles)) !~# 'ALL'
       " Profile: s:whiteout_at_patterns() is a bottle-neck according to
       "   `:profile`
       let line = foldpeek#whiteout#at_patterns(line)
