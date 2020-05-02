@@ -60,21 +60,8 @@ function! s:whiteout.match(text, patterns) abort "{{{2
   for pat in a:patterns
     if type(pat) == type('')
       let ret = matchstr(a:text, pat)
-
-    elseif type(pat) == type([])
-      for p in pat
-        let l:match = matchstr(a:text, p)
-
-        if empty(l:match)
-          let ret = ''
-          continue
-        endif
-
-        let ret .= l:match
-      endfor
-
     else
-      throw 'type of patterns to match must be either String or List'
+      return 'Not a String: '. pat
     endif
 
     if !empty(ret) | break | endif
