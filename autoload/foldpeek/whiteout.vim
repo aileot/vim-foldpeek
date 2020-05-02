@@ -102,6 +102,9 @@ endfunction
 function! s:whiteout.substitute(text, lists) abort "{{{2
   let ret = a:text
 
+  if type(a:lists) != type([])
+    return 'You must set g:foldpeek#whiteout_patterns.substitute in List'
+  endif
   for l:list in a:lists
     let pat   = l:list[0]
     let sub   = get(l:list, 1, '')
