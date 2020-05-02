@@ -1,8 +1,9 @@
 let s:whiteout = {}
+let s:whiteout_styles_available = ['left', 'omit', 'fill', 'substitute']
 
 function! foldpeek#whiteout#at_patterns(line) abort "{{{1
   let patterns = {}
-  for type in keys(g:foldpeek#whiteout#patterns)
+  for type in s:whiteout_styles_available
     let patterns[type] = s:set_whiteout_patterns(type)
   endfor
   let ret = a:line
@@ -119,7 +120,7 @@ function! s:set_style_for_foldmarker() abort "{{{2
   let ret = get(b:, 'foldpeek_whiteout_style_for_foldmarker',
         \ g:foldpeek#whiteout_style_for_foldmarker)
 
-  if index(keys(g:foldpeek#whiteout#patterns), ret) < 0
+  if index(s:whiteout_styles_available, ret) < 0
     return 'omit'
   endif
 
