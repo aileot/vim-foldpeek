@@ -104,8 +104,8 @@ function! s:whiteout.substitute(text, lists) abort "{{{2
 
   for l:list in a:lists
     let pat   = l:list[0]
-    let sub   = l:list[1]
-    let flags = l:list[2]
+    let sub   = get(l:list, 1, '')
+    let flags = get(l:list, 2, '')
 
     let ret = substitute(ret, pat, sub, flags)
   endfor
