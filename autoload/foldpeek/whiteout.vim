@@ -36,15 +36,22 @@ function! s:set_whiteout_patterns(type) abort "{{{2
         \ g:foldpeek#overrided_whiteout_styles))
   let g_patterns = get(g:foldpeek#whiteout#patterns, a:type, [])
 
+  let ret = []
   if disabled_styles =~# a:type .'\|ALL'
     return []
   elseif !exists('b:foldpeek_whiteout_patterns')
-    return g_patterns
+    let ret = g_patterns
   elseif overrided_styles =~# a:type .'\|ALL'
-    return get(b:foldpeek_whiteout_patterns, a:type, g_patterns)
+    let ret = get(b:foldpeek_whiteout_patterns, a:type, g_patterns)
+  else
+    let ret = get(b:foldpeek_whiteout_patterns, a:type, []) + g_patterns
   endif
 
-  return get(b:foldpeek_whiteout_patterns, a:type, []) + g_patterns
+  if type(ret) == type([])
+    return 'type of patterns must be either List'
+  endif
+
+  return ret
 endfunction
 
 function! s:whiteout.match(text, patterns) abort "{{{2
