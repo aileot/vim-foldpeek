@@ -85,21 +85,6 @@ function! s:set_default(var, default) abort "{{{2
   let {a:var} = get({prefix}, suffix, a:default)
 endfunction
 
-function! s:initialize_variables(prefix, suffixes, default) abort "{{{2
-  " Example:
-  "   a:prefix: 'g:foldpeek#whiteout_patterns_'
-  "   a:suffixes: ['omit', 'fill']
-  "   a:default: []
-  "   var will be g:foldpeek#whiteout_patterns_omit and
-  "   g:foldpeek#whiteout_patterns_fill
-
-  for suffix in a:suffixes
-    " Example:
-    let var = a:prefix . suffix
-    call s:set_default(var, a:default)
-  endfor
-endfunction
-
 " Initialze Global Variables {{{1
 call s:set_default('g:foldpeek#maxspaces', &shiftwidth)
 call s:set_default('g:foldpeek#auto_foldcolumn', 0)
