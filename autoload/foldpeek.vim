@@ -126,7 +126,7 @@ call s:set_default('g:foldpeek#whiteout#patterns', {
       \ })
 call s:set_default('g:foldpeek#disabled_whiteout_styles', [])
 call s:set_default('g:foldpeek#overrided_whiteout_styles', [])
-call s:set_default('g:foldpeek#whiteout_style_for_foldmarker', 'omit')
+call s:set_default('g:foldpeek#whiteout#style_for_foldmarker', 'omit')
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
