@@ -75,7 +75,7 @@ if !exists('*foldpeek#tail') "{{{2
   endfunction
 endif
 
-function! s:init_variable(var, default) abort "{{{2
+function! s:set_default(var, default) abort "{{{2
   let prefix = matchstr(a:var, '^\w:')
   let suffix = substitute(a:var, prefix, '', '')
   if empty(prefix) || prefix ==# 'l:'
@@ -96,36 +96,36 @@ function! s:initialize_variables(prefix, suffixes, default) abort "{{{2
   for suffix in a:suffixes
     " Example:
     let var = a:prefix . suffix
-    call s:init_variable(var, a:default)
+    call s:set_default(var, a:default)
   endfor
 endfunction
 
 " Initialze Global Variables {{{1
-call s:init_variable('g:foldpeek#maxspaces', &shiftwidth)
-call s:init_variable('g:foldpeek#auto_foldcolumn', 0)
-call s:init_variable('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
+call s:set_default('g:foldpeek#maxspaces', &shiftwidth)
+call s:set_default('g:foldpeek#auto_foldcolumn', 0)
+call s:set_default('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 
-call s:init_variable('g:foldpeek#head', "foldpeek#head()")
-call s:init_variable('g:foldpeek#tail', "foldpeek#tail()")
-call s:init_variable('g:foldpeek#table', {}) " deprecated
-call s:init_variable('g:foldpeek#indent_with_head', 0)
+call s:set_default('g:foldpeek#head', "foldpeek#head()")
+call s:set_default('g:foldpeek#tail', "foldpeek#tail()")
+call s:set_default('g:foldpeek#table', {}) " deprecated
+call s:set_default('g:foldpeek#indent_with_head', 0)
 
-call s:init_variable('g:foldpeek#skip_patterns', [
+call s:set_default('g:foldpeek#skip_patterns', [
       \ '^[>#\-=/{!* \t]*$',
       \ ])
-call s:init_variable('g:foldpeek#override_skip_patterns', 0)
+call s:set_default('g:foldpeek#override_skip_patterns', 0)
 
 let s:whiteout_styles = ['left', 'omit', 'fill', 'substitute']
 call s:initialize_variables('g:foldpeek#whiteout_patterns_',
       \ filter(deepcopy(s:whiteout_styles), 'v:val !=# "substitute"'), [])
-call s:init_variable('g:foldpeek#whiteout_patterns_substitute', [
+call s:set_default('g:foldpeek#whiteout_patterns_substitute', [
       \   ['{\s*$', '{...}', ''],
       \   ['[\s*$', '[...]', ''],
       \   ['(\s*$', '(...)', ''],
       \ ])
-call s:init_variable('g:foldpeek#disabled_whiteout_styles', [])
-call s:init_variable('g:foldpeek#overrided_whiteout_styles', [])
-call s:init_variable('g:foldpeek#whiteout_style_for_foldmarker', 'omit')
+call s:set_default('g:foldpeek#disabled_whiteout_styles', [])
+call s:set_default('g:foldpeek#overrided_whiteout_styles', [])
+call s:set_default('g:foldpeek#whiteout_style_for_foldmarker', 'omit')
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
