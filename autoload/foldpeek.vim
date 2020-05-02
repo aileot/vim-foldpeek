@@ -115,9 +115,6 @@ call s:set_default('g:foldpeek#skip_patterns', [
 call s:set_default('g:foldpeek#override_skip_patterns', 0)
 
 call s:set_default('g:foldpeek#whiteout#patterns', {
-      \ 'omit': [],
-      \ 'fill': [],
-      \ 'left': [],
       \ 'substitute': [
       \   ['{\s*$', '{...}', ''],
       \   ['[\s*$', '[...]', ''],
