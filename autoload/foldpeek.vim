@@ -38,43 +38,6 @@ set cpo&vim
 "}}}
 
 " Define Helper Functions {{{1
-if !exists('*foldpeek#head') "{{{2
-  function! foldpeek#head() abort
-    let hunk_sign = ''
-    if foldpeek#git#status().has_hunks
-      let hunk_sign = '(*) '
-    endif
-
-    if v:foldlevel == 1
-      return empty(hunk_sign) ? (v:folddashes .' ') : hunk_sign
-    endif
-
-    return v:foldlevel .') '. hunk_sign
-  endfunction
-endif
-
-if !exists('*foldpeek#tail') "{{{2
-  function! foldpeek#tail() abort
-    let foldlines = v:foldend - v:foldstart + 1
-    if g:foldpeek_lnum == 1
-      let fold_info = '['. foldlines .']'
-    else
-      let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
-    endif
-
-    let git_info = ''
-    let git_stat = foldpeek#git#status()
-    if git_stat.has_diff
-      let git_info = '(+%a ~%m -%r)'
-      let git_info = substitute(git_info, '%a', git_stat.Added,    'g')
-      let git_info = substitute(git_info, '%m', git_stat.Modified, 'g')
-      let git_info = substitute(git_info, '%r', git_stat.Removed,  'g')
-    endif
-
-    return ' '. git_info . fold_info
-  endfunction
-endif
-
 function! s:set_default(var, default) abort "{{{2
   let prefix = matchstr(a:var, '^\w:')
   let suffix = substitute(a:var, prefix, '', '')
@@ -90,8 +53,8 @@ call s:set_default('g:foldpeek#maxspaces', &shiftwidth)
 call s:set_default('g:foldpeek#auto_foldcolumn', 0)
 call s:set_default('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 
-call s:set_default('g:foldpeek#head', "foldpeek#head()")
-call s:set_default('g:foldpeek#tail', "foldpeek#tail()")
+call s:set_default('g:foldpeek#head', 'foldpeek#default#head()')
+call s:set_default('g:foldpeek#tail', 'foldpeek#default#tail()')
 call s:set_default('g:foldpeek#table', {}) " deprecated
 call s:set_default('g:foldpeek#indent_with_head', 0)
 call s:set_default('g:foldpeek#skip#patterns', [
