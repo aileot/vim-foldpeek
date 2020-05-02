@@ -196,24 +196,33 @@ b:foldpeek_disable_whiteout			*b:foldpeek_disable_whiteout*
 	plugin, you can disable it.
 	The more a tab has folds, the slower vim will be.
 
-g:foldpeek#whiteout_patterns_omit	  *g:foldpeek#whiteout_patterns_omit*
-b:foldpeek_whiteout_patterns_omit	  *b:foldpeek_whiteout_patterns_omit*
-	(default: [])
-	Set in |List|.
-	Omit all patterns in given list from foldtext virtually.
-	To white-out by filling is a bit faster than by omitting; if you
-	prefer fastness to steadier appearance, use
-	|g:foldpeek#whiteout_patterns_fill| instead.
+g:foldpeek#whiteout#patterns			*g:foldpeek#whiteout#patterns*
+b:foldpeek_whiteout_patterns			*b:foldpeek_whiteout_patterns*
+	(default: {"substitute": [
+		\   ['{\s*$', '{...}', ''],
+		\   ['[\s*$', '[...]', ''],
+		\   ['(\s*$', '(...)', ''],
+		\   ]
+		\ })
+	Set in |Dictionary|. The possible keys are
+
+	match		expects |List| of |String|. Only show matched patterns,
+			ignore the others.
+
+	omit		expects |List| of |String|. Omit matched patterns.
+
+	fill		expects |List| of |String|. Similar to "omit", but replace
+			with whitespaces as matched length.
+
+	substitute	expects |List| of |List|. Subsititute as listed. The format
+			of value is [{pat}, {sub}, {flags}].
 
 	See |foldpeek-example-foldpeek#whiteout|.
 
-g:foldpeek#whiteout_patterns_fill	  *g:foldpeek#whiteout_patterns_fill*
-b:foldpeek_whiteout_patterns_fill	  *g:foldpeek_whiteout_patterns_fill*
-	(default: [])
-	Set in |List|.
-	Replace all patterns in given list in foldtext with whitespaces
-	virtually.
-	For more detail, see |g:foldpeek#whiteout_patterns_omit|.
+g:foldpeek#whiteout_patterns_omit	    *g:foldpeek#whiteout_patterns_omit*
+g:foldpeek#whiteout_patterns_fill	    *g:foldpeek#whiteout_patterns_fill*
+	(Deprecated)
+	Use |g:foldpeek#whiteout#patterns| instead.
 
 				   *g:foldpeek#whiteout#style_for_foldmarker*
 				   *b:foldpeek_whiteout_style_for_foldmarker*
@@ -304,6 +313,11 @@ notice.
 2020.05.02
 * Deprecated: foldpeek#head() and foldpeek#tail(); please use
   foldpeek#default#head() and foldpeek#default#tail() instead.
+* Deprecated: g:foldpeek#whiteout_patterns_omit/fill and
+  b:foldpeek_whiteout_patterns_fill/omit will be removed; please use
+  g:foldpeek#whiteout#patterns and b:foldpeek_whiteout_patterns instead.
+  That's because easier for users to reset variables without unintentional
+  behaviors.
 * Deprecated: g:foldpeek#whiteout_style_for_foldmarker; please use
   g:foldpeek#whiteout#style_for_foldmarker instead. The change is only for
   unity, sorry.
