@@ -369,7 +369,7 @@ function! s:deprecation_notice() abort "{{{2
   for style in whiteout_styles
     if exists({'g:foldpeek#whiteout_patterns_'. style})
       let msg .= {'g:foldpeek#whiteout_patterns_'. style}
-            \ .' instead use g:foldpeek#whiteout#patterns; '
+            \ .' please use g:foldpeek#whiteout#patterns instead; '
     endif
   endfor
 
@@ -381,7 +381,7 @@ function! s:deprecation_notice() abort "{{{2
     endif
     let str = get(b:, 'foldpeek_'. part, {'g:foldpeek#'. part})
     if !empty(matchstr(str, '%PEEK%'))
-      let msg .= '%PEEK% so use g:foldpeek_lnum instead;'
+      let msg .= '%PEEK% please use g:foldpeek_lnum instead;'
     endif
   endfor
 
