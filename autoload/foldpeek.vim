@@ -41,7 +41,7 @@ set cpo&vim
 if !exists('*foldpeek#head') "{{{2
   function! foldpeek#head() abort
     let hunk_sign = ''
-    if foldpeek#has_any_hunks()
+    if foldpeek#git#status().has_hunks
       let hunk_sign = '(*) '
     endif
 
@@ -62,16 +62,16 @@ if !exists('*foldpeek#tail') "{{{2
       let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
     endif
 
-    let hunk_info = ''
-    if foldpeek#has_any_hunks()
-      let hunks = s:hunk_info()
-      let hunk_info = '(+%a ~%m -%r)'
-      let hunk_info = substitute(hunk_info, '%a', hunks.Added,    'g')
-      let hunk_info = substitute(hunk_info, '%m', hunks.Modified, 'g')
-      let hunk_info = substitute(hunk_info, '%r', hunks.Removed,  'g')
+    let git_info = ''
+    let git_stat = foldpeek#git#status()
+    if git_stat.has_diff
+      let git_info = '(+%a ~%m -%r)'
+      let git_info = substitute(git_info, '%a', git_stat.Added,    'g')
+      let git_info = substitute(git_info, '%m', git_stat.Modified, 'g')
+      let git_info = substitute(git_info, '%r', git_stat.Removed,  'g')
     endif
 
-    return ' '. hunk_info . fold_info
+    return ' '. git_info . fold_info
   endfunction
 endif
 
