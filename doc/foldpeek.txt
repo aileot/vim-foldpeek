@@ -170,27 +170,20 @@ b:foldpeek_indent_with_head			*b:foldpeek_indent_with_head*
 g:foldpeek#head						    *g:foldpeek#head*
 b:foldpeek_head						    *b:foldpeek_head*
 	(default: "foldpeek#default#head()"
-	Set in |String|.
-	The keys should be a number which represents lnum of the peeked line
-	as the lnum of v:foldstart is `1`. The value of the highest key under
-	the peeked lnum will be evaluated.
-
+	Set in |String|. The value will be evaluated if possible.
+	Replace heads of foldtext with the value.
 	If you dislike the change of indent in folded text, add
 >
 		let g:foldpeek#head = ''
 <
 	in your vimrc and keep it empty.
 
-	Note: Ambiwidth with a following space
-	You should append a space to ambiwidth character for keep the width of
-	shown fold text.
-
 g:foldpeek#tail						    *g:foldpeek#tail*
 b:foldpeek_tail						    *b:foldpeek_tail*
 	(default: "foldpeek#default#tail()"
-	Set in |String|.
-	For more detail, see |g:foldpeek#head| or see |g:foldpeek#table|
-	especially for the detail about %PEEK% and for advanced customization.
+	Set in |String|. The value will be evaluated if possible.
+	Replace tails of foldtext with the value, at the column decided by
+	|g:foldpeek#maxwidth|.
 
 g:foldpeek#table					    *g:foldpeek#table*
 	(Deprecated)
