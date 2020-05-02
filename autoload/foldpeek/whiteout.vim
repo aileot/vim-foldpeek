@@ -1,25 +1,26 @@
 let s:whiteout = {}
 
 function! foldpeek#whiteout#at_patterns(line) abort "{{{1
+  let patterns = {}
   for type in keys(g:foldpeek#whiteout#patterns)
-    let {'patterns_'. type} = s:set_whiteout_patterns(type)
+    let patterns[type] = s:set_whiteout_patterns(type)
   endfor
   let ret = a:line
 
-  let match_for_left = s:whiteout.left(ret, patterns_left)
+  let match_for_left = s:whiteout.left(ret, patterns.left)
 
   if !empty(match_for_left)
     let ret = match_for_left
 
   else
     let style_for_foldmarker = s:set_style_for_foldmarker()
-    let {'patterns_'. style_for_foldmarker} += s:foldmarkers_on_buffer()
+    let patterns[style_for_foldmarker] += s:foldmarkers_on_buffer()
 
-    let ret = s:whiteout.omit(ret, patterns_omit)
-    let ret = s:whiteout.fill(ret, patterns_fill)
+    let ret = s:whiteout.omit(ret, patterns.omit)
+    let ret = s:whiteout.fill(ret, patterns.fill)
   endif
 
-  let ret = s:whiteout.substitute(ret, patterns_substitute)
+  let ret = s:whiteout.substitute(ret, patterns.substitute)
 
   if &ts != &sw
     let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
