@@ -365,9 +365,12 @@ function! s:deprecation_notice() abort "{{{2
   let msg = 'Deprecated: '
   let msg_len = len(msg)
 
-  let whiteout_styles = ['left', 'omit', 'fill', 'substitute']
+  let whiteout_styles = ['omit', 'fill']
   for style in whiteout_styles
-    if exists({'g:foldpeek#whiteout_patterns_'. style})
+    if exists({'b:foldpeek_whiteout_patterns_'. style})
+      let msg .= {'b:foldpeek_whiteout_patterns_'. style}
+            \ .' please use b:foldpeek_whiteout_patterns instead; '
+    elseif exists({'g:foldpeek#whiteout_patterns_'. style})
       let msg .= {'g:foldpeek#whiteout_patterns_'. style}
             \ .' please use g:foldpeek#whiteout#patterns instead; '
     endif
