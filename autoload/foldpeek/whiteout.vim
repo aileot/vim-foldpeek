@@ -47,8 +47,8 @@ function! s:set_whiteout_patterns(type) abort "{{{2
     let ret = get(b:foldpeek_whiteout_patterns, a:type, []) + g_patterns
   endif
 
-  if type(ret) == type([])
-    return 'type of patterns must be either List'
+  if type(ret) != type([])
+    return 'Not a List: '. ret
   endif
 
   return ret
@@ -110,12 +110,18 @@ function! s:whiteout.substitute(text, lists) abort "{{{2
   let ret = a:text
 
   if type(a:lists) != type([])
-    return 'You must set g:foldpeek#whiteout_patterns.substitute in List'
+    return 'Not a List: '. a:lists
   endif
+
   for l:list in a:lists
-    let pat   = l:list[0]
-    let sub   = get(l:list, 1, '')
-    let flags = get(l:list, 2, '')
+    try
+      let pat   = l:list[0]
+      let sub   = l:list[1]
+      let flags = l:list[2]
+    catch /E684/
+      return 'Invalid patterns: '. l:list
+            \ .'; you must set in [{pat}, {sub}, {flags}]'
+    endtry
 
     let ret = substitute(ret, pat, sub, flags)
   endfor
