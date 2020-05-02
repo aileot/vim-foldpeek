@@ -109,7 +109,6 @@ call s:set_default('g:foldpeek#head', "foldpeek#head()")
 call s:set_default('g:foldpeek#tail', "foldpeek#tail()")
 call s:set_default('g:foldpeek#table', {}) " deprecated
 call s:set_default('g:foldpeek#indent_with_head', 0)
-
 call s:set_default('g:foldpeek#skip_patterns', [
       \ '^[>#\-=/{!* \t]*$',
       \ ])
