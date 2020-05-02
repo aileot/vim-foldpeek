@@ -244,9 +244,9 @@ b:foldpeek_whiteout_patterns_fill	  *g:foldpeek_whiteout_patterns_fill*
 	virtually.
 	For more detail, see |g:foldpeek#whiteout_patterns_omit|.
 
-				   *g:foldpeek#whiteout_style_for_foldmarker*
+				   *g:foldpeek#whiteout#style_for_foldmarker*
 				   *b:foldpeek_whiteout_style_for_foldmarker*
-g:foldpeek#whiteout_style_for_foldmarker
+g:foldpeek#whiteout#style_for_foldmarker
 b:foldpeek_whiteout_style_for_foldmarker
 	(default: "omit")
 	(available: "omit", "fill")
@@ -261,6 +261,11 @@ b:foldpeek_whiteout_style_for_foldmarker
 	Unless explicitly set "fill" in this variable, it is always set to
 	"omit"; the behavior is the same as |g:foldpeek#whiteout_patterns_omit|
 	and so on.
+
+				   *g:foldpeek#whiteout_style_for_foldmarker*
+g:foldpeek#whiteout_style_for_foldmarker
+	(Deprecated)
+	Use |g:foldpeek#whiteout#style_for_foldmarker| instead.
 
 ==============================================================================
 FEATURE							    *foldpeek-feature*
@@ -324,6 +329,11 @@ COMPATIBILITY					      *foldpeek-compatibility*
 
 Deprecated feature will be all removed in the next update after deprecation
 notice.
+
+2020.05.02
+* Deprecated: g:foldpeek#whiteout_style_for_foldmarker; please use
+  g:foldpeek#whiteout#style_for_foldmarker instead. The change is only for
+  unity, sorry.
 
 2020.04.28
 * Deprecated: g:foldpeek#head/tail and b:foldpeek_head/tail in Dictionary.

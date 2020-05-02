@@ -358,6 +358,11 @@ function! s:deprecation_notice() abort "{{{2
     endif
   endfor
 
+  if exists('g:foldpeek#whiteout_style_for_foldmarker')
+    let msg .= 'g:foldpeek#whiteout_style_for_foldmarker'
+          \ .' please use g:foldpeek#whiteout#style_for_foldmarker instead;'
+  endif
+
   for part in ['head', 'tail']
     if type(get(b:, 'foldpeek_'. part)) == type({})
       let msg .= 'b:foldpeek_'. part .' in Dict; '
