@@ -123,6 +123,16 @@ call s:set_default('g:foldpeek#whiteout_patterns_substitute', [
       \   ['[\s*$', '[...]', ''],
       \   ['(\s*$', '(...)', ''],
       \ ])
+call s:set_default('g:foldpeek#whiteout#patterns', {
+      \ 'omit': [],
+      \ 'fill': [],
+      \ 'left': [],
+      \ 'substitute': [
+      \   ['{\s*$', '{...}', ''],
+      \   ['[\s*$', '[...]', ''],
+      \   ['(\s*$', '(...)', ''],
+      \   ],
+      \ })
 call s:set_default('g:foldpeek#disabled_whiteout_styles', [])
 call s:set_default('g:foldpeek#overrided_whiteout_styles', [])
 call s:set_default('g:foldpeek#whiteout_style_for_foldmarker', 'omit')

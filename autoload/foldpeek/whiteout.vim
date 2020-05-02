@@ -1,7 +1,7 @@
 let s:whiteout_styles = ['left', 'omit', 'fill', 'substitute']
 
 function! foldpeek#whiteout#at_patterns(line) abort "{{{1
-  for type in s:whiteout_styles
+  for type in keys(g:foldpeek#whiteout#patterns)
     let {'patterns_'. type} = s:set_whiteout_patterns(type)
   endfor
   let ret = a:line
