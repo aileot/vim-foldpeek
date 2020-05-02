@@ -23,10 +23,12 @@ function! s:git_stat_as_signs() abort "{{{2
         let git_stat.has_diff = (sign.name =~# l:key)
       endif
       " e.g., git_stat['Added'] += ('GitGutterLineAdded' =~# 'Added')
-      " Take care of combined named signs like 'GitGutterLineModifiedRemoved'
-      let git_stat[l:key] += (sign.name =~# 'Removed')
-            \ ? (sign.name =~# 'Modified')
-            \ : (sign.name =~# l:key)
+      if sign.name =~# 'Modified'
+        " Take care of combined named signs like 'GitGutterLineModifiedRemoved'
+        let git_stat[l:key] += l:key =~# 'Modified'
+      elseif sign.name =~# 'Added'
+        let git_stat[l:key] += sign.name =~# l:key
+      endif
     endfor
   endfor
 
