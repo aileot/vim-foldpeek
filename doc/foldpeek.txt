@@ -196,26 +196,7 @@ b:foldpeek_tail						    *b:foldpeek_tail*
 	especially for the detail about %PEEK% and for advanced customization.
 
 g:foldpeek#table					    *g:foldpeek#table*
-	(default: {})
-	Set in |Dictionary| for head/tail in foldtext. No b:var; fill in g:var
-	and leave those for |b:foldpeek_head| or |b:foldpeek_tail|, unused.
-
-	Both keys and values must be {expr} which returns in |String|.
-	Optionally, each keys can contain a double digit number at head.
-
-	The number is only used to specify priority of substitution and you
-	can use the keys as if a variable, with "%" at the both end, in
-	|g:foldpeek#head| and so on.
-
-	So you must ignore any 2-digit number to use as a variable. Thus,
-	write "%foldlevel%" if you have "50foldlevel" as a key in
-	|g:foldpeek#table|.
-
-	See |foldpeek-example-foldpeek#table|.
-
-	Note: %PEEK%					    *foldpeek-%PEEK%*
-	Though %PEEK% isn't in the dictionary, "%PEEK%" is reserved as the
-	line number that is peeked as the lnum of v:foldstart is equal to `1`.
+	(Deprecated)
 
 g:foldpeek#disable_whiteout			*g:foldpeek#disable_whiteout*
 b:foldpeek_disable_whiteout			*b:foldpeek_disable_whiteout*
