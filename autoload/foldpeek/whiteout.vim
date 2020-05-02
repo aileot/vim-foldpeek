@@ -1,4 +1,4 @@
-let s:whiteout_styles = ['left', 'omit', 'fill', 'substitute']
+let s:whiteout = {}
 
 function! foldpeek#whiteout#at_patterns(line) abort "{{{1
   for type in keys(g:foldpeek#whiteout#patterns)
@@ -6,7 +6,7 @@ function! foldpeek#whiteout#at_patterns(line) abort "{{{1
   endfor
   let ret = a:line
 
-  let match_for_left = s:whiteout_left(ret, patterns_left)
+  let match_for_left = s:whiteout.left(ret, patterns_left)
 
   if !empty(match_for_left)
     let ret = match_for_left
@@ -15,11 +15,11 @@ function! foldpeek#whiteout#at_patterns(line) abort "{{{1
     let style_for_foldmarker = s:set_style_for_foldmarker()
     let {'patterns_'. style_for_foldmarker} += s:foldmarkers_on_buffer()
 
-    let ret = s:whiteout_omit(ret, patterns_omit)
-    let ret = s:whiteout_fill(ret, patterns_fill)
+    let ret = s:whiteout.omit(ret, patterns_omit)
+    let ret = s:whiteout.fill(ret, patterns_fill)
   endif
 
-  let ret = s:whiteout_substitute(ret, patterns_substitute)
+  let ret = s:whiteout.substitute(ret, patterns_substitute)
 
   if &ts != &sw
     let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
@@ -47,7 +47,7 @@ return get(b:, 'foldpeek_whiteout_patterns_'. a:type, [])
       \ + {'g:foldpeek#whiteout_patterns_'. a:type}
 endfunction
 
-function! s:whiteout_left(text, patterns) abort "{{{2
+function! s:whiteout.left(text, patterns) abort "{{{2
   let ret = ''
 
   for pat in a:patterns
@@ -76,7 +76,7 @@ function! s:whiteout_left(text, patterns) abort "{{{2
   return ret
 endfunction
 
-function! s:whiteout_omit(text, patterns) abort "{{{2
+function! s:whiteout.omit(text, patterns) abort "{{{2
   let ret = a:text
   for pat in a:patterns
     let matchlen = len(matchstr(ret, pat))
@@ -91,7 +91,7 @@ function! s:whiteout_omit(text, patterns) abort "{{{2
   return ret
 endfunction
 
-function! s:whiteout_fill(text, patterns) abort "{{{2
+function! s:whiteout.fill(text, patterns) abort "{{{2
   let ret = a:text
   for pat in a:patterns
     let ret = substitute(ret, pat, repeat(' ', len('\0')), 'g')
@@ -99,7 +99,7 @@ function! s:whiteout_fill(text, patterns) abort "{{{2
   return  ret
 endfunction
 
-function! s:whiteout_substitute(text, lists) abort "{{{2
+function! s:whiteout.substitute(text, lists) abort "{{{2
   let ret = a:text
 
   for l:list in a:lists
