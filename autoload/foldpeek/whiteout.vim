@@ -32,6 +32,7 @@ function! s:set_whiteout_patterns(type) abort "{{{2
         \ g:foldpeek#disabled_whiteout_styles))
   let overrided_styles = string(get(b:, 'foldpeek_overrided_whiteout_styles',
         \ g:foldpeek#overrided_whiteout_styles))
+  let g_patterns = get(g:foldpeek#whiteout#patterns, a:type, [])
 
   if disabled_styles =~# a:type .'\|ALL'
     return []
@@ -39,12 +40,10 @@ function! s:set_whiteout_patterns(type) abort "{{{2
   elseif overrided_styles =~# a:type .'\|ALL'
     " Note: without deepcopy(), g:foldpeek#whiteout_patterns_foo will increase
     " their values infinitely.
-    return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
-          \ {'g:foldpeek#whiteout_patterns_'. a:type}))
+    return get(b:, 'foldpeek_whiteout_patterns_'. a:type, g_patterns)
   endif
 
-return get(b:, 'foldpeek_whiteout_patterns_'. a:type, [])
-      \ + {'g:foldpeek#whiteout_patterns_'. a:type}
+  return get(b:, 'foldpeek_whiteout_patterns_'. a:type, []) + g_patterns
 endfunction
 
 function! s:whiteout.left(text, patterns) abort "{{{2
