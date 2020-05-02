@@ -1,5 +1,5 @@
 let s:whiteout = {}
-let s:whiteout_styles_available = ['left', 'omit', 'fill', 'substitute']
+let s:whiteout_styles_available = ['match', 'omit', 'fill', 'substitute']
 
 function! foldpeek#whiteout#at_patterns(line) abort "{{{1
   let patterns = {}
@@ -8,10 +8,10 @@ function! foldpeek#whiteout#at_patterns(line) abort "{{{1
   endfor
   let ret = a:line
 
-  let match_for_left = s:whiteout.left(ret, patterns.left)
+  let matched = s:whiteout.match(ret, patterns.match)
 
-  if !empty(match_for_left)
-    let ret = match_for_left
+  if !empty(matched)
+    let ret = matched
 
   else
     let style_for_foldmarker = s:set_style_for_foldmarker()
@@ -47,7 +47,7 @@ function! s:set_whiteout_patterns(type) abort "{{{2
   return get(b:foldpeek_whiteout_patterns, a:type, []) + g_patterns
 endfunction
 
-function! s:whiteout.left(text, patterns) abort "{{{2
+function! s:whiteout.match(text, patterns) abort "{{{2
   let ret = ''
 
   for pat in a:patterns
@@ -67,7 +67,7 @@ function! s:whiteout.left(text, patterns) abort "{{{2
       endfor
 
     else
-      throw 'type of pattern to be left must be either String or List'
+      throw 'type of patterns to match must be either String or List'
     endif
 
     if !empty(ret) | break | endif
