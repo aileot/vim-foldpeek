@@ -38,44 +38,7 @@ set cpo&vim
 "}}}
 
 " Define Helper Functions {{{1
-if !exists('*foldpeek#head') "{{{2
-  function! foldpeek#head() abort
-    let hunk_sign = ''
-    if foldpeek#git#status().has_hunks
-      let hunk_sign = '(*) '
-    endif
-
-    if v:foldlevel == 1
-      return empty(hunk_sign) ? (v:folddashes .' ') : hunk_sign
-    endif
-
-    return v:foldlevel .') '. hunk_sign
-  endfunction
-endif
-
-if !exists('*foldpeek#tail') "{{{2
-  function! foldpeek#tail() abort
-    let foldlines = v:foldend - v:foldstart + 1
-    if g:foldpeek_lnum == 1
-      let fold_info = '['. foldlines .']'
-    else
-      let fold_info = '['. (g:foldpeek_lnum) .'/'. foldlines .']'
-    endif
-
-    let git_info = ''
-    let git_stat = foldpeek#git#status()
-    if git_stat.has_diff
-      let git_info = '(+%a ~%m -%r)'
-      let git_info = substitute(git_info, '%a', git_stat.Added,    'g')
-      let git_info = substitute(git_info, '%m', git_stat.Modified, 'g')
-      let git_info = substitute(git_info, '%r', git_stat.Removed,  'g')
-    endif
-
-    return ' '. git_info . fold_info
-  endfunction
-endif
-
-function! s:init_variable(var, default) abort "{{{2
+function! s:set_default(var, default) abort "{{{2
   let prefix = matchstr(a:var, '^\w:')
   let suffix = substitute(a:var, prefix, '', '')
   if empty(prefix) || prefix ==# 'l:'
@@ -85,47 +48,30 @@ function! s:init_variable(var, default) abort "{{{2
   let {a:var} = get({prefix}, suffix, a:default)
 endfunction
 
-function! s:initialize_variables(prefix, suffixes, default) abort "{{{2
-  " Example:
-  "   a:prefix: 'g:foldpeek#whiteout_patterns_'
-  "   a:suffixes: ['omit', 'fill']
-  "   a:default: []
-  "   var will be g:foldpeek#whiteout_patterns_omit and
-  "   g:foldpeek#whiteout_patterns_fill
-
-  for suffix in a:suffixes
-    " Example:
-    let var = a:prefix . suffix
-    call s:init_variable(var, a:default)
-  endfor
-endfunction
-
 " Initialze Global Variables {{{1
-call s:init_variable('g:foldpeek#maxspaces', &shiftwidth)
-call s:init_variable('g:foldpeek#auto_foldcolumn', 0)
-call s:init_variable('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
+call s:set_default('g:foldpeek#maxspaces', &shiftwidth)
+call s:set_default('g:foldpeek#auto_foldcolumn', 0)
+call s:set_default('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 
-call s:init_variable('g:foldpeek#head', "foldpeek#head()")
-call s:init_variable('g:foldpeek#tail', "foldpeek#tail()")
-call s:init_variable('g:foldpeek#table', {}) " deprecated
-call s:init_variable('g:foldpeek#indent_with_head', 0)
-
-call s:init_variable('g:foldpeek#skip_patterns', [
+call s:set_default('g:foldpeek#head', 'foldpeek#default#head()')
+call s:set_default('g:foldpeek#tail', 'foldpeek#default#tail()')
+call s:set_default('g:foldpeek#table', {}) " deprecated
+call s:set_default('g:foldpeek#indent_with_head', 0)
+call s:set_default('g:foldpeek#skip#patterns', [
       \ '^[>#\-=/{!* \t]*$',
       \ ])
-call s:init_variable('g:foldpeek#override_skip_patterns', 0)
+call s:set_default('g:foldpeek#skip#override_patterns', 0)
 
-let s:whiteout_styles = ['left', 'omit', 'fill', 'substitute']
-call s:initialize_variables('g:foldpeek#whiteout_patterns_',
-      \ filter(deepcopy(s:whiteout_styles), 'v:val !=# "substitute"'), [])
-call s:init_variable('g:foldpeek#whiteout_patterns_substitute', [
+call s:set_default('g:foldpeek#whiteout#patterns', {
+      \ 'substitute': [
       \   ['{\s*$', '{...}', ''],
       \   ['[\s*$', '[...]', ''],
       \   ['(\s*$', '(...)', ''],
-      \ ])
-call s:init_variable('g:foldpeek#disabled_whiteout_styles', [])
-call s:init_variable('g:foldpeek#overrided_whiteout_styles', [])
-call s:init_variable('g:foldpeek#whiteout_style_for_foldmarker', 'omit')
+      \   ],
+      \ })
+call s:set_default('g:foldpeek#whiteout#disabled_styles', [])
+call s:set_default('g:foldpeek#whiteout#overrided_styles', [])
+call s:set_default('g:foldpeek#whiteout#style_for_foldmarker', 'omit')
 
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
@@ -145,14 +91,14 @@ function! s:peekline() abort "{{{2
   while offset <= (v:foldend - v:foldstart)
     let line = getline(v:foldstart + offset)
 
-    if string(get(b:, 'foldpeek_disabled_whiteout_styles',
-          \ g:foldpeek#disabled_whiteout_styles)) !~# 'ALL'
+    if string(get(b:, 'foldpeek_whiteout_disabled_styles',
+          \ g:foldpeek#whiteout#disabled_styles)) !~# 'ALL'
       " Profile: s:whiteout_at_patterns() is a bottle-neck according to
       "   `:profile`
-      let line = s:whiteout_at_patterns(line)
+      let line = foldpeek#whiteout#at_patterns(line)
     endif
 
-    if !s:skippattern(line)
+    if !s:has_skip_patterns(line)
       let g:foldpeek_lnum = offset + 1
       return line
     endif
@@ -164,155 +110,13 @@ function! s:peekline() abort "{{{2
   return getline(v:foldstart)
 endfunction
 
-function! s:whiteout_at_patterns(line) abort "{{{3
-  for type in s:whiteout_styles
-    let {'patterns_'. type} = s:set_whiteout_patterns(type)
-  endfor
-
-  let ret = a:line
-
-  let match_for_left = s:whiteout_left(ret, patterns_left)
-
-  if !empty(match_for_left)
-    let ret = match_for_left
-
-  else
-    let style_for_foldmarker = s:set_style_for_foldmarker()
-    let {'patterns_'. style_for_foldmarker} += s:foldmarkers_on_buffer()
-
-    let ret = s:whiteout_omit(ret, patterns_omit)
-    let ret = s:whiteout_fill(ret, patterns_fill)
-  endif
-
-  let ret = s:whiteout_substitute(ret, patterns_substitute)
-
-  if &ts != &sw
-    let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
-  endif
-  return substitute(ret, '\t', repeat(' ', &shiftwidth), 'g')
-endfunction
-
-function! s:set_whiteout_patterns(type) abort "{{{4
-  let disabled_styles = string(get(b:, 'foldpeek_disabled_whiteout_styles',
-        \ g:foldpeek#disabled_whiteout_styles))
-  let overrided_styles = string(get(b:, 'foldpeek_overrided_whiteout_styles',
-        \ g:foldpeek#overrided_whiteout_styles))
-
-  if disabled_styles =~# a:type .'\|ALL'
-    return []
-
-  elseif overrided_styles =~# a:type .'\|ALL'
-    " Note: without deepcopy(), g:foldpeek#whiteout_patterns_foo will increase
-    " their values infinitely.
-    return deepcopy(get(b:, 'foldpeek_whiteout_patterns_'. a:type,
-          \ {'g:foldpeek#whiteout_patterns_'. a:type}))
-  endif
-
-  return get(b:, 'foldpeek_whiteout_patterns_'. a:type, [])
-        \ + {'g:foldpeek#whiteout_patterns_'. a:type}
-endfunction
-
-function! s:whiteout_left(text, patterns) abort "{{{4
-  let ret = ''
-
-  for pat in a:patterns
-    if type(pat) == type('')
-      let ret = matchstr(a:text, pat)
-
-    elseif type(pat) == type([])
-      for p in pat
-        let l:match = matchstr(a:text, p)
-
-        if empty(l:match)
-          let ret = ''
-          continue
-        endif
-
-        let ret .= l:match
-      endfor
-
-    else
-      throw 'type of pattern to be left must be either String or List'
-    endif
-
-    if !empty(ret) | break | endif
-  endfor
-
-  return ret
-endfunction
-
-function! s:whiteout_omit(text, patterns) abort "{{{4
-  let ret = a:text
-  for pat in a:patterns
-    let matchlen = len(matchstr(ret, pat))
-
-    while matchlen > 0
-      let ret .= repeat(' ', matchlen)
-      let ret  = substitute(ret, pat, '', '')
-      let matchlen = len(matchstr(ret, pat))
-    endwhile
-  endfor
-
-  return ret
-endfunction
-
-function! s:whiteout_fill(text, patterns) abort "{{{4
-  let ret = a:text
-  for pat in a:patterns
-    let ret = substitute(ret, pat, repeat(' ', len('\0')), 'g')
-  endfor
-  return  ret
-endfunction
-
-function! s:whiteout_substitute(text, lists) abort "{{{4
-  let ret = a:text
-
-  for l:list in a:lists
-    let pat   = l:list[0]
-    let sub   = l:list[1]
-    let flags = l:list[2]
-
-    let ret = substitute(ret, pat, sub, flags)
-  endfor
-
-  return ret
-endfunction
-
-function! s:set_style_for_foldmarker() abort "{{{4
-  let ret = get(b:, 'foldpeek_whiteout_style_for_foldmarker',
-        \ g:foldpeek#whiteout_style_for_foldmarker)
-
-  if index(s:whiteout_styles, ret) < 0
-    return 'omit'
-  endif
-
-  return ret
-endfunction
-
-function! s:foldmarkers_on_buffer() abort "{{{4
-  if exists('b:foldpeek__foldmarkers')
-    return b:foldpeek__foldmarkers
-  endif
-
-  let cms = split(&commentstring, '%s')
-  " Note:  at end-of-line, replace cms which is besides foldmarker
-  let foldmarkers = map(split(&foldmarker, ','),
-        \ "'['. cms[0] .' ]*'.  v:val .'\\d*['. cms[len(cms) - 1] .' ]*$'")
-  " TODO: except at end-of-line, constantly make a whitespace replace markers
-  let foldmarkers += map(split(&foldmarker, ','),
-        \ "'\\<'.  v:val .'\\d*\\>'")
-
-  let b:foldpeek__foldmarkers = foldmarkers
-  return b:foldpeek__foldmarkers
-endfunction
-
-function! s:skippattern(line) abort "{{{3
-  if get(b:, 'foldpeek_override_skip_patterns',
-        \ g:foldpeek#override_skip_patterns)
-    let patterns = get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip_patterns)
+function! s:has_skip_patterns(line) abort "{{{3
+  if get(b:, 'foldpeek_skip_override_patterns',
+        \ g:foldpeek#skip#override_patterns)
+    let patterns = get(b:, 'foldpeek_skip_patterns', g:foldpeek#skip#patterns)
   else
     let patterns = get(b:, 'foldpeek_skip_patterns', [])
-          \ + g:foldpeek#skip_patterns
+          \ + g:foldpeek#skip#patterns
   endif
 
   for pat in patterns
@@ -506,6 +310,22 @@ function! s:deprecation_notice() abort "{{{2
   let msg = 'Deprecated: '
   let msg_len = len(msg)
 
+  let whiteout_styles = ['omit', 'fill']
+  for style in whiteout_styles
+    if exists({'b:foldpeek_whiteout_patterns_'. style})
+      let msg .= {'b:foldpeek_whiteout_patterns_'. style}
+            \ .' please use b:foldpeek_whiteout_patterns instead; '
+    elseif exists({'g:foldpeek#whiteout_patterns_'. style})
+      let msg .= {'g:foldpeek#whiteout_patterns_'. style}
+            \ .' please use g:foldpeek#whiteout#patterns instead; '
+    endif
+  endfor
+
+  if exists('g:foldpeek#whiteout_style_for_foldmarker')
+    let msg .= 'g:foldpeek#whiteout_style_for_foldmarker'
+          \ .' please use g:foldpeek#whiteout#style_for_foldmarker instead;'
+  endif
+
   for part in ['head', 'tail']
     if type(get(b:, 'foldpeek_'. part)) == type({})
       let msg .= 'b:foldpeek_'. part .' in Dict; '
@@ -514,7 +334,7 @@ function! s:deprecation_notice() abort "{{{2
     endif
     let str = get(b:, 'foldpeek_'. part, {'g:foldpeek#'. part})
     if !empty(matchstr(str, '%PEEK%'))
-      let msg .= '%PEEK% so use g:foldpeek_lnum instead;'
+      let msg .= '%PEEK% please use g:foldpeek_lnum instead;'
     endif
   endfor
 
