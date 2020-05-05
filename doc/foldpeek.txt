@@ -210,8 +210,8 @@ b:foldpeek_whiteout_patterns			*b:foldpeek_whiteout_patterns*
 	fill		expects |List| of |String|. Similar to "omit", but replace
 			with whitespaces as matched length.
 
-	substitute	expects |List| of |List|. Subsititute as listed. The format
-			of value is [{pat}, {sub}, {flags}].
+	substitute	expects |List| of |List|. Subsititute as given lists. The
+			format of value is [{pat}, {sub}, {flags}].
 
 	See |foldpeek-example-foldpeek#whiteout|.
 
