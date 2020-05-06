@@ -67,6 +67,7 @@ whiteout					   *foldpeek-overview-whiteout*
 	omit		omit matched patterns.
 	fill		replace with whitespaces as matched patterns length.
 	substitute	subsititue as listed.
+	subloop		subsititue as listed.
 
 	For more detail, respectively follow the tags:
 
@@ -212,6 +213,12 @@ b:foldpeek_whiteout_patterns			*b:foldpeek_whiteout_patterns*
 
 	substitute	expects |List| of |List|. Subsititute as given lists. The
 			format of value is [{pat}, {sub}, {flags}].
+
+	subloop		expects |List| of |List|. Similar to "substitute", but
+			repeat to substitute while text has given pattern. It's
+			useful for patterns with atoms like "*" and "\{-}",
+			which are useless with g-flag. The format is the same
+			as "substitute".
 
 	See |foldpeek-example-foldpeek#whiteout|.
 
