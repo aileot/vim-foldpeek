@@ -1,5 +1,11 @@
 let s:whiteout = {}
-let s:whiteout_styles_available = ['match', 'omit', 'fill', 'substitute']
+let s:whiteout_styles_available = [
+      \ 'match',
+      \ 'omit',
+      \ 'fill',
+      \ 'substitute',
+      \ 'subloop',
+      \ ]
 
 function! foldpeek#whiteout#at_patterns(line) abort "{{{1
   let patterns = {}
@@ -20,6 +26,7 @@ function! foldpeek#whiteout#at_patterns(line) abort "{{{1
     let ret = s:whiteout.fill(ret, patterns.fill)
   endif
 
+  let ret = s:whiteout.subloop(ret, patterns.subloop)
   let ret = s:whiteout.substitute(ret, patterns.substitute)
 
   if &ts != &sw
@@ -110,6 +117,31 @@ function! s:whiteout.substitute(text, lists) abort "{{{2
     endtry
 
     let ret = substitute(ret, pat, sub, flags)
+  endfor
+
+  return ret
+endfunction
+
+function! s:whiteout.subloop(text, lists) abort "{{{2
+  let ret = a:text
+
+  if type(a:lists) != type([])
+    return 'Not a List: '. a:lists
+  endif
+
+  for l:list in a:lists
+    try
+      let pat   = l:list[0]
+      let sub   = l:list[1]
+      let flags = l:list[2]
+    catch /E684/
+      return 'Invalid patterns: '. l:list
+            \ .'; you must set in [{pat}, {sub}, {flags}]'
+    endtry
+
+    while matchstr(ret, pat) !=# ''
+      let ret = substitute(ret, pat, sub, flags)
+    endwhile
   endfor
 
   return ret
