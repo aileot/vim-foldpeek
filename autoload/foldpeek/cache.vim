@@ -24,11 +24,11 @@ function! s:has_changed(cache) abort "{{{2
 
   let lnum = v:foldstart
   let peeked_lnum = v:foldstart + a:cache.offset
-  while lnum < peeked_lnum
-    let lnum += 1
-    if getline(lnum) !=# a:cache[lnum]
+  while lnum <= peeked_lnum
+    if getline(lnum) !=# a:cache.lines[lnum]
       return 1
     endif
+    let lnum += 1
   endwhile
 
   return 0
@@ -37,18 +37,19 @@ endfunction
 function! foldpeek#cache#update(text, offset) abort "{{{1
   " Extends a key, v:foldstart, with dict as {v:foldstart : dict}
   let dict = {
-        \ 'return' : a:text,
-        \ 'offset' : a:offset,
+        \ 'return':  a:text,
+        \ 'offset':  a:offset,
         \ 'foldend': v:foldend,
+        \ 'lines':   {},
         \ }
 
   let lnum = v:foldstart
-  while lnum < (v:foldstart + a:offset)
+  while lnum <= (v:foldstart + a:offset)
     " {v:foldstart     : getline(v:foldstart)    },
     " {v:foldstart + 1 : getline(v:foldstart + 1)},
     " ...
     " {v:foldstart + s:offset : getline(v:foldstart + a:offset)}
-    call extend(dict, {lnum : getline(lnum)})
+    call extend(dict.lines, {lnum : getline(lnum)})
     let lnum += 1
   endwhile
 
