@@ -17,8 +17,12 @@ Example				|foldpeek-example|
 Compatibility			|foldpeek-compatibility|
 
 ==============================================================================
-INTRODUCTION						     *foldpeek-intro*
-	customize your foldtext
+INTRODUCTION						       *foldpeek-intro*
+
+	Peek in folds!
+
+	*foldpeek* lets you get more informations at foldtext.
+	You can get git-diff status in each folds with another plugin.
 
 Latest version:
 https://github.com/kaile256/vim-foldpeek
