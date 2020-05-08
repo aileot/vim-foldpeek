@@ -52,6 +52,7 @@ endfunction
 call s:set_default('g:foldpeek#maxspaces', &shiftwidth)
 call s:set_default('g:foldpeek#auto_foldcolumn', 0)
 call s:set_default('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
+call s:set_default('g:foldpeek#cache#disable', 0)
 
 call s:set_default('g:foldpeek#head', 'foldpeek#default#head()')
 call s:set_default('g:foldpeek#tail', 'foldpeek#default#tail()')
@@ -81,6 +82,11 @@ function! foldpeek#status() abort "{{{1
 endfunction
 
 function! foldpeek#text() abort "{{{1
+  let ret = foldpeek#cache#text()
+  if !empty(ret)
+    return ret
+  endif
+
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
     let &foldcolumn = v:foldlevel + 1
   endif
@@ -91,6 +97,8 @@ function! foldpeek#text() abort "{{{1
   let ret = !empty(s:deprecation_notice())
         \ ? s:deprecation_notice()
         \ : s:return_text(head, body, tail)
+
+  call foldpeek#cache#update(ret, s:offset)
 
   return ret
 endfunction
