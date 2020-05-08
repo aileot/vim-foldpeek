@@ -88,9 +88,11 @@ function! foldpeek#text() abort "{{{1
   let body = s:peekline()
   let [head, tail] = s:decorations()
 
-  return !empty(s:deprecation_notice())
+  let ret = !empty(s:deprecation_notice())
         \ ? s:deprecation_notice()
         \ : s:return_text(head, body, tail)
+
+  return ret
 endfunction
 
 function! s:peekline() abort "{{{2
