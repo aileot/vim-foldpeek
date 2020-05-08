@@ -7,7 +7,7 @@ function! foldpeek#cache#text() abort "{{{1
   endif
 endfunction
 
-function! s:has_cache(cache) abort
+function! s:has_cache(cache) abort "{{{2
   let ret = get(a:cache, 'return')
   return !empty(ret)
 endfunction
