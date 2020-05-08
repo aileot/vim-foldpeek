@@ -30,7 +30,7 @@ https://github.com/kaile256/vim-foldpeek
 ==============================================================================
 OVERVIEW						   *foldpeek-overview*
 
-FoldPeek provides some functions and variables to configure. Read the
+|foldpeek| provides some functions and variables to configure. Read the
 details in |foldpeek-interface|.
 The functions:
 
@@ -65,7 +65,7 @@ Most of the variables have buffer-local ones respectively like
 |b:foldpeek_skip_patterns|. Follow the tags for more detail.
 
 whiteout					   *foldpeek-overview-whiteout*
-	Currently, FoldPeek supports the styles:
+	Currently, |foldpeek| supports the styles:
 
 	left		only show matched patterns.
 	omit		omit matched patterns.
@@ -82,7 +82,7 @@ whiteout					   *foldpeek-overview-whiteout*
 
 git							*foldpeek-overview-git*
 	Watch the changes in each folds.
-	Related functions:
+	|foldpeek| only provides |foldpeek#git#status()|.
 
 	`foldpeek#hunk_info()`
 	`foldpeek#has_any_hunks()`
@@ -336,7 +336,7 @@ notice.
 
 2020.04.28
 * Deprecated: g:foldpeek#head/tail and b:foldpeek_head/tail in Dictionary.
-  FoldPeek will stop to support them in Dictionary; please use them in
+  |foldpeek| will stop to support them in Dictionary; please use them in
   String.
 * Deprecated: g:foldpeek#table will be removed; please override or define
   functions like foldpeek#head() or foldpeek#tail() instead.
