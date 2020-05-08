@@ -254,6 +254,11 @@ g:foldpeek#whiteout_style_for_foldmarker
 	(Deprecated)
 	Use |g:foldpeek#whiteout#style_for_foldmarker| instead.
 
+g:foldpeek#cache#disable			      *g:foldpeek#cache#disable*
+	(Default: 0)
+	If not 0, |foldpeek| always processes foldtext at every folded lines as
+	Vim/Neovim demands.
+
 ==============================================================================
 FEATURE							    *foldpeek-feature*
 
