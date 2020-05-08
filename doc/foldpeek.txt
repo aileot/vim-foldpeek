@@ -5,7 +5,7 @@ Author: kaile256 <kaile256acc at gmail.com>
 License: MIT license
 
 ==============================================================================
-CONTENTS						  *foldpeek-contents*
+CONTENTS						    *foldpeek-contents*
 
 Introduction			|foldpeek-introduction|
 Overview			|foldpeek-overview|
@@ -28,11 +28,13 @@ Latest version:
 https://github.com/kaile256/vim-foldpeek
 
 ==============================================================================
-OVERVIEW						   *foldpeek-overview*
+OVERVIEW						    *foldpeek-overview*
 
 |foldpeek| provides some functions and variables to configure. Read the
 details in |foldpeek-interface|.
 The functions:
+------------------------------------------------------------------------------
+FUNCTION					   *foldpeek-overview-function*
 
 | `foldpeek#text()`          | the main function for 'foldtext'   |
 | `foldpeek#head()`          | used in |g:foldpeek#head| as default |
@@ -40,12 +42,8 @@ The functions:
 | `foldpeek#hunk_info()`     | see |foldpeek-overview-git|          |
 | `foldpeek#has_any_hunks()` | see |foldpeek-overview-git|          |
 
-The variables:
-
-| |g:foldpeek#local_only|                    | FoldPeek won't set 'foldtext' |
-| |g:foldpeek#auto_foldcolumn|               |                                   |
-| |g:foldpeek#skip_patterns|                 | patterns to the next line in fold |
-| |g:foldpeek#override_skip_patterns|        | only use b:foldpeek_skip_patterns |
+------------------------------------------------------------------------------
+VARIABLE					   *foldpeek-overview-variable*
 
 | |g:foldpeek#indent_with_head|              | modify fold head as indent        |
 | |g:foldpeek#head|                          | decorate head of folded line      |
@@ -63,6 +61,9 @@ The variables:
 
 Most of the variables have buffer-local ones respectively like
 |b:foldpeek_skip_patterns|. Follow the tags for more detail.
+
+------------------------------------------------------------------------------
+FEATURE						    *foldpeek-overview-feature*
 
 whiteout					   *foldpeek-overview-whiteout*
 	Currently, |foldpeek| supports the styles:
@@ -97,12 +98,12 @@ git							*foldpeek-overview-git*
 	"https://github.com/airblade/vim-gitgutter".
 
 ==============================================================================
-INTERFACE						 *foldpeek-interface*
+INTERFACE						   *foldpeek-interface*
 
 ------------------------------------------------------------------------------
-FUNCTION						   *foldpeek-function*
+FUNCTION						    *foldpeek-function*
 
-foldpeek#text()					    *foldpeek-foldpeek#text()*
+foldpeek#text						       *foldpeek#text()*
 	Unless |g:foldpeek#local_only| is set to 1, this function will be set in
 	'foldtext'. For local use, add
 >
@@ -110,8 +111,8 @@ foldpeek#text()					    *foldpeek-foldpeek#text()*
 <
 	in your vimrc with |autocmd| or under ftplugin/foo.vim.
 
-foldpeek#default#head()			     *foldpeek-foldpeek#default#head()*
-foldpeek#default#tail() 		     *foldpeek-foldpeek#default#tail()*
+foldpeek#default#head()				       *foldpeek#default#head()*
+foldpeek#default#tail() 		     	       *foldpeek#default#tail()*
 	The default functions for |g:foldpeek#head| and |g:foldpeek#tail|.
 	You can overwrite them with {expr} like
 >
@@ -130,9 +131,9 @@ foldpeek#has_any_hunks()			    *foldpeek#has_any_hunks()*
 	Note: The feature depends on another plugin; see |foldpeek-overview-git|.
 
 ------------------------------------------------------------------------------
-VARIABLES						  *foldpeek-variable*
+VARIABLE						    *foldpeek-variable*
 
-g:foldpeek#local_only				      *g:foldpeek#local_only*
+g:foldpeek#local_only					*g:foldpeek#local_only*
 	(default: 0)
 	If not 0, |foldpeek#text()| won't be set in &foldtext unless
 >
@@ -140,19 +141,19 @@ g:foldpeek#local_only				      *g:foldpeek#local_only*
 <
 	in your vimrc or in commandline.
 
-g:foldpeek#maxwidth					*g:foldpeek#maxwidth*
+g:foldpeek#maxwidth					  *g:foldpeek#maxwidth*
 	(default: "&textwidth > 0 ? &tw : 79")
 	Set in |Number| or |String|. The value will be evaluated.
 	|foldpeek#text()| will keep foldtext, including head and tail, within
 	the column as is evaluated.
 
-g:foldpeek#auto_foldcolumn			 *g:foldpeek#auto_foldcolumn*
+g:foldpeek#auto_foldcolumn			   *g:foldpeek#auto_foldcolumn*
 	(default: 0)
 	If not `0`, increase |&foldcolumn| as the highest v:foldlevel of current
 	buffer.
 
-g:foldpeek#skip_patterns			   *g:foldpeek#skip_patterns*
-b:foldpeek_skip_patterns			   *b:foldpeek_skip_patterns*
+g:foldpeek#skip#patterns			     *g:foldpeek#skip#patterns*
+b:foldpeek_skip_patterns			     *b:foldpeek_skip_patterns*
 	(default: ['^[>#\-=/{!* \t]*$'])
 	Set in |List|.
 	This value will be compared to the folded lines in regexp match. Check
@@ -162,8 +163,14 @@ b:foldpeek_skip_patterns			   *b:foldpeek_skip_patterns*
 	<Tab> and pair out of 'foldmarker' with &commentstring (without `%s`)
 	close to those is regarded as whitespaces on the comparison.
 
-g:foldpeek#indent_with_head			*g:foldpeek#indent_with_head*
-b:foldpeek_indent_with_head			*b:foldpeek_indent_with_head*
+g:foldpeek#skip_patterns			     *g:foldpeek#skip_patterns*
+	(Deprecated)
+
+g:foldpeek#skip#override_patterns	    *g:foldpeek#skip#override_patterns*
+b:foldpeek_skip_override_patterns	    *b:foldpeek_skip_override_patterns*
+
+g:foldpeek#indent_with_head			  *g:foldpeek#indent_with_head*
+b:foldpeek_indent_with_head			  *b:foldpeek_indent_with_head*
 	(default: 0)
 	Set in |Number|.
 	If 0, head of foldtext which is returned by |g:foldpeek#head| or
@@ -172,8 +179,8 @@ b:foldpeek_indent_with_head			*b:foldpeek_indent_with_head*
 	otherwise, head will be shown at the first character of the line where
 	you get by "0" in normal mode.
 
-g:foldpeek#head						    *g:foldpeek#head*
-b:foldpeek_head						    *b:foldpeek_head*
+g:foldpeek#head						      *g:foldpeek#head*
+b:foldpeek_head						      *b:foldpeek_head*
 	(default: "foldpeek#default#head()"
 	Set in |String|. The value will be evaluated if possible.
 	Replace heads of foldtext with the value.
@@ -183,22 +190,22 @@ b:foldpeek_head						    *b:foldpeek_head*
 <
 	in your vimrc and keep it empty.
 
-g:foldpeek#tail						    *g:foldpeek#tail*
-b:foldpeek_tail						    *b:foldpeek_tail*
+g:foldpeek#tail						      *g:foldpeek#tail*
+b:foldpeek_tail						      *b:foldpeek_tail*
 	(default: "foldpeek#default#tail()"
 	Set in |String|. The value will be evaluated if possible.
 	Replace tails of foldtext with the value, at the column decided by
 	|g:foldpeek#maxwidth|.
 
-g:foldpeek#table					    *g:foldpeek#table*
+g:foldpeek#table					     *g:foldpeek#table*
 	(Deprecated)
 
-g:foldpeek#disable_whiteout			*g:foldpeek#disable_whiteout*
-b:foldpeek_disable_whiteout			*b:foldpeek_disable_whiteout*
+g:foldpeek#disable_whiteout			  *g:foldpeek#disable_whiteout*
+b:foldpeek_disable_whiteout			  *b:foldpeek_disable_whiteout*
 	(Deprecated)
 
-g:foldpeek#whiteout#patterns			*g:foldpeek#whiteout#patterns*
-b:foldpeek_whiteout_patterns			*b:foldpeek_whiteout_patterns*
+g:foldpeek#whiteout#patterns			 *g:foldpeek#whiteout#patterns*
+b:foldpeek_whiteout_patterns			 *b:foldpeek_whiteout_patterns*
 	(default: {"substitute": [
 		\   ['{\s*$', '{...}', ''],
 		\   ['[\s*$', '[...]', ''],
@@ -231,8 +238,8 @@ g:foldpeek#whiteout_patterns_fill	    *g:foldpeek#whiteout_patterns_fill*
 	(Deprecated)
 	Use |g:foldpeek#whiteout#patterns| instead.
 
-				   *g:foldpeek#whiteout#style_for_foldmarker*
-				   *b:foldpeek_whiteout_style_for_foldmarker*
+				     *g:foldpeek#whiteout#style_for_foldmarker*
+				     *b:foldpeek_whiteout_style_for_foldmarker*
 g:foldpeek#whiteout#style_for_foldmarker
 b:foldpeek_whiteout_style_for_foldmarker
 	(default: "omit")
@@ -249,7 +256,7 @@ b:foldpeek_whiteout_style_for_foldmarker
 	"omit"; the behavior is the same as |g:foldpeek#whiteout_patterns_omit|
 	and so on.
 
-				   *g:foldpeek#whiteout_style_for_foldmarker*
+				     *g:foldpeek#whiteout_style_for_foldmarker*
 g:foldpeek#whiteout_style_for_foldmarker
 	(Deprecated)
 	Use |g:foldpeek#whiteout#style_for_foldmarker| instead.
@@ -260,7 +267,7 @@ g:foldpeek#cache#disable			      *g:foldpeek#cache#disable*
 	Vim/Neovim demands.
 
 ==============================================================================
-FEATURE							    *foldpeek-feature*
+EXAMPLE							      *foldpeek-example*
 
 whiteout					   *foldpeek-feature-whiteout*
 	Currently, vim-foldpeek supports the styles:
@@ -317,7 +324,7 @@ in |g:foldpeek#whiteout_patterns_omit| instead, you will see as below:
 	-#'foo/bar'                                                      [2/2]
 <
 ===============================================================================
-COMPATIBILITY					      *foldpeek-compatibility*
+COMPATIBILITY					        *foldpeek-compatibility*
 
 Deprecated feature will be all removed in the next update after deprecation
 notice.
