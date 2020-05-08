@@ -73,6 +73,13 @@ call s:set_default('g:foldpeek#whiteout#disabled_styles', [])
 call s:set_default('g:foldpeek#whiteout#overrided_styles', [])
 call s:set_default('g:foldpeek#whiteout#style_for_foldmarker', 'omit')
 
+function! foldpeek#status() abort "{{{1
+  return {
+        \ 'lnum': s:lnum,
+        \ 'offset': s:offset,
+        \ }
+endfunction
+
 function! foldpeek#text() abort "{{{1
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
     let &foldcolumn = v:foldlevel + 1
@@ -99,14 +106,15 @@ function! s:peekline() abort "{{{2
     endif
 
     if !s:has_skip_patterns(line)
-      let g:foldpeek_lnum = offset + 1
+      let s:offset = offset
+      let s:lnum = offset + 1
       return line
     endif
 
     let offset += 1
   endwhile
 
-  let g:foldpeek_lnum = 1
+  let s:lnum = 1
   return getline(v:foldstart)
 endfunction
 
@@ -130,7 +138,7 @@ function! s:decorations() abort "{{{2
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
   for num in keys(head)
-    if g:foldpeek_lnum >= num
+    if s:lnum >= num
       let head = exists('b:foldpeek_head')
             \ ? b:foldpeek_head[num]
             \ : g:foldpeek#head[num]
@@ -138,7 +146,7 @@ function! s:decorations() abort "{{{2
   endfor
 
   for num in keys(tail)
-    if g:foldpeek_lnum >= num
+    if s:lnum >= num
       let tail = exists('b:foldpeek_tail')
             \ ? b:foldpeek_tail[num]
             \ : g:foldpeek#tail[num]
