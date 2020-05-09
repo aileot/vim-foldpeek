@@ -1,5 +1,10 @@
 let s:caches = {}
 
+if exists('*foldpeek#git#status()')
+  let summary = GitGutterGetHunkSummary()
+  call extend(s:caches, {'summary': GitGutterGetHunkSummary()})
+endif
+
 " Helper Functions {{{1
 function! s:caches.update_all_folds() abort
   " Expects to be used for s:caches.is_updating()
@@ -22,12 +27,10 @@ endfunction
 
 function! s:has_changed(cache) abort "{{{2
   if g:foldpeek#cache#disable
+        \ || s:caches.is_updating()
+        \ || s:has_git_updated()
         \ || (v:foldend != a:cache.foldend)
     return 1
-  endif
-
-  if exists('*foldpeek#git#status')
-    " TODO: update as git's status, too
   endif
 
   let lnum = v:foldstart
@@ -50,6 +53,19 @@ function! s:caches.is_updating() abort "{{{2
   if v:foldstart <= s:caches.update_pos
     unlet s:caches.update_pos
   endif
+
+  return 1
+endfunction
+
+function! s:has_git_updated() abort "{{{2
+  if !exists('*foldpeek#git#status()')
+        \ || !exists('*GitGutterGetHunkSummary()')
+        \ || (GitGutterGetHunkSummary() == s:caches.summary)
+    return 0
+  endif
+
+  let s:caches.summary = GitGutterGetHunkSummary()
+  call s:caches.update_all_folds()
 
   return 1
 endfunction
