@@ -9,7 +9,7 @@ let s:caches = {
 " Helper Functions {{{1
 function! s:update_all_folds() abort
   " Expects to be used for s:caches.is_updating()
-  let s:caches.update_pos = v:foldstart
+  let s:update_pos = v:foldstart
 endfunction
 "}}}1
 
@@ -52,12 +52,12 @@ function! s:compare_lines(cache, depth) abort "{{{2
 endfunction
 
 function! s:is_updating() abort "{{{2
-  if !exists('s:caches.update_pos')
+  if !exists('s:update_pos')
     return 0
   endif
 
-  if v:foldstart <= s:caches.update_pos
-    unlet s:caches.update_pos
+  if v:foldstart <= s:update_pos
+    unlet s:update_pos
   endif
 
   return 1
