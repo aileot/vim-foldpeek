@@ -88,16 +88,11 @@ function! s:complete_stat_at_removed() abort "{{{2
 
   let Removed = 0
   let hunks = b:gitgutter.hunks
-  for hunk_info in hunks
-    if hunk_info[2] < v:foldstart || hunk_info[2] > v:foldend
+  for [_lnum_before, removed, lnum, added] in hunks
+    if lnum < v:foldstart || lnum > v:foldend
       continue
     endif
-    let removed = hunk_info[1]
-    let added   = hunk_info[3]
-    let diff = removed - added
-    if diff > 0
-      let Removed += diff
-    endif
+    let Removed += max([0, removed - added])
   endfor
 
   return Removed
