@@ -28,9 +28,9 @@ endfunction
 
 function! s:has_changed(cache) abort "{{{2
   if g:foldpeek#cache#disable
-        \ || s:caches.is_updating()
-        \ || s:has_git_updated()
         \ || (v:foldend != a:cache.foldend)
+        \ || s:is_updating()
+        \ || s:has_git_updated()
     return 1
   endif
 
