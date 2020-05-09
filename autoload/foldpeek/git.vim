@@ -1,8 +1,9 @@
 function! foldpeek#git#status() abort "{{{1
-  return s:git_stat_as_signs()
+  call s:set_git_stat_as_signs()
+  return s:git_stat
 endfunction
 
-function! s:git_stat_as_signs() abort "{{{2
+function! s:set_git_stat_as_signs() abort "{{{2
   let git_stat = s:reset_git_stat()
   let sign_name = git_stat.sign_name
   let signs = s:get_signs()
