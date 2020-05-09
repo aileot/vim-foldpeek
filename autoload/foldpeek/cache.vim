@@ -1,9 +1,10 @@
-let s:caches = {}
-
-if exists('*foldpeek#git#status()')
-  let summary = GitGutterGetHunkSummary()
-  call extend(s:caches, {'summary': GitGutterGetHunkSummary()})
-endif
+let s:caches = {
+      \ 'return': '',
+      \ 'offset': 0,
+      \ 'foldend': 0,
+      \ 'lines': {},
+      \ 'summary': [0, 0, 0],
+      \ }
 
 " Helper Functions {{{1
 function! s:caches.update_all_folds() abort
