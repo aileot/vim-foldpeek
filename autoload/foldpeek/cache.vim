@@ -31,7 +31,7 @@ function! s:has_changed(cache) abort "{{{2
   return s:compare_lines(a:cache, peeked_lnum)
 endfunction
 
-function! s:compare_lines(cache, depth) abort "{{{2
+function! s:compare_lines(cache, depth) abort "{{{3
   let lnum = v:foldstart
   while lnum <= a:depth
     if getline(lnum) !=# a:cache.lines[lnum]
@@ -44,7 +44,7 @@ function! s:compare_lines(cache, depth) abort "{{{2
   return 0
 endfunction
 
-function! s:is_updating() abort "{{{2
+function! s:is_updating() abort "{{{3
   if !exists('s:update_pos')
     return 0
   endif
@@ -56,7 +56,7 @@ function! s:is_updating() abort "{{{2
   return 1
 endfunction
 
-function! s:has_git_updated() abort "{{{2
+function! s:has_git_updated() abort "{{{3
   if !exists('*foldpeek#git#status()')
         \ || !exists('*GitGutterGetHunkSummary()')
         \ || (GitGutterGetHunkSummary() == get(s:, 'summary', [0, 0, 0]))
