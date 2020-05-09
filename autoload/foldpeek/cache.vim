@@ -1,5 +1,12 @@
 let s:caches = {}
 
+" Helper Functions {{{1
+function! s:caches.update_all_folds() abort
+  " Expects to be used for s:caches.is_updating()
+  let s:caches.update_pos = v:foldstart
+endfunction
+"}}}1
+
 function! foldpeek#cache#text() abort "{{{1
   let cache = get(s:caches, v:foldstart, {})
 
@@ -33,6 +40,18 @@ function! s:has_changed(cache) abort "{{{2
   endwhile
 
   return 0
+endfunction
+
+function! s:caches.is_updating() abort "{{{2
+  if !exists('s:caches.update_pos')
+    return 0
+  endif
+
+  if v:foldstart <= s:caches.update_pos
+    unlet s:caches.update_pos
+  endif
+
+  return 1
 endfunction
 
 function! foldpeek#cache#update(text, offset) abort "{{{1
