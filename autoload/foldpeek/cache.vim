@@ -10,6 +10,7 @@ function! foldpeek#cache#text() abort "{{{1
   let cache = get(folds, v:foldstart, {})
 
   if s:has_cache(cache) && !s:has_changed(cache)
+    let folds = s:refresh_caches(folds)
     return cache.return
   endif
 endfunction
@@ -67,6 +68,14 @@ function! s:has_git_updated() abort "{{{3
   call s:update_all_folds()
 
   return 1
+endfunction
+
+function! s:refresh_caches(folds) abort "{{{2
+  return filter(a:folds,
+        \ 'foldclosed(v:key) == v:key'
+        \ .' && v:key >= line("w0")'
+        \ .' && v:key <= line("w$")'
+        \ )
 endfunction
 
 function! foldpeek#cache#update(text, offset) abort "{{{1
