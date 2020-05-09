@@ -34,12 +34,17 @@ function! s:has_changed(cache) abort "{{{2
     return 1
   endif
 
-  let lnum = v:foldstart
   let peeked_lnum = v:foldstart + a:cache.offset
-  while lnum <= peeked_lnum
+  return s:compare_lines(a:cache, peeked_lnum)
+endfunction
+
+function! s:compare_lines(cache, depth) abort "{{{2
+  let lnum = v:foldstart
+  while lnum <= a:depth
     if getline(lnum) !=# a:cache.lines[lnum]
       return 1
     endif
+
     let lnum += 1
   endwhile
 
