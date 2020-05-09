@@ -1,11 +1,3 @@
-let s:caches = {
-      \ 'return': '',
-      \ 'offset': 0,
-      \ 'foldend': 0,
-      \ 'lines': {},
-      \ 'summary': [0, 0, 0],
-      \ }
-
 " Helper Functions {{{1
 function! s:update_all_folds() abort
   " Expects to be used for s:caches.is_updating()
@@ -14,7 +6,8 @@ endfunction
 "}}}1
 
 function! foldpeek#cache#text() abort "{{{1
-  let cache = get(s:caches, v:foldstart, {})
+  let folds = get(w:, 'foldpeek_folds', {})
+  let cache = get(folds, v:foldstart, {})
 
   if s:has_cache(cache) && !s:has_changed(cache)
     return cache.return
@@ -95,5 +88,6 @@ function! foldpeek#cache#update(text, offset) abort "{{{1
     let lnum += 1
   endwhile
 
-  call extend(s:caches, {v:foldstart : dict})
+  let w:foldpeek_folds = get(w:, 'foldpeek_folds', {})
+  call extend(w:foldpeek_folds, {v:foldstart : dict})
 endfunction
