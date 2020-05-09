@@ -66,12 +66,12 @@ endfunction
 function! s:has_git_updated() abort "{{{2
   if !exists('*foldpeek#git#status()')
         \ || !exists('*GitGutterGetHunkSummary()')
-        \ || (GitGutterGetHunkSummary() == s:caches.summary)
+        \ || (GitGutterGetHunkSummary() == get(s:, 'summary', [0, 0, 0]))
     return 0
   endif
 
-  let s:caches.summary = GitGutterGetHunkSummary()
-  call s:caches.update_all_folds()
+  let s:summary = GitGutterGetHunkSummary()
+  call s:update_all_folds()
 
   return 1
 endfunction
