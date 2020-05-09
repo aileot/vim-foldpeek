@@ -3,9 +3,7 @@ let s:caches = {}
 function! foldpeek#cache#text() abort "{{{1
   let cache = get(s:caches, v:foldstart, {})
 
-  if !s:has_cache(cache)
-    return ''
-  elseif !s:has_changed(cache)
+  if s:has_cache(cache) && !s:has_changed(cache)
     return cache.return
   endif
 endfunction
