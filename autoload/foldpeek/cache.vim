@@ -93,7 +93,7 @@ function! foldpeek#cache#update(text, offset) abort "{{{1
         \ }
 
   let lnum = v:foldstart
-  while lnum <= (v:foldstart + a:offset)
+  while lnum <= v:foldend
     " {v:foldstart     : getline(v:foldstart)    },
     " {v:foldstart + 1 : getline(v:foldstart + 1)},
     " ...
