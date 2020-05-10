@@ -62,7 +62,8 @@ function! s:is_updating() abort "{{{3
 endfunction
 
 function! s:has_git_updated() abort "{{{3
-  if !exists('*foldpeek#git#status()')
+  " TODO: Pick up a fold which contains any change to update.
+  if !exists('g:autoloaded_foldpeek_git')
         \ || !exists('*GitGutterGetHunkSummary()')
         \ || (GitGutterGetHunkSummary()
         \   == get(w:, 'foldpeek_git_summary', [0, 0, 0]))

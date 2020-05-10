@@ -1,3 +1,5 @@
+let g:autoloaded_foldpeek_git = 1
+
 function! foldpeek#git#status() abort "{{{1
   call s:set_git_stat_as_signs()
   return s:git_stat
