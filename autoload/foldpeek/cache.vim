@@ -5,9 +5,12 @@ function! s:update_all_folds() abort
 endfunction
 "}}}1
 
-function! foldpeek#cache#text() abort "{{{1
+function! foldpeek#cache#text(lnum) abort "{{{1
+  let s:foldstart = foldclosed(a:lnum)
+  let s:foldend = foldclosedend(a:lnum)
+
   let folds = get(w:, 'foldpeek_folds', {})
-  let cache = get(folds, v:foldstart, {})
+  let cache = get(folds, s:foldstart, {})
 
   if s:has_cache(cache) && !s:has_changed(cache)
     let folds = s:refresh_caches(folds)
@@ -21,18 +24,20 @@ function! s:has_cache(cache) abort "{{{2
 endfunction
 
 function! s:has_changed(cache) abort "{{{2
-  if (v:foldend != a:cache.foldend)
-        \ || s:is_updating()
-        \ || s:has_git_updated()
+  if s:foldend != a:cache.foldend
+    return 1
+  elseif s:is_updating()
+    return s:compare_lines(a:cache, s:foldend)
+  elseif s:has_git_updated()
     return 1
   endif
 
-  let peeked_lnum = v:foldstart + a:cache.offset
+  let peeked_lnum = s:foldstart + a:cache.offset
   return s:compare_lines(a:cache, peeked_lnum)
 endfunction
 
 function! s:compare_lines(cache, depth) abort "{{{3
-  let lnum = v:foldstart
+  let lnum = s:foldstart
   while lnum <= a:depth
     if getline(lnum) !=# a:cache.lines[lnum]
       return 1
@@ -49,7 +54,7 @@ function! s:is_updating() abort "{{{3
     return 0
   endif
 
-  if v:foldstart <= s:update_pos
+  if s:foldstart <= s:update_pos
     unlet s:update_pos
   endif
 

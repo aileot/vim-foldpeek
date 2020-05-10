@@ -83,7 +83,7 @@ endfunction
 
 function! foldpeek#text() abort "{{{1
   if !g:foldpeek#cache#disable
-    let ret = foldpeek#cache#text()
+    let ret = foldpeek#cache#text(v:foldstart)
     if !empty(ret)
       return ret
     endif
