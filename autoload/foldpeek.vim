@@ -100,7 +100,9 @@ function! foldpeek#text() abort "{{{1
         \ ? s:deprecation_notice()
         \ : s:return_text(head, body, tail)
 
-  call foldpeek#cache#update(ret, s:offset)
+  if !g:foldpeek#cache#disable
+    call foldpeek#cache#update(ret, s:offset)
+  endif
 
   return ret
 endfunction
