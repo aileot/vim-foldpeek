@@ -1,11 +1,16 @@
-let s:caches = {}
+" Helper Functions {{{1
+function! s:update_all_folds() abort
+  " Expects to be used for s:caches.is_updating()
+  let s:update_pos = v:foldstart
+endfunction
+"}}}1
 
 function! foldpeek#cache#text() abort "{{{1
-  let cache = get(s:caches, v:foldstart, {})
+  let folds = get(w:, 'foldpeek_folds', {})
+  let cache = get(folds, v:foldstart, {})
 
-  if !s:has_cache(cache)
-    return ''
-  elseif !s:has_changed(cache)
+  if s:has_cache(cache) && !s:has_changed(cache)
+    let folds = s:refresh_caches(folds)
     return cache.return
   endif
 endfunction
@@ -18,23 +23,60 @@ endfunction
 function! s:has_changed(cache) abort "{{{2
   if g:foldpeek#cache#disable
         \ || (v:foldend != a:cache.foldend)
+        \ || s:is_updating()
+        \ || s:has_git_updated()
     return 1
   endif
 
-  if exists('*foldpeek#git#status')
-    " TODO: update as git's status, too
-  endif
-
-  let lnum = v:foldstart
   let peeked_lnum = v:foldstart + a:cache.offset
-  while lnum <= peeked_lnum
+  return s:compare_lines(a:cache, peeked_lnum)
+endfunction
+
+function! s:compare_lines(cache, depth) abort "{{{3
+  let lnum = v:foldstart
+  while lnum <= a:depth
     if getline(lnum) !=# a:cache.lines[lnum]
       return 1
     endif
+
     let lnum += 1
   endwhile
 
   return 0
+endfunction
+
+function! s:is_updating() abort "{{{3
+  if !exists('s:update_pos')
+    return 0
+  endif
+
+  if v:foldstart <= s:update_pos
+    unlet s:update_pos
+  endif
+
+  return 1
+endfunction
+
+function! s:has_git_updated() abort "{{{3
+  if !exists('*foldpeek#git#status()')
+        \ || !exists('*GitGutterGetHunkSummary()')
+        \ || (GitGutterGetHunkSummary()
+        \   == get(w:, 'foldpeek_git_summary', [0, 0, 0]))
+    return 0
+  endif
+
+  let w:foldpeek_git_summary = GitGutterGetHunkSummary()
+  call s:update_all_folds()
+
+  return 1
+endfunction
+
+function! s:refresh_caches(folds) abort "{{{2
+  return filter(a:folds,
+        \ 'foldclosed(v:key) == v:key'
+        \ .' && v:key >= line("w0")'
+        \ .' && v:key <= line("w$")'
+        \ )
 endfunction
 
 function! foldpeek#cache#update(text, offset) abort "{{{1
@@ -56,5 +98,6 @@ function! foldpeek#cache#update(text, offset) abort "{{{1
     let lnum += 1
   endwhile
 
-  call extend(s:caches, {v:foldstart : dict})
+  let w:foldpeek_folds = get(w:, 'foldpeek_folds', {})
+  call extend(w:foldpeek_folds, {v:foldstart : dict})
 endfunction

@@ -1,10 +1,12 @@
 function! foldpeek#git#status() abort "{{{1
-  return s:git_stat_as_signs()
+  call s:set_git_stat_as_signs()
+  return s:git_stat
 endfunction
 
-function! s:git_stat_as_signs() abort "{{{2
+function! s:set_git_stat_as_signs() abort "{{{2
   let git_stat = s:reset_git_stat()
   let sign_name = git_stat.sign_name
+  let diff = git_stat.diff
   let signs = s:get_signs()
 
   for sign in signs
@@ -14,31 +16,37 @@ function! s:git_stat_as_signs() abort "{{{2
     endif
 
     " Otherwise, 1 is only added no matter how many lines were removed.
-    let git_stat.Removed = s:complete_stat_at_removed()
+    let diff.Removed = s:complete_stat_at_removed()
 
-    for l:key in keys(git_stat)
+    for l:key in keys(diff)
       " e.g., git_stat['sign_name'] ==# 'GitGutterLine'
-      if l:key ==# 'sign_name' | continue | endif
       if !git_stat.has_diff
         let git_stat.has_diff = (sign.name =~# l:key)
       endif
       " e.g., git_stat['Added'] += ('GitGutterLineAdded' =~# 'Added')
       if sign.name =~# 'Modified'
         " Take care of combined named signs like 'GitGutterLineModifiedRemoved'
-        let git_stat[l:key] += l:key =~# 'Modified'
+        let diff[l:key] += l:key =~# 'Modified'
       elseif sign.name =~# 'Added'
-        let git_stat[l:key] += sign.name =~# l:key
+        let diff[l:key] += sign.name =~# l:key
       endif
     endfor
   endfor
 
-  return git_stat
+  let s:git_stat = git_stat
 endfunction
 
 function! s:reset_git_stat() abort "{{{2
   " get signs by getbufinfo(bufnr('%'))[0].signs
-  let dict = {'sign_name': 'NONE', 'has_diff': 0,
-        \ 'Added': 0, 'Modified': 0, 'Removed': 0}
+  let dict = {
+        \ 'sign_name': 'NONE',
+        \ 'has_diff': 0,
+        \ 'diff': {
+        \   'Added': 0,
+        \   'Modified': 0,
+        \   'Removed': 0,
+        \   }
+        \ }
   if exists('b:gitgutter')
     call extend(dict, {'sign_name': 'GitGutterLine'})
   endif
@@ -80,16 +88,11 @@ function! s:complete_stat_at_removed() abort "{{{2
 
   let Removed = 0
   let hunks = b:gitgutter.hunks
-  for hunk_info in hunks
-    if hunk_info[2] < v:foldstart || hunk_info[2] > v:foldend
+  for [_lnum_before, removed, lnum, added] in hunks
+    if lnum < v:foldstart || lnum > v:foldend
       continue
     endif
-    let removed = hunk_info[1]
-    let added   = hunk_info[3]
-    let diff = removed - added
-    if diff > 0
-      let Removed += diff
-    endif
+    let Removed += max([0, removed - added])
   endfor
 
   return Removed
