@@ -49,7 +49,7 @@ function! s:is_updating() abort "{{{3
     return 0
   endif
 
-  if v:foldstart > s:update_pos
+  if v:foldstart <= s:update_pos
     unlet s:update_pos
   endif
 
