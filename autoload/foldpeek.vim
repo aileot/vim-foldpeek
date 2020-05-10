@@ -82,9 +82,11 @@ function! foldpeek#status() abort "{{{1
 endfunction
 
 function! foldpeek#text() abort "{{{1
-  let ret = foldpeek#cache#text()
-  if !empty(ret)
-    return ret
+  if !g:foldpeek#cache#disable
+    let ret = foldpeek#cache#text(v:foldstart)
+    if !empty(ret)
+      return ret
+    endif
   endif
 
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
@@ -98,7 +100,9 @@ function! foldpeek#text() abort "{{{1
         \ ? s:deprecation_notice()
         \ : s:return_text(head, body, tail)
 
-  call foldpeek#cache#update(ret, s:offset)
+  if !g:foldpeek#cache#disable
+    call foldpeek#cache#update(ret, s:offset)
+  endif
 
   return ret
 endfunction
