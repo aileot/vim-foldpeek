@@ -87,10 +87,11 @@ endfunction
 function! foldpeek#cache#update(text, offset) abort "{{{1
   " Extends a key, v:foldstart, with dict as {v:foldstart : dict}
   let dict = {
-        \ 'return':  a:text,
-        \ 'offset':  a:offset,
+        \ 'return': a:text,
+        \ 'offset': a:offset,
+        \ 'foldstart': v:foldstart,
         \ 'foldend': v:foldend,
-        \ 'lines':   {},
+        \ 'lines': {},
         \ }
 
   let lnum = v:foldstart
