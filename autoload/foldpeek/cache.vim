@@ -99,7 +99,7 @@ function! foldpeek#cache#update(text, offset) abort "{{{1
     " {v:foldstart     : getline(v:foldstart)    },
     " {v:foldstart + 1 : getline(v:foldstart + 1)},
     " ...
-    " {v:foldstart + s:offset : getline(v:foldstart + a:offset)}
+    " {v:foldstart + a:offset : getline(v:foldstart + a:offset)}
     call extend(dict.lines, {lnum : getline(lnum)})
     let lnum += 1
   endwhile
