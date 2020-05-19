@@ -1,8 +1,47 @@
 let g:autoloaded_foldpeek_git = 1
 
-function! foldpeek#git#status() abort "{{{1
+function! foldpeek#git#status(...) abort "{{{1
+  if a:0 == 0
+    let s:foldstart = v:foldstart
+    let s:foldend = v:foldend
+
+  elseif foldclosed(a:1) == -1
+    return 'Invalid Number:'. a:1 .'belongs to no fold'
+
+  else
+    let s:foldstart = foldclosed(a:1)
+    let s:foldend = foldclosedend(a:1)
+  endif
+
+  if s:is_cache_available()
+    return extend(w:foldpeek_git[s:foldstart], {'cached': 1})
+  endif
+
   call s:set_git_stat_as_signs()
-  return s:git_stat
+  call s:update_cache()
+  return extend(s:git_stat, {'cached': 0})
+endfunction
+
+function! s:is_cache_available() abort "{{{2
+  return exists('w:foldpeek_git')
+        \ && !empty(get(w:foldpeek_git, s:foldstart, {}))
+        \ && !s:has_changed()
+endfunction
+
+function! s:has_changed() abort "{{{3
+  " git-stat in folds hardly changes without changing summary at once.
+  if GitGutterGetHunkSummary() != w:foldpeek_git[s:foldstart].summary
+    return 1
+  endif
+
+  return 0
+endfunction
+
+function! s:update_cache() abort "{{{2
+  let w:foldpeek_git = get(w:, 'foldpeek_git', {})
+  let dict = deepcopy(s:git_stat)
+  call extend(dict, {'summary' : GitGutterGetHunkSummary()})
+  call extend(w:foldpeek_git, {s:foldstart : dict})
 endfunction
 
 function! s:set_git_stat_as_signs() abort "{{{2
@@ -13,7 +52,7 @@ function! s:set_git_stat_as_signs() abort "{{{2
 
   for sign in signs
     if sign.name !~# sign_name | continue | endif
-    if v:foldstart > sign.lnum || sign.lnum > v:foldend
+    if s:foldstart > sign.lnum || sign.lnum > s:foldend
       continue
     endif
 
@@ -91,7 +130,7 @@ function! s:complete_stat_at_removed() abort "{{{2
   let Removed = 0
   let hunks = b:gitgutter.hunks
   for [_lnum_before, removed, lnum, added] in hunks
-    if lnum < v:foldstart || lnum > v:foldend
+    if lnum < s:foldstart || lnum > s:foldend
       continue
     endif
     let Removed += max([0, removed - added])
