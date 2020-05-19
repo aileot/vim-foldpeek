@@ -1,5 +1,15 @@
 let g:autoloaded_foldpeek_git = 1
 
+function! foldpeek#git#has_diff(...) abort "{{{1
+  let lnum = a:0 > 0 ? a:1 : v:foldstart
+  return foldpeek#git#status(lnum).has_diff
+endfunction
+
+function! foldpeek#git#get_diff(...) abort "{{{1
+  let lnum = a:0 > 0 ? a:1 : v:foldstart
+  return foldpeek#git#status(lnum).diff
+endfunction
+
 function! foldpeek#git#status(...) abort "{{{1
   if a:0 == 0
     let s:foldstart = v:foldstart
