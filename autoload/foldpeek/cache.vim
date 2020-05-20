@@ -62,7 +62,8 @@ function! s:is_updating() abort "{{{3
 endfunction
 
 function! s:has_git_updated() abort "{{{3
-  if !exists('*foldpeek#git#status()')
+  " TODO: Pick up a fold which contains any change to update.
+  if !exists('g:autoloaded_foldpeek_git')
         \ || !exists('*GitGutterGetHunkSummary()')
         \ || (GitGutterGetHunkSummary()
         \   == get(w:, 'foldpeek_git_summary', [0, 0, 0]))
@@ -86,10 +87,11 @@ endfunction
 function! foldpeek#cache#update(text, offset) abort "{{{1
   " Extends a key, v:foldstart, with dict as {v:foldstart : dict}
   let dict = {
-        \ 'return':  a:text,
-        \ 'offset':  a:offset,
+        \ 'return': a:text,
+        \ 'offset': a:offset,
+        \ 'foldstart': v:foldstart,
         \ 'foldend': v:foldend,
-        \ 'lines':   {},
+        \ 'lines': {},
         \ }
 
   let lnum = v:foldstart
@@ -97,7 +99,7 @@ function! foldpeek#cache#update(text, offset) abort "{{{1
     " {v:foldstart     : getline(v:foldstart)    },
     " {v:foldstart + 1 : getline(v:foldstart + 1)},
     " ...
-    " {v:foldstart + s:offset : getline(v:foldstart + a:offset)}
+    " {v:foldstart + a:offset : getline(v:foldstart + a:offset)}
     call extend(dict.lines, {lnum : getline(lnum)})
     let lnum += 1
   endwhile
