@@ -24,6 +24,7 @@ function! foldpeek#git#status(...) abort "{{{1
   endif
 
   if s:is_cache_available()
+    call s:refresh_caches(w:foldpeek_git)
     return extend(w:foldpeek_git[s:foldstart], {'cached': 1})
   endif
 
@@ -52,6 +53,14 @@ function! s:update_cache() abort "{{{2
   let dict = deepcopy(s:git_stat)
   call extend(dict, {'summary' : GitGutterGetHunkSummary()})
   call extend(w:foldpeek_git, {s:foldstart : dict})
+endfunction
+
+function! s:refresh_caches(cache) abort "{{{2
+  return filter(a:cache,
+        \ 'foldclosed(v:key) == v:key'
+        \ .' && v:key >= line("w0")'
+        \ .' && v:key <= line("w$")'
+        \ )
 endfunction
 
 function! s:set_git_stat_as_signs() abort "{{{2
