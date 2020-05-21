@@ -12,10 +12,16 @@ function! foldpeek#cache#text(lnum) abort "{{{1
   let folds = get(w:, 'foldpeek_folds', {})
   let cache = get(folds, s:foldstart, {})
 
-  if s:has_cache(cache) && !s:has_changed(cache)
-    let folds = s:refresh_caches(folds)
+  if s:is_cache_available(cache)
+    call s:refresh_caches(w:foldpeek_folds)
     return cache.return
   endif
+endfunction
+
+function! s:is_cache_available(cache) abort
+  return exists('w:foldpeek_folds')
+        \ && s:has_cache(a:cache)
+        \ && !s:has_text_changed(a:cache)
 endfunction
 
 function! s:has_cache(cache) abort "{{{2
