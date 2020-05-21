@@ -48,18 +48,19 @@ function! s:has_changed(cache) abort "{{{2
     return 1
   endif
 
-  let peeked_lnum = s:foldstart + a:cache.offset
-  return s:compare_lines(a:cache, peeked_lnum)
+  return s:compare_lines(a:cache.lines, s:cache.offset)
 endfunction
 
-function! s:compare_lines(cache, depth) abort "{{{3
-  let lnum = s:foldstart
-  while lnum <= a:depth
-    if getline(lnum) !=# a:cache.lines[lnum]
+function! s:compare_lines(lines, offset) abort "{{{3
+  let offset = 0
+  let max = a:offset
+  while offset <= max
+    let lnum = s:foldstart + offset
+    if getline(lnum) !=# a:lines[offset]
       return 1
     endif
 
-    let lnum += 1
+    let offset += 1
   endwhile
 
   return 0
@@ -109,16 +110,15 @@ function! foldpeek#cache#update(text, offset) abort "{{{1
         \ 'offset': a:offset,
         \ 'foldstart': v:foldstart,
         \ 'foldend': v:foldend,
-        \ 'lines': {},
+        \ 'lines': [],
         \ }
 
   let lnum = v:foldstart
-  while lnum <= v:foldend
-    " {v:foldstart     : getline(v:foldstart)    },
-    " {v:foldstart + 1 : getline(v:foldstart + 1)},
-    " ...
-    " {v:foldstart + a:offset : getline(v:foldstart + a:offset)}
-    call extend(dict.lines, {lnum : getline(lnum)})
+  let max_lnum = g:foldpeek#cache#max_saved_offset < (v:foldend - v:foldstart)
+       \ ? v:foldstart + g:foldpeek#cache#max_saved_offset
+       \ : v:foldend
+  while lnum <= max_lnum
+    call add(dict.lines, getline(lnum))
     let lnum += 1
   endwhile
 
