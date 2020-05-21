@@ -94,8 +94,8 @@ function! s:has_git_updated() abort "{{{3
   return 1
 endfunction
 
-function! s:refresh_caches(folds) abort "{{{2
-  return filter(a:folds,
+function! s:refresh_caches(cache) abort "{{{2
+  return filter(a:cache,
         \ 'foldclosed(v:key) == v:key'
         \ .' && v:key >= line("w0")'
         \ .' && v:key <= line("w$")'
