@@ -1,6 +1,6 @@
 " Helper Functions {{{1
 function! s:update_all_folds() abort
-  " Expects to be used for s:caches.is_updating()
+  " Expects to be used for s:is_cache_updating()
   let s:update_pos = v:foldstart
 endfunction
 "}}}1
@@ -32,8 +32,18 @@ endfunction
 function! s:has_changed(cache) abort "{{{2
   if s:foldend != a:cache.foldend
     return 1
-  elseif s:is_updating()
-    return s:compare_lines(a:cache, s:foldend)
+
+  elseif s:is_cache_updating()
+    " FIXME: Use the other logic below after the problem is fixed that folds
+    " with git-diff status often fails to appear at first fold update to be in
+    " cache.
+    "
+    " return len(a:cache.lines) < (s:foldend - s:foldstart)
+    "      \ ? s:compare_lines(a:cache, s:foldend)
+    "      \ : 1
+
+    return 1
+
   elseif s:has_git_updated()
     return 1
   endif
@@ -55,7 +65,9 @@ function! s:compare_lines(cache, depth) abort "{{{3
   return 0
 endfunction
 
-function! s:is_updating() abort "{{{3
+function! s:is_cache_updating() abort "{{{3
+  " Use it with s:update_all_folds(); this function should be only for test.
+
   if !exists('s:update_pos')
     return 0
   endif
