@@ -10,18 +10,18 @@ function! foldpeek#git#get_diff(...) abort "{{{1
   return get(s:get_git_stat(lnum), 'diff')
 endfunction
 
-function! s:git_stat(...) abort "{{{1
-  if a:0 == 0
-    let s:foldstart = v:foldstart
-    let s:foldend = v:foldend
-
-  elseif foldclosed(a:1) == -1
-    return 'Invalid Number:'. a:1 .'belongs to no fold'
+function! s:update_tracking_fold(lnum) abort "{{{1
+  if foldclosed(a:lnum) == -1
+    throw 'Invalid Number: '. a:lnum .' belongs to no fold'
 
   else
-    let s:foldstart = foldclosed(a:1)
-    let s:foldend = foldclosedend(a:1)
+    let s:foldstart = foldclosed(a:lnum)
+    let s:foldend = foldclosedend(a:lnum)
   endif
+endfunction
+
+function! s:get_git_stat(lnum) abort "{{{1
+  call s:update_tracking_fold(a:lnum)
 
   if s:is_cache_available()
     call s:refresh_caches(w:foldpeek_git)
@@ -30,7 +30,7 @@ function! s:git_stat(...) abort "{{{1
 
   call s:set_git_stat_as_signs()
   call s:update_cache()
-  return extend(s:git_stat, {'cached': 0})
+  return extend(w:foldpeek_git[s:foldstart], {'cached': 0})
 endfunction
 
 function! s:is_cache_available() abort "{{{2
