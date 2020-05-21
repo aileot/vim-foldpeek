@@ -2,12 +2,12 @@ let g:autoloaded_foldpeek_git = 1
 
 function! foldpeek#git#has_diff(...) abort "{{{1
   let lnum = a:0 > 0 ? a:1 : v:foldstart
-  return s:git_stat(lnum).has_diff
+  return get(s:get_git_stat(lnum), 'has_diff')
 endfunction
 
 function! foldpeek#git#get_diff(...) abort "{{{1
   let lnum = a:0 > 0 ? a:1 : v:foldstart
-  return s:git_stat(lnum).diff
+  return get(s:get_git_stat(lnum), 'diff')
 endfunction
 
 function! s:git_stat(...) abort "{{{1
