@@ -2,15 +2,15 @@ let g:autoloaded_foldpeek_git = 1
 
 function! foldpeek#git#has_diff(...) abort "{{{1
   let lnum = a:0 > 0 ? a:1 : v:foldstart
-  return foldpeek#git#status(lnum).has_diff
+  return s:git_stat(lnum).has_diff
 endfunction
 
 function! foldpeek#git#get_diff(...) abort "{{{1
   let lnum = a:0 > 0 ? a:1 : v:foldstart
-  return foldpeek#git#status(lnum).diff
+  return s:git_stat(lnum).diff
 endfunction
 
-function! foldpeek#git#status(...) abort "{{{1
+function! s:git_stat(...) abort "{{{1
   if a:0 == 0
     let s:foldstart = v:foldstart
     let s:foldend = v:foldend
@@ -84,7 +84,7 @@ function! s:set_git_stat_as_signs() abort "{{{2
         let git_stat.has_diff = (sign.name =~# l:key)
       endif
       " e.g., git_stat['Added'] += ('GitGutterLineAdded' =~# 'Added')
-      if sign.name =~# 'Modified'
+      if sign.name =~# 'Modified\|Change'
         " Take care of combined named signs like 'GitGutterLineModifiedRemoved'
         let diff[l:key] += l:key =~# 'Modified'
       elseif sign.name =~# 'Added'
