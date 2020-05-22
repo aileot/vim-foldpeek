@@ -1,3 +1,5 @@
+let s:cache = {}
+
 " Helper Functions {{{1
 function! s:update_all_folds() abort
   " Expects to be used for s:is_cache_updating()
@@ -9,31 +11,39 @@ function! foldpeek#cache#text(lnum) abort "{{{1
   let s:foldstart = foldclosed(a:lnum)
   let s:foldend = foldclosedend(a:lnum)
 
-  let folds = get(w:, 'foldpeek_folds', {})
-  let cache = get(folds, s:foldstart, {})
+  return s:cache.return()
+endfunction
 
-  if s:is_cache_available(cache)
-    call s:refresh_caches(w:foldpeek_folds)
-    return cache.return
+function! s:cache.return() abort  "{{{2
+  if !exists('w:foldpeek_folds')
+    let w:foldpeek_folds = {}
   endif
+  let self.folds = w:foldpeek_folds
+  let self.tracking_fold = get(w:foldpeek_folds, s:foldstart, {})
+
+  if self.is_available()
+    call self.refresh()
+    return self.tracking_fold.return
+  endif
+
+  return {}
 endfunction
 
-function! s:is_cache_available(cache) abort
-  return exists('w:foldpeek_folds')
-        \ && s:has_cache(a:cache)
-        \ && !s:has_text_changed(a:cache)
+function! s:cache.is_available() abort  "{{{2
+  return self.is_saved()
+        \ && !self.has_text_changed()
 endfunction
 
-function! s:has_cache(cache) abort "{{{2
-  let ret = get(a:cache, 'return')
+function! s:cache.is_saved() abort  "{{{2
+  let ret = get(self.tracking_fold, 'return')
   return !empty(ret)
 endfunction
 
-function! s:has_changed(cache) abort "{{{2
-  if s:foldend != a:cache.foldend
+function! s:cache.has_text_changed() abort  "{{{2
+  if s:foldend != self.tracking_fold.foldend
     return 1
 
-  elseif s:is_cache_updating()
+  elseif self.is_updating()
     " FIXME: Use the other logic below after the problem is fixed that folds
     " with git-diff status often fails to appear at first fold update to be in
     " cache.
@@ -44,19 +54,20 @@ function! s:has_changed(cache) abort "{{{2
 
     return 1
 
-  elseif s:has_git_updated()
+  elseif self.compare_lines()
     return 1
   endif
 
-  return s:compare_lines(a:cache.lines, s:cache.offset)
+  return s:has_git_updated()
 endfunction
 
-function! s:compare_lines(lines, offset) abort "{{{3
+function! s:cache.compare_lines() abort  "{{{2
   let offset = 0
-  let max = a:offset
+  let max = self.tracking_fold.offset
+  let cached_lines = self.tracking_fold.lines
   while offset <= max
     let lnum = s:foldstart + offset
-    if getline(lnum) !=# a:lines[offset]
+    if getline(lnum) !=# cached_lines[offset]
       return 1
     endif
 
@@ -66,7 +77,7 @@ function! s:compare_lines(lines, offset) abort "{{{3
   return 0
 endfunction
 
-function! s:is_cache_updating() abort "{{{3
+function! s:cache.is_updating() abort "{{{2
   " Use it with s:update_all_folds(); this function should be only for test.
 
   if !exists('s:update_pos')
@@ -80,7 +91,7 @@ function! s:is_cache_updating() abort "{{{3
   return 1
 endfunction
 
-function! s:has_git_updated() abort "{{{3
+function! s:has_git_updated() abort "{{{2
   " TODO: Pick up a fold which contains any change to update.
   if !exists('g:autoloaded_foldpeek_git')
         \ || !exists('*GitGutterGetHunkSummary()')
@@ -95,8 +106,8 @@ function! s:has_git_updated() abort "{{{3
   return 1
 endfunction
 
-function! s:refresh_caches(cache) abort "{{{2
-  return filter(a:cache,
+function! s:cache.refresh() abort "{{{2
+  return filter(self.folds,
         \ 'foldclosed(v:key) == v:key'
         \ .' && v:key >= line("w0")'
         \ .' && v:key <= line("w$")'
