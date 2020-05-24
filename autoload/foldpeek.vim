@@ -96,9 +96,8 @@ function! foldpeek#text() abort "{{{1
   let body = s:peekline()
   let [head, tail] = s:decorations()
 
-  let ret = s:return_text(head, body, tail)
   if !empty(s:deprecation_notice())
-    let ret .= s:deprecation_notice()
+    let tail .= s:deprecation_notice()
   endif
 
   if !g:foldpeek#cache#disable
