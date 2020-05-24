@@ -1,9 +1,25 @@
 let s:cache = {}
 
 " Helper Functions {{{1
-function! s:update_all_folds() abort
+let s:update_all_folds = {} "{{{2
+
+function! s:update_all_folds.prepare() abort
   " Expects to be used for s:is_cache_updating()
-  let s:update_pos = v:foldstart
+  let self.start_point = v:foldstart
+endfunction
+
+function! s:update_all_folds.in_progress() abort
+  " Use it with self.prepare(); this function is preferable to be used only for test.
+
+  if !exists('s:update_all_folds.start_point')
+    return 0
+  endif
+
+  if s:foldstart <= self.start_point
+    unlet self.start_point
+  endif
+
+  return 1
 endfunction
 "}}}1
 
@@ -31,6 +47,7 @@ endfunction
 
 function! s:cache.is_available() abort  "{{{2
   return self.is_saved()
+        \ && !s:update_all_folds.in_progress()
         \ && !self.has_text_changed()
 endfunction
 
@@ -41,17 +58,6 @@ endfunction
 
 function! s:cache.has_text_changed() abort  "{{{2
   if s:foldend != self.tracking_fold.foldend
-    return 1
-
-  elseif self.is_updating()
-    " FIXME: Use the other logic below after the problem is fixed that folds
-    " with git-diff status often fails to appear at first fold update to be in
-    " cache.
-    "
-    " return len(a:cache.lines) < (s:foldend - s:foldstart)
-    "      \ ? s:compare_lines(a:cache, s:foldend)
-    "      \ : 1
-
     return 1
 
   elseif self.compare_lines()
@@ -77,20 +83,6 @@ function! s:cache.compare_lines() abort  "{{{2
   return 0
 endfunction
 
-function! s:cache.is_updating() abort "{{{2
-  " Use it with s:update_all_folds(); this function should be only for test.
-
-  if !exists('s:update_pos')
-    return 0
-  endif
-
-  if s:foldstart <= s:update_pos
-    unlet s:update_pos
-  endif
-
-  return 1
-endfunction
-
 function! s:has_git_updated() abort "{{{2
   " TODO: Pick up a fold which contains any change to update.
   if !exists('g:autoloaded_foldpeek_git')
@@ -101,7 +93,7 @@ function! s:has_git_updated() abort "{{{2
   endif
 
   let w:foldpeek_git_summary = GitGutterGetHunkSummary()
-  call s:update_all_folds()
+  call s:update_all_folds.prepare()
 
   return 1
 endfunction
