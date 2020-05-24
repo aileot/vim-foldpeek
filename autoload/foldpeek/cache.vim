@@ -32,7 +32,7 @@ endfunction
 
 function! s:cache.return() abort  "{{{2
   let self.folds = w:foldpeek_folds
-  let self.tracking_fold = get(w:foldpeek_folds, s:foldstart, {})
+  let self.tracking_fold = get(self.folds, s:foldstart, {})
 
   if self.is_available()
     call self.refresh()
