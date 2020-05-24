@@ -100,9 +100,10 @@ function! foldpeek#text() abort "{{{1
     let tail .= s:deprecation_notice()
   endif
 
+  let ret = s:return_text(head, body, tail)
   if !g:foldpeek#cache#disable
     let dict = {
-          \ 'text': ret,
+          \ 'foldtext': ret,
           \ 'offset': s:offset,
           \ 'textwidth': s:textwidth,
           \ }

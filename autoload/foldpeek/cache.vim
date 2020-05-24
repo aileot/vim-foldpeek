@@ -134,11 +134,12 @@ function! s:cache.refresh() abort "{{{2
         \ )
 endfunction
 
-function! foldpeek#cache#update(text, offset) abort "{{{1
-  " Extends a key, v:foldstart, with dict as {v:foldstart : dict}
+function! foldpeek#cache#update(dict) abort "{{{1
+  " Extends a key, s:foldstart, with dict as {s:foldstart : dict}
+
   let dict = {
-        \ 'return': a:text,
-        \ 'offset': a:offset,
+        \ 'return': a:dict.foldtext,
+        \ 'offset': a:dict.offset,
         \ 'foldstart': v:foldstart,
         \ 'foldend': v:foldend,
         \ 'lines': [],
