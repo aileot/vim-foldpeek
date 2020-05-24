@@ -45,12 +45,43 @@ endfunction
 function! s:cache.is_available() abort  "{{{2
   return self.is_saved()
         \ && !s:update_all_folds.in_progress()
+        \ && !s:textwidth.is_changed()
         \ && !self.has_text_changed()
 endfunction
 
 function! s:cache.is_saved() abort  "{{{2
   let ret = get(self.tracking_fold, 'return')
   return !empty(ret)
+endfunction
+
+let s:textwidth = {} "{{{2
+function! s:textwidth.is_changed() abort "{{{3
+  " TODO: Also detect either signcolumn or foldcolumn changes; if that's
+  " difficult, rewrite foldpeek#cache#update() to cache on 'head', 'body' and
+  " 'tail' than on 'foldtext'.
+
+  if self.has_winwidth_changed()
+    call s:update_all_folds.prepare()
+    return 1
+  endif
+
+  return 0
+endfunction
+
+function! s:textwidth.has_winwidth_changed() abort "{{{3
+  let winwidth = winwidth(0)
+
+  if winwidth < g:foldpeek#maxwidth && !exists('w:foldpeek_winwidth')
+    let w:foldpeek_winwidth = winwidth
+    return 1
+  endif
+
+  if exists('w:foldpeek_winwidth') && winwidth != w:foldpeek_winwidth
+    unlet w:foldpeek_winwidth
+    call s:update_all_folds.prepare()
+  endif
+
+  return 0
 endfunction
 
 function! s:cache.has_text_changed() abort  "{{{2
