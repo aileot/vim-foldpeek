@@ -84,21 +84,22 @@ function! s:textwidth.has_winwidth_changed() abort "{{{3
   return 0
 endfunction
 
-function! s:cache.has_text_changed() abort  "{{{2
-  if s:foldend != self.tracking_fold.foldend
+let s:text_diff = {} "{{{2
+function! s:text_diff.has_changed() abort  "{{{3
+  if s:foldend != s:cache.tracking_fold.foldend
     return 1
 
   elseif self.compare_lines()
     return 1
   endif
 
-  return s:has_git_updated()
+  return self.has_git_updated()
 endfunction
 
-function! s:cache.compare_lines() abort  "{{{2
+function! s:text_diff.compare_lines() abort  "{{{3
   let offset = 0
-  let max = self.tracking_fold.offset
-  let cached_lines = self.tracking_fold.lines
+  let max = s:cache.tracking_fold.offset
+  let cached_lines = s:cache.tracking_fold.lines
   while offset <= max
     let lnum = s:foldstart + offset
     if getline(lnum) !=# cached_lines[offset]
@@ -111,7 +112,7 @@ function! s:cache.compare_lines() abort  "{{{2
   return 0
 endfunction
 
-function! s:has_git_updated() abort "{{{2
+function! s:text_diff.has_git_updated() abort "{{{3
   " TODO: Accept other diff-management plugins like coc-git, vim-signify.
   " The src should be managed in autoload/foldpeek/git.vim.
   if !exists('g:autoloaded_foldpeek_git')
