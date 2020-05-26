@@ -112,7 +112,8 @@ function! s:cache.compare_lines() abort  "{{{2
 endfunction
 
 function! s:has_git_updated() abort "{{{2
-  " TODO: Pick up a fold which contains any change to update.
+  " TODO: Accept other diff-management plugins like coc-git, vim-signify.
+  " The src should be managed in autoload/foldpeek/git.vim.
   if !exists('g:autoloaded_foldpeek_git')
         \ || !exists('*GitGutterGetHunkSummary()')
         \ || (GitGutterGetHunkSummary()
