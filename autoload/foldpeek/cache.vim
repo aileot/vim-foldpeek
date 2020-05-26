@@ -146,9 +146,10 @@ function! foldpeek#cache#update(dict) abort "{{{1
         \ }
 
   let lnum = v:foldstart
-  let max_lnum = g:foldpeek#cache#max_saved_offset < (v:foldend - v:foldstart)
-       \ ? v:foldstart + g:foldpeek#cache#max_saved_offset
-       \ : v:foldend
+  " let max_lnum = g:foldpeek#cache#max_saved_offset < (v:foldend - v:foldstart)
+  "      \ ? v:foldstart + g:foldpeek#cache#max_saved_offset
+  "      \ : v:foldend
+  let max_lnum = lnum + a:dict.offset
   while lnum <= max_lnum
     call add(dict.lines, getline(lnum))
     let lnum += 1
