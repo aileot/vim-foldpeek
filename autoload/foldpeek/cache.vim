@@ -21,38 +21,6 @@ function! s:update_all_folds.in_progress() abort
 
   return 1
 endfunction
-"}}}1
-
-function! foldpeek#cache#text(lnum) abort "{{{1
-  let s:foldstart = foldclosed(a:lnum)
-  let s:foldend = foldclosedend(a:lnum)
-
-  return s:cache.return()
-endfunction
-
-function! s:cache.return() abort  "{{{2
-  let self.folds = w:foldpeek_folds
-  let self.tracking_fold = get(self.folds, s:foldstart, {})
-
-  if self.is_available()
-    call self.refresh()
-    return self.tracking_fold.return
-  endif
-
-  return {}
-endfunction
-
-function! s:cache.is_available() abort  "{{{2
-  return self.is_saved()
-        \ && !s:update_all_folds.in_progress()
-        \ && !s:textwidth.is_changed()
-        \ && !self.has_text_changed()
-endfunction
-
-function! s:cache.is_saved() abort  "{{{2
-  let ret = get(self.tracking_fold, 'return')
-  return !empty(ret)
-endfunction
 
 let s:textwidth = {} "{{{2
 function! s:textwidth.is_changed() abort "{{{3
@@ -126,6 +94,38 @@ function! s:text_diff.has_git_updated() abort "{{{3
   call s:update_all_folds.prepare()
 
   return 1
+endfunction
+"}}}1
+
+function! foldpeek#cache#text(lnum) abort "{{{1
+  let s:foldstart = foldclosed(a:lnum)
+  let s:foldend = foldclosedend(a:lnum)
+
+  return s:cache.return()
+endfunction
+
+function! s:cache.return() abort  "{{{2
+  let self.folds = w:foldpeek_folds
+  let self.tracking_fold = get(self.folds, s:foldstart, {})
+
+  if self.is_available()
+    call self.refresh()
+    return self.tracking_fold.return
+  endif
+
+  return {}
+endfunction
+
+function! s:cache.is_available() abort  "{{{2
+  return self.is_saved()
+        \ && !s:update_all_folds.in_progress()
+        \ && !s:textwidth.is_changed()
+        \ && !s:text_diff.has_changed()
+endfunction
+
+function! s:cache.is_saved() abort  "{{{2
+  let ret = get(self.tracking_fold, 'return')
+  return !empty(ret)
 endfunction
 
 function! s:cache.refresh() abort "{{{2
