@@ -105,7 +105,7 @@ function! foldpeek#cache#text(lnum) abort "{{{1
 endfunction
 
 function! s:cache.return() abort  "{{{2
-  let self.folds = w:foldpeek_folds
+  let self.folds = get(w:, 'foldpeek_folds', [])
   let self.tracking_fold = get(self.folds, s:foldstart, {})
 
   if self.is_available()
