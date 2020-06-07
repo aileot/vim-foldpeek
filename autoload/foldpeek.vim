@@ -54,13 +54,27 @@ call s:set_default('g:foldpeek#auto_foldcolumn', 0)
 call s:set_default('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 call s:set_default('g:foldpeek#cache#disable', 0)
 
+call s:set_default('g:foldpeek#indent_with_head', 0)
 call s:set_default('g:foldpeek#head', 'foldpeek#default#head()')
 call s:set_default('g:foldpeek#tail', 'foldpeek#default#tail()')
 call s:set_default('g:foldpeek#head_padding', ' ')
 call s:set_default('g:foldpeek#tail_padding', ' ')
 
 call s:set_default('g:foldpeek#table', {}) " deprecated
-call s:set_default('g:foldpeek#indent_with_head', 0)
+call s:set_default('g:foldpeek#default#diff_sign', '@')
+call s:set_default('g:foldpeek#default#diff_status_format', '(+%a ~%m -%r)')
+call s:set_default('g:foldpeek#default#foldlevel_signs', {
+      \ 1: '[-]',
+      \ 2: '[2]',
+      \ 3: '[3]',
+      \ 4: '[4]',
+      \ 5: '[5]',
+      \ 6: '[6]',
+      \ 7: '[7]',
+      \ 8: '[8]',
+      \ 9: '[9]',
+      \ })
+
 call s:set_default('g:foldpeek#skip#patterns', [
       \ '^[0-9<>#\-=/[({!*`"'' \t]*$',
       \ ])
