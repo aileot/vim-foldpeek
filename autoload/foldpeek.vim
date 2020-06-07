@@ -52,6 +52,7 @@ endfunction
 call s:set_default('g:foldpeek#maxspaces', &shiftwidth)
 call s:set_default('g:foldpeek#auto_foldcolumn', 0)
 call s:set_default('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
+call s:set_default('g:foldpeek#cache#disable', 0)
 
 call s:set_default('g:foldpeek#head', 'foldpeek#default#head()')
 call s:set_default('g:foldpeek#tail', 'foldpeek#default#tail()')
@@ -73,7 +74,21 @@ call s:set_default('g:foldpeek#whiteout#disabled_styles', [])
 call s:set_default('g:foldpeek#whiteout#overrided_styles', [])
 call s:set_default('g:foldpeek#whiteout#style_for_foldmarker', 'omit')
 
+function! foldpeek#status() abort "{{{1
+  return {
+        \ 'lnum': s:lnum,
+        \ 'offset': s:offset,
+        \ }
+endfunction
+
 function! foldpeek#text() abort "{{{1
+  if !g:foldpeek#cache#disable
+    let ret = foldpeek#cache#text(v:foldstart)
+    if !empty(ret)
+      return ret
+    endif
+  endif
+
   if g:foldpeek#auto_foldcolumn && v:foldlevel > (&foldcolumn - 1)
     let &foldcolumn = v:foldlevel + 1
   endif
@@ -81,9 +96,21 @@ function! foldpeek#text() abort "{{{1
   let body = s:peekline()
   let [head, tail] = s:decorations()
 
-  return !empty(s:deprecation_notice())
-        \ ? s:deprecation_notice()
-        \ : s:return_text(head, body, tail)
+  if !empty(s:deprecation_notice())
+    let tail .= s:deprecation_notice()
+  endif
+
+  let ret = s:return_text(head, body, tail)
+  if !g:foldpeek#cache#disable
+    let dict = {
+          \ 'foldtext': ret,
+          \ 'offset': s:offset,
+          \ 'textwidth': s:textwidth,
+          \ }
+    call foldpeek#cache#update(dict)
+  endif
+
+  return ret
 endfunction
 
 function! s:peekline() abort "{{{2
@@ -91,22 +118,21 @@ function! s:peekline() abort "{{{2
   while offset <= (v:foldend - v:foldstart)
     let line = getline(v:foldstart + offset)
 
+    if s:has_skip_patterns(line)
+      let offset += 1
+      continue
+    endif
+
+    let s:offset = offset
+
     if string(get(b:, 'foldpeek_whiteout_disabled_styles',
           \ g:foldpeek#whiteout#disabled_styles)) !~# 'ALL'
-      " Profile: s:whiteout_at_patterns() is a bottle-neck according to
-      "   `:profile`
       let line = foldpeek#whiteout#at_patterns(line)
     endif
 
-    if !s:has_skip_patterns(line)
-      let g:foldpeek_lnum = offset + 1
-      return line
-    endif
-
-    let offset += 1
+    return line
   endwhile
 
-  let g:foldpeek_lnum = 1
   return getline(v:foldstart)
 endfunction
 
@@ -130,7 +156,7 @@ function! s:decorations() abort "{{{2
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
   for num in keys(head)
-    if g:foldpeek_lnum >= num
+    if num <= (s:offset + 1)
       let head = exists('b:foldpeek_head')
             \ ? b:foldpeek_head[num]
             \ : g:foldpeek#head[num]
@@ -138,7 +164,7 @@ function! s:decorations() abort "{{{2
   endfor
 
   for num in keys(tail)
-    if g:foldpeek_lnum >= num
+    if num <= (s:offset + 1)
       let tail = exists('b:foldpeek_tail')
             \ ? b:foldpeek_tail[num]
             \ : g:foldpeek#tail[num]
@@ -147,8 +173,8 @@ function! s:decorations() abort "{{{2
 
   let head = s:substitute_as_table(head) " deprecated
   let tail = s:substitute_as_table(tail) " deprecated
-  let head = substitute(head, '%PEEK%', g:_foldpeek_lnum, 'g') " deprecated
-  let tail = substitute(tail, '%PEEK%', g:_foldpeek_lnum, 'g') " deprecated
+  let head = substitute(head, '%PEEK%', s:offset + 1, 'g') " deprecated
+  let tail = substitute(tail, '%PEEK%', s:offset + 1, 'g') " deprecated
 
   let ret = []
   for part in [head, tail]
@@ -285,7 +311,7 @@ endfunction
 function! s:adjust_textlen(body, bodywidth) abort "{{{3
   " Note: strdisplaywidth() returns up to &tabstop, &display and &ambiwidth
   let displaywidth = strdisplaywidth(a:body)
-  if  a:bodywidth < displaywidth
+  if a:bodywidth < displaywidth
     return s:ambiwidth_into_double(a:body, a:bodywidth)
   endif
 
@@ -344,8 +370,13 @@ function! s:deprecation_notice() abort "{{{2
 
   return msg_len == len(msg)
         \ ? ''
-        \ : msg .'`:h foldpeek-compatibility` for more detail'
+        \ : msg .'`:help foldpeek-compatibility` for more detail'
 endfunction
+
+function! foldpeek#get_offset() abort "{{{1
+  return s:offset
+endfunction
+
 " restore 'cpoptions' {{{1
 let &cpo = s:save_cpo
 unlet s:save_cpo
