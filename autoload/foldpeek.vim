@@ -155,21 +155,25 @@ function! s:decorations() abort "{{{2
   let head = get(b:, 'foldpeek_head', g:foldpeek#head)
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
-  for num in keys(head)
-    if num <= (s:offset + 1)
-      let head = exists('b:foldpeek_head')
-            \ ? b:foldpeek_head[num]
-            \ : g:foldpeek#head[num]
-    endif
-  endfor
+  if type(head) == type({}) " deprecated
+    for num in keys(head)
+      if num <= (s:offset + 1)
+        let head = exists('b:foldpeek_head')
+              \ ? b:foldpeek_head[num]
+              \ : g:foldpeek#head[num]
+      endif
+    endfor
+  endif
 
-  for num in keys(tail)
-    if num <= (s:offset + 1)
-      let tail = exists('b:foldpeek_tail')
-            \ ? b:foldpeek_tail[num]
-            \ : g:foldpeek#tail[num]
-    endif
-  endfor
+  if type(tail) == type({}) " deprecated
+    for num in keys(tail)
+      if num <= (s:offset + 1)
+        let tail = exists('b:foldpeek_tail')
+              \ ? b:foldpeek_tail[num]
+              \ : g:foldpeek#tail[num]
+      endif
+    endfor
+  endif
 
   let head = s:substitute_as_table(head) " deprecated
   let tail = s:substitute_as_table(tail) " deprecated
