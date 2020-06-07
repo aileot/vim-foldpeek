@@ -7,6 +7,10 @@ let s:whiteout_styles_available = [
       \ 'subloop',
       \ ]
 
+function! foldpeek#whiteout#is_applied() abort "{{{1
+  return s:is_applied
+endfunction
+
 function! foldpeek#whiteout#at_patterns(line) abort "{{{1
   let patterns = {}
   for type in s:whiteout_styles_available
@@ -15,6 +19,7 @@ function! foldpeek#whiteout#at_patterns(line) abort "{{{1
 
   let ret = a:line
   let ret = s:whiteout[s:style_for_foldmarker()](ret, s:patterns_foldmarker())
+  let ret_original = ret
 
   let matched = s:whiteout.match(ret, patterns.match)
 
@@ -32,6 +37,13 @@ function! foldpeek#whiteout#at_patterns(line) abort "{{{1
   if &ts != &sw
     let ret = substitute(ret, '^\t', repeat(' ', &tabstop), '')
   endif
+
+  if ret !=# ret_original
+    let s:is_applied = 1
+  else
+    let s:is_applied = 0
+  endif
+
   return substitute(ret, '\t', repeat(' ', &shiftwidth), 'g')
 endfunction
 
