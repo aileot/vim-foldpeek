@@ -348,10 +348,10 @@ function! s:deprecation_notice() abort "{{{2
 
   let whiteout_styles = ['omit', 'fill']
   for style in whiteout_styles
-    if exists({'b:foldpeek_whiteout_patterns_'. style})
+    if exists('b:foldpeek_whiteout_patterns_'. style)
       let msg .= {'b:foldpeek_whiteout_patterns_'. style}
             \ .' please use b:foldpeek_whiteout_patterns instead; '
-    elseif exists({'g:foldpeek#whiteout_patterns_'. style})
+    elseif exists('g:foldpeek#whiteout_patterns_'. style)
       let msg .= {'g:foldpeek#whiteout_patterns_'. style}
             \ .' please use g:foldpeek#whiteout#patterns instead; '
     endif
