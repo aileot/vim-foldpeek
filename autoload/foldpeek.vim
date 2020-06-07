@@ -56,6 +56,9 @@ call s:set_default('g:foldpeek#cache#disable', 0)
 
 call s:set_default('g:foldpeek#head', 'foldpeek#default#head()')
 call s:set_default('g:foldpeek#tail', 'foldpeek#default#tail()')
+call s:set_default('g:foldpeek#head_padding', ' ')
+call s:set_default('g:foldpeek#tail_padding', ' ')
+
 call s:set_default('g:foldpeek#table', {}) " deprecated
 call s:set_default('g:foldpeek#indent_with_head', 0)
 call s:set_default('g:foldpeek#skip#patterns', [
@@ -236,8 +239,11 @@ function! s:return_text(head, body, tail) abort "{{{2
   "   selection of peekline.
   let foldtextwidth = s:width_without_col()
   " TODO: get correct width of head and tail;
-  let headwidth = len(a:head)
-  let tailwidth = len(a:tail)
+  let head = empty(a:head) ? '' : a:head . g:foldpeek#head_padding
+  let tail = empty(a:tail) ? '' : g:foldpeek#tail_padding . a:tail
+
+  let headwidth = len(head)
+  let tailwidth = len(tail)
   let decorwidth = headwidth + tailwidth
   let bodywidth  = foldtextwidth - decorwidth
 
