@@ -20,7 +20,7 @@ function! foldpeek#whiteout#at_patterns(line) abort "{{{1
     let ret = matched
 
   else
-    let patterns[s:style_for_foldmarker()] += s:foldmarkers_on_buffer()
+    let patterns[s:style_for_foldmarker()] += s:patterns_foldmarker()
 
     let ret = s:whiteout.omit(ret, patterns.omit)
     let ret = s:whiteout.fill(ret, patterns.fill)
@@ -158,7 +158,7 @@ function! s:style_for_foldmarker() abort "{{{2
   return ret
 endfunction
 
-function! s:foldmarkers_on_buffer() abort "{{{2
+function! s:patterns_foldmarker() abort "{{{2
   if exists('b:_foldpeek_foldmarkers')
     return b:_foldpeek_foldmarkers
   endif
