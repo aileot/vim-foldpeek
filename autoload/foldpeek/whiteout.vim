@@ -159,8 +159,8 @@ function! s:style_for_foldmarker() abort "{{{2
 endfunction
 
 function! s:foldmarkers_on_buffer() abort "{{{2
-  if exists('b:foldpeek__foldmarkers')
-    return b:foldpeek__foldmarkers
+  if exists('b:_foldpeek_foldmarkers')
+    return b:_foldpeek_foldmarkers
   endif
 
   let cms = split(&commentstring, '%s')
@@ -171,6 +171,6 @@ function! s:foldmarkers_on_buffer() abort "{{{2
   let foldmarkers += map(split(&foldmarker, ','),
         \ "'\\<'.  v:val .'\\d*\\>'")
 
-  let b:foldpeek__foldmarkers = foldmarkers
-  return b:foldpeek__foldmarkers
+  let b:_foldpeek_foldmarkers = foldmarkers
+  return foldmarkers
 endfunction
