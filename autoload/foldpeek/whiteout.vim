@@ -79,13 +79,10 @@ endfunction
 function! s:whiteout.omit(text, patterns) abort "{{{2
   let ret = a:text
   for pat in a:patterns
-    let matchlen = len(matchstr(ret, pat))
-
-    while matchlen > 0
-      let ret .= repeat(' ', matchlen)
-      let ret  = substitute(ret, pat, '', '')
-      let matchlen = len(matchstr(ret, pat))
-    endwhile
+    if type(ret) != type('')
+      return 'Not a String: '. pat
+    endif
+    let ret = substitute(ret, pat, '', 'g')
   endfor
 
   return ret
