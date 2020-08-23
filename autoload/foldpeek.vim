@@ -205,7 +205,7 @@ function! s:decorations() abort "{{{2
     catch
       call add(ret, part)
     endtry
-    call filter(ret, 'type(v:val) == type('')')
+    call filter(ret, 'type(v:val) == type("")')
   endfor
 
   return ret
