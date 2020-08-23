@@ -54,12 +54,29 @@ call s:set_default('g:foldpeek#auto_foldcolumn', 0)
 call s:set_default('g:foldpeek#maxwidth','&textwidth > 0 ? &tw : 79')
 call s:set_default('g:foldpeek#cache#disable', 0)
 
+call s:set_default('g:foldpeek#indent_with_head', 0)
 call s:set_default('g:foldpeek#head', 'foldpeek#default#head()')
 call s:set_default('g:foldpeek#tail', 'foldpeek#default#tail()')
+call s:set_default('g:foldpeek#head_padding', ' ')
+call s:set_default('g:foldpeek#tail_padding', ' ')
+
 call s:set_default('g:foldpeek#table', {}) " deprecated
-call s:set_default('g:foldpeek#indent_with_head', 0)
+call s:set_default('g:foldpeek#default#diff_sign', '@')
+call s:set_default('g:foldpeek#default#diff_status_format', '(+%a ~%m -%r)')
+call s:set_default('g:foldpeek#default#foldlevel_signs', {
+      \ 1: '[-]',
+      \ 2: '[2]',
+      \ 3: '[3]',
+      \ 4: '[4]',
+      \ 5: '[5]',
+      \ 6: '[6]',
+      \ 7: '[7]',
+      \ 8: '[8]',
+      \ 9: '[9]',
+      \ })
+
 call s:set_default('g:foldpeek#skip#patterns', [
-      \ '^[>#\-=/{!* \t]*$',
+      \ '^[0-9<>#\-=/[({!*`"'' \t]*$',
       \ ])
 call s:set_default('g:foldpeek#skip#override_patterns', 0)
 
@@ -155,21 +172,25 @@ function! s:decorations() abort "{{{2
   let head = get(b:, 'foldpeek_head', g:foldpeek#head)
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
-  for num in keys(head)
-    if num <= (s:offset + 1)
-      let head = exists('b:foldpeek_head')
-            \ ? b:foldpeek_head[num]
-            \ : g:foldpeek#head[num]
-    endif
-  endfor
+  if type(head) == type({}) " deprecated
+    for num in keys(head)
+      if num <= (s:offset + 1)
+        let head = exists('b:foldpeek_head')
+              \ ? b:foldpeek_head[num]
+              \ : g:foldpeek#head[num]
+      endif
+    endfor
+  endif
 
-  for num in keys(tail)
-    if num <= (s:offset + 1)
-      let tail = exists('b:foldpeek_tail')
-            \ ? b:foldpeek_tail[num]
-            \ : g:foldpeek#tail[num]
-    endif
-  endfor
+  if type(tail) == type({}) " deprecated
+    for num in keys(tail)
+      if num <= (s:offset + 1)
+        let tail = exists('b:foldpeek_tail')
+              \ ? b:foldpeek_tail[num]
+              \ : g:foldpeek#tail[num]
+      endif
+    endfor
+  endif
 
   let head = s:substitute_as_table(head) " deprecated
   let tail = s:substitute_as_table(tail) " deprecated
@@ -232,8 +253,11 @@ function! s:return_text(head, body, tail) abort "{{{2
   "   selection of peekline.
   let foldtextwidth = s:width_without_col()
   " TODO: get correct width of head and tail;
-  let headwidth = len(a:head)
-  let tailwidth = len(a:tail)
+  let head = empty(a:head) ? '' : a:head . g:foldpeek#head_padding
+  let tail = empty(a:tail) ? '' : g:foldpeek#tail_padding . a:tail
+
+  let headwidth = len(head)
+  let tailwidth = len(tail)
   let decorwidth = headwidth + tailwidth
   let bodywidth  = foldtextwidth - decorwidth
 
@@ -338,10 +362,10 @@ function! s:deprecation_notice() abort "{{{2
 
   let whiteout_styles = ['omit', 'fill']
   for style in whiteout_styles
-    if exists({'b:foldpeek_whiteout_patterns_'. style})
+    if exists('b:foldpeek_whiteout_patterns_'. style)
       let msg .= {'b:foldpeek_whiteout_patterns_'. style}
             \ .' please use b:foldpeek_whiteout_patterns instead; '
-    elseif exists({'g:foldpeek#whiteout_patterns_'. style})
+    elseif exists('g:foldpeek#whiteout_patterns_'. style)
       let msg .= {'g:foldpeek#whiteout_patterns_'. style}
             \ .' please use g:foldpeek#whiteout#patterns instead; '
     endif
