@@ -279,9 +279,6 @@ whiteout					   *foldpeek-feature-whiteout*
 
 	For more detail, see g:foldpeek#whiteout_patterns_foo respectively.
 
-==============================================================================
-EXAMPLE							    *foldpeek-example*
-
 ------------------------------------------------------------------------------
 EXAMPLE-VARIABLE				   *foldpeek-example-variable*
 
