@@ -172,31 +172,6 @@ function! s:decorations() abort "{{{2
   let head = get(b:, 'foldpeek_head', g:foldpeek#head)
   let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
 
-  if type(head) == type({}) " deprecated
-    for num in keys(head)
-      if num <= (s:offset + 1)
-        let head = exists('b:foldpeek_head')
-              \ ? b:foldpeek_head[num]
-              \ : g:foldpeek#head[num]
-      endif
-    endfor
-  endif
-
-  if type(tail) == type({}) " deprecated
-    for num in keys(tail)
-      if num <= (s:offset + 1)
-        let tail = exists('b:foldpeek_tail')
-              \ ? b:foldpeek_tail[num]
-              \ : g:foldpeek#tail[num]
-      endif
-    endfor
-  endif
-
-  let head = s:substitute_as_table(head) " deprecated
-  let tail = s:substitute_as_table(tail) " deprecated
-  let head = substitute(head, '%PEEK%', s:offset + 1, 'g') " deprecated
-  let tail = substitute(tail, '%PEEK%', s:offset + 1, 'g') " deprecated
-
   let ret = []
   for part in [head, tail]
     try
@@ -375,18 +350,6 @@ function! s:deprecation_notice() abort "{{{2
     let msg .= 'g:foldpeek#whiteout_style_for_foldmarker'
           \ .' please use g:foldpeek#whiteout#style_for_foldmarker instead;'
   endif
-
-  for part in ['head', 'tail']
-    if type(get(b:, 'foldpeek_'. part)) == type({})
-      let msg .= 'b:foldpeek_'. part .' in Dict; '
-    elseif type({'g:foldpeek#'. part}) == type({})
-      let msg .= 'g:foldpeek#'. part .' in Dict; '
-    endif
-    let str = get(b:, 'foldpeek_'. part, {'g:foldpeek#'. part})
-    if !empty(matchstr(str, '%PEEK%'))
-      let msg .= '%PEEK% please use g:foldpeek_lnum instead;'
-    endif
-  endfor
 
   if !empty(g:foldpeek#table)
     let msg .= 'g:foldpeek#table; '

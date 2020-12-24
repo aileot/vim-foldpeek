@@ -326,6 +326,10 @@ COMPATIBILITY					        *foldpeek-compatibility*
 Deprecated feature will be all removed in the next update after deprecation
 notice.
 
+2020.12.24
+* Remove deprecated features and the notification around g:foldpeek#head/tail
+  and b:foldpeek_head/tail.
+
 2020.05.02
 * Deprecated: foldpeek#head() and foldpeek#tail(); please use
   foldpeek#default#head() and foldpeek#default#tail() instead.
