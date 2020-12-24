@@ -351,18 +351,6 @@ function! s:deprecation_notice() abort "{{{2
           \ .' please use g:foldpeek#whiteout#style_for_foldmarker instead;'
   endif
 
-  for part in ['head', 'tail']
-    if type(get(b:, 'foldpeek_'. part)) == type({})
-      let msg .= 'b:foldpeek_'. part .' in Dict; '
-    elseif type({'g:foldpeek#'. part}) == type({})
-      let msg .= 'g:foldpeek#'. part .' in Dict; '
-    endif
-    let str = get(b:, 'foldpeek_'. part, {'g:foldpeek#'. part})
-    if !empty(matchstr(str, '%PEEK%'))
-      let msg .= '%PEEK% please use g:foldpeek_lnum instead;'
-    endif
-  endfor
-
   if !empty(g:foldpeek#table)
     let msg .= 'g:foldpeek#table; '
   endif
