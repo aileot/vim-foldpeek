@@ -169,21 +169,22 @@ function! s:has_skip_patterns(line) abort "{{{3
 endfunction
 
 function! s:decorations() abort "{{{2
-  let head = get(b:, 'foldpeek_head', g:foldpeek#head)
-  let tail = get(b:, 'foldpeek_tail', g:foldpeek#tail)
+  for part in ['head', 'tail']
+    let {part} = exists('b:foldpeek_'. part)
+          \ ? {'b:foldpeek_'. part}
+          \ : {'g:foldpeek#'. part}
 
-  let ret = []
-  for part in [head, tail]
     try
-      " Note: at failure of eval(), 0 is added to 'ret'
-      call add(ret, eval(part))
+      " TODO: accept funcref.
+      let text = eval({part})
     catch
-      call add(ret, part)
+      let text = {part}
     endtry
-    call filter(ret, 'type(v:val) == type("")')
+
+    let {part} = text
   endfor
 
-  return ret
+  return [head, tail]
 endfunction
 
 function! s:substitute_as_table(line) abort "{{{3
