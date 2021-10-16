@@ -173,28 +173,10 @@ endfunction
 
 function! s:decorations() abort "{{{2
   for part in ['head', 'tail']
-    " Note: Make the internal variable name in upper case here to copy
-    " a variable which could be a funcref.
-    let Part = toupper(part)
-    let {Part} = exists('b:foldpeek_'. part)
+    let {part} = foldpeek#util#eval_or_raw(
+          \ exists('b:foldpeek_'. part)
           \ ? {'b:foldpeek_'. part}
-          \ : {'g:foldpeek#'. part}
-
-    try
-      if type({Part}) == v:t_func
-        let text = call({Part}, [])
-      else
-        let text = eval({Part})
-      endif
-    catch
-      try
-        let text = {Part} " Failback in string.
-      catch
-        let text = '[Invalid '. part .']'
-      endtry
-    endtry
-
-    let {part} = text
+          \ : {'g:foldpeek#'. part})
   endfor
 
   return [head, tail]
