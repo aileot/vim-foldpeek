@@ -178,7 +178,11 @@ function! s:decorations() abort "{{{2
       " TODO: accept funcref.
       let text = eval({part})
     catch
-      let text = {part}
+      try
+        let text = {part}
+      catch
+        let text = '[Invalid '. part .']'
+      endtry
     endtry
 
     let {part} = text
