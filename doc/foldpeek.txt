@@ -182,9 +182,10 @@ b:foldpeek_indent_with_head			  *b:foldpeek_indent_with_head*
 g:foldpeek#head						      *g:foldpeek#head*
 b:foldpeek_head						      *b:foldpeek_head*
 	(default: "foldpeek#default#head()"
-	Set in |String|. The value will be evaluated if possible.
-	Replace heads of foldtext with the value.
-	If you dislike the change of indent in folded text, add
+	Set in |String| or |Funcref|.
+	The value will be evaluated if possible. Replace heads of foldtext
+	with the value. If you dislike the change of indent in folded text,
+	set
 >
 		let g:foldpeek#head = ''
 <
@@ -193,9 +194,9 @@ b:foldpeek_head						      *b:foldpeek_head*
 g:foldpeek#tail						      *g:foldpeek#tail*
 b:foldpeek_tail						      *b:foldpeek_tail*
 	(default: "foldpeek#default#tail()"
-	Set in |String|. The value will be evaluated if possible.
-	Replace tails of foldtext with the value, at the column decided by
-	|g:foldpeek#maxwidth|.
+	Set in |String| or |Funcref|.
+	The value will be evaluated if possible. Replace tails of foldtext
+	with the value, at the column decided by |g:foldpeek#maxwidth|.
 
 g:foldpeek#table					     *g:foldpeek#table*
 	(Deprecated)
@@ -325,6 +326,9 @@ COMPATIBILITY					        *foldpeek-compatibility*
 
 Deprecated feature will be all removed in the next update after deprecation
 notice.
+
+2021.10.16
+* Update required version. Check if `has('patch-7.4.2071')` returns `1`.
 
 2020.12.24
 * Remove deprecated features and the notification around g:foldpeek#head/tail
