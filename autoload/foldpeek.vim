@@ -27,8 +27,11 @@
 "if v:version < 730 | finish | endif
 "" v7.3: for strdisplaywidth()
 
-if !has('patch-7.4.156') | finish | endif
-" v:7.4.156: for func-abort
+" if !has('patch-7.4.156') | finish | endif
+" " v:7.4.156: for func-abort
+
+if !has('patch-7.4.2071') | finish | endif
+" v:7.4.156: for v:t_func
 
 if exists('g:loaded_foldpeek') | finish | endif
 let g:loaded_foldpeek = 1
@@ -170,15 +173,25 @@ endfunction
 
 function! s:decorations() abort "{{{2
   for part in ['head', 'tail']
-    let {part} = exists('b:foldpeek_'. part)
+    " Note: Make the internal variable name in upper case here to copy
+    " a variable which could be a funcref.
+    let Part = toupper(part)
+    let {Part} = exists('b:foldpeek_'. part)
           \ ? {'b:foldpeek_'. part}
           \ : {'g:foldpeek#'. part}
 
     try
-      " TODO: accept funcref.
-      let text = eval({part})
+      if type({Part}) == v:t_func
+        let text = call({Part}, [])
+      else
+        let text = eval({Part})
+      endif
     catch
-      let text = {part}
+      try
+        let text = {Part} " Failback in string.
+      catch
+        let text = '[Invalid '. part .']'
+      endtry
     endtry
 
     let {part} = text
