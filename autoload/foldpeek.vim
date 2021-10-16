@@ -27,8 +27,11 @@
 "if v:version < 730 | finish | endif
 "" v7.3: for strdisplaywidth()
 
-if !has('patch-7.4.156') | finish | endif
-" v:7.4.156: for func-abort
+" if !has('patch-7.4.156') | finish | endif
+" " v:7.4.156: for func-abort
+
+if !has('patch-7.4.2071') | finish | endif
+" v:7.4.156: for v:t_func
 
 if exists('g:loaded_foldpeek') | finish | endif
 let g:loaded_foldpeek = 1
